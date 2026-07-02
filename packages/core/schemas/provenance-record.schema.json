@@ -1,0 +1,30 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://earworm.dev/schemas/provenance-record.schema.json",
+  "title": "ProvenanceRecord",
+  "type": "object",
+  "required": ["provenance_id", "source_type", "consent_status", "usage_constraints", "created_at"],
+  "additionalProperties": false,
+  "properties": {
+    "provenance_id": { "type": "string" },
+    "source_type": {
+      "type": "string",
+      "enum": ["generated", "recorded", "imported", "cloned", "designed", "unknown"]
+    },
+    "provider": { "type": "string" },
+    "model_id": { "type": "string" },
+    "voice_id": { "type": "string" },
+    "seed": { "type": "integer" },
+    "request_hash": { "type": "string" },
+    "asset_hash": { "type": "string" },
+    "consent_status": {
+      "type": "string",
+      "enum": ["owned", "licensed", "public_domain", "unknown", "restricted"]
+    },
+    "usage_constraints": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "created_at": { "type": "string" }
+  }
+}

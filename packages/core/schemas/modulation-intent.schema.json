@@ -1,0 +1,41 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://earworm.dev/schemas/modulation-intent.schema.json",
+  "title": "ModulationIntent",
+  "type": "object",
+  "required": ["intent_id", "target", "reason", "source_refs", "mapping", "constraints", "confidence"],
+  "additionalProperties": false,
+  "properties": {
+    "intent_id": { "type": "string" },
+    "target": { "type": "string" },
+    "reason": {
+      "type": "string",
+      "enum": ["prompt_trait", "audio_tag", "analysis_feature", "user_feedback", "agent_evaluation"]
+    },
+    "source_refs": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "mapping": {
+      "type": "object",
+      "required": ["type", "parameters"],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "type": "string", "enum": ["linear", "rule", "ml", "manual"] },
+        "parameters": { "type": "object" }
+      }
+    },
+    "constraints": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "min": { "type": "number" },
+        "max": { "type": "number" },
+        "smoothing_ms": { "type": "integer" },
+        "protect_intelligibility": { "type": "boolean" }
+      }
+    },
+    "output_lane_ref": { "type": "string" },
+    "confidence": { "type": "number" }
+  }
+}

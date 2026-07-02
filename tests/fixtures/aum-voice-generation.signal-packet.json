@@ -1,0 +1,21 @@
+{
+  "packet_id": "packet_voice_line_001",
+  "signal_type": "audio",
+  "asset_ref": "asset_voice_line_001",
+  "segment_id": "segment_line_001",
+  "time_range": {
+    "start": 0,
+    "end": 3.42,
+    "unit": "seconds"
+  },
+  "context_refs": [
+    "evt_prompt_001",
+    "evt_generation_request_001",
+    "evt_audio_generated_001",
+    "evt_alignment_001"
+  ],
+  "features_ref": "evt_analysis_001",
+  "feature_stream_ref": "features_voice_line_001",
+  "provenance_id": "prov_voice_line_001",
+  "tags": ["voice", "generated", "breathy"]
+}

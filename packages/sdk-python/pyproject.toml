@@ -1,0 +1,20 @@
+[project]
+name = "earworm-sdk-python"
+version = "0.1.0"
+description = "Read-only Python helpers for Earworm session and manifest fixtures."
+requires-python = ">=3.11"
+license = { text = "MPL-2.0" }
+readme = "README.md"
+authors = [
+  { name = "Sonic Field Labs" }
+]
+keywords = ["audio", "provenance", "event-sourcing", "agentic"]
+
+[project.urls]
+Homepage = "https://github.com/sonicfieldlabs/earworm"
+Repository = "https://github.com/sonicfieldlabs/earworm"
+Issues = "https://github.com/sonicfieldlabs/earworm/issues"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

@@ -1,0 +1,44 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://earworm.dev/schemas/export-manifest.schema.json",
+  "title": "ExportManifest",
+  "type": "object",
+  "required": ["manifest_id", "session_id", "app_id", "created_at", "scope", "assets", "events", "provenance", "policy", "views", "audit"],
+  "additionalProperties": false,
+  "properties": {
+    "manifest_id": { "type": "string" },
+    "session_id": { "type": "string" },
+    "app_id": { "type": "string" },
+    "created_at": { "type": "string" },
+    "scope": { "type": "object" },
+    "assets": {
+      "type": "array",
+      "items": { "$ref": "https://earworm.dev/schemas/asset-ref.schema.json" }
+    },
+    "events": {
+      "type": "array",
+      "items": { "$ref": "https://earworm.dev/schemas/earworm-event.schema.json" }
+    },
+    "provenance": {
+      "type": "array",
+      "items": { "$ref": "https://earworm.dev/schemas/provenance-record.schema.json" }
+    },
+    "policy": { "$ref": "https://earworm.dev/schemas/retention-policy.schema.json" },
+    "views": { "type": "object" },
+    "audit": {
+      "type": "object",
+      "required": ["asset_count", "event_count", "provenance_count", "warnings"],
+      "additionalProperties": false,
+      "properties": {
+        "asset_count": { "type": "integer" },
+        "event_count": { "type": "integer" },
+        "provenance_count": { "type": "integer" },
+        "rights_status": { "type": "string" },
+        "warnings": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    }
+  }
+}

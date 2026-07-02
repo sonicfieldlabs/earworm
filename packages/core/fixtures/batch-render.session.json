@@ -1,0 +1,90 @@
+{
+  "session_id": "sess_batch_render_001",
+  "app_id": "batch-render-manifest",
+  "created_at": "2026-05-25T18:30:00.000Z",
+  "policy": {
+    "mode": "project_lifetime",
+    "local_only": true,
+    "redaction": {
+      "sensitive_fields": [],
+      "agent_safe_omissions": []
+    }
+  },
+  "assets": [
+    {
+      "asset_id": "asset_batch_voice_001",
+      "type": "audio",
+      "uri": "batch/voice-001.wav",
+      "duration_seconds": 2.4,
+      "provenance_id": "prov_batch_voice_001"
+    }
+  ],
+  "events": [
+    {
+      "event_id": "evt_batch_prompt_001",
+      "session_id": "sess_batch_render_001",
+      "type": "prompt.ingested",
+      "time": { "wall_clock": "2026-05-25T18:30:01.000Z", "project_seconds": 0 },
+      "source": { "actor": "system", "node_id": "batch.prompt" },
+      "payload": { "prompt": "neutral narration, close mic" },
+      "confidence": 1,
+      "reversible": false,
+      "parent_event_ids": []
+    },
+    {
+      "event_id": "evt_batch_audio_001",
+      "session_id": "sess_batch_render_001",
+      "type": "audio.generated",
+      "time": { "wall_clock": "2026-05-25T18:30:05.000Z", "asset_seconds": 0 },
+      "source": { "actor": "provider", "node_id": "example-tts" },
+      "payload": { "asset_id": "asset_batch_voice_001", "duration_seconds": 2.4 },
+      "confidence": 1,
+      "reversible": false,
+      "parent_event_ids": ["evt_batch_prompt_001"],
+      "provenance_id": "prov_batch_voice_001"
+    },
+    {
+      "event_id": "evt_batch_render_001",
+      "session_id": "sess_batch_render_001",
+      "type": "render.created",
+      "time": { "wall_clock": "2026-05-25T18:30:08.000Z", "project_seconds": 0 },
+      "source": { "actor": "system", "node_id": "batch.render" },
+      "payload": {
+        "render_id": "render_batch_voice_001",
+        "asset_id": "asset_batch_voice_001",
+        "output_uri": "batch/rendered/voice-001.wav",
+        "asset_hash": "sha256:batch-render-001"
+      },
+      "confidence": 1,
+      "reversible": false,
+      "parent_event_ids": ["evt_batch_audio_001"],
+      "provenance_id": "prov_batch_voice_001"
+    }
+  ],
+  "provenance": [
+    {
+      "provenance_id": "prov_batch_voice_001",
+      "source_type": "generated",
+      "provider": "example-tts",
+      "model_id": "voice-model-preview",
+      "request_hash": "sha256:batch-request-001",
+      "asset_hash": "sha256:batch-asset-001",
+      "consent_status": "owned",
+      "usage_constraints": ["batch_demo"],
+      "created_at": "2026-05-25T18:30:05.000Z"
+    }
+  ],
+  "views": {
+    "current_state": {
+      "active_asset_id": "asset_batch_voice_001",
+      "latest_render_id": "render_batch_voice_001"
+    },
+    "summaries": []
+  },
+  "indexes": {
+    "by_time": true,
+    "by_asset": true,
+    "by_node": true,
+    "by_text": true
+  }
+}

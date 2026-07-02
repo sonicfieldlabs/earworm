@@ -1,0 +1,47 @@
+{
+  "name": "earworm",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Project-agnostic protocol and SDK for persistent listening in agentic signal chains.",
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sonicfieldlabs/earworm.git"
+  },
+  "homepage": "https://github.com/sonicfieldlabs/earworm#readme",
+  "bugs": {
+    "url": "https://github.com/sonicfieldlabs/earworm/issues"
+  },
+  "engines": {
+    "node": ">=22",
+    "pnpm": ">=10"
+  },
+  "packageManager": "pnpm@10.32.1",
+  "scripts": {
+    "validate": "node scripts/validate-fixtures.mjs",
+    "test": "pnpm build && node scripts/test-event-store.mjs && node scripts/test-sdk-js.mjs",
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "lint": "node scripts/lint.mjs",
+    "manifest:fixture": "pnpm build && node scripts/export-manifest.mjs --session packages/core/fixtures/aum-voice-generation.session.json --asset asset_voice_line_001 --out tests/fixtures/aum-voice-generation.export-manifest.json",
+    "manifest:validate": "node scripts/validate-manifest.mjs tests/fixtures/aum-voice-generation.export-manifest.json",
+    "conformance": "pnpm build && node scripts/conformance.mjs",
+    "example:aum": "pnpm build && node examples/aum-lite-demo/run.mjs",
+    "example:batch": "pnpm build && node examples/batch-render-manifest/run.mjs",
+    "example:phonostack": "pnpm build && node examples/phonostack-studio-sidecar/run.mjs",
+    "examples:smoke": "pnpm example:aum && pnpm example:batch && pnpm example:phonostack",
+    "check": "pnpm validate && pnpm test && pnpm typecheck && pnpm lint && pnpm conformance && pnpm manifest:validate && pnpm examples:smoke"
+  },
+  "keywords": [
+    "agentic",
+    "audio",
+    "provenance",
+    "event-sourcing",
+    "signal-chain"
+  ],
+  "license": "MPL-2.0",
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "typescript": "^5.8.0"
+  }
+}

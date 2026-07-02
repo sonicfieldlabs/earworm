@@ -1,0 +1,13 @@
+{
+  "features_ref": "features_voice_line_001",
+  "asset_ref": "asset_voice_line_001",
+  "format": "json_frames",
+  "uri": "features/voice-line-001.frames.json",
+  "time_range": {
+    "start": 0,
+    "end": 3.42,
+    "unit": "seconds"
+  },
+  "sample_rate_hz": 10,
+  "feature_names": ["loudness_lufs", "pitch_hz", "spectral_centroid_hz", "voiced"]
+}

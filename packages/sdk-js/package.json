@@ -1,0 +1,35 @@
+{
+  "name": "@earworm/sdk-js",
+  "version": "0.1.0",
+  "description": "Developer-facing JavaScript SDK for Earworm.",
+  "type": "module",
+  "main": "src/index.js",
+  "types": "src/index.d.ts",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sonicfieldlabs/earworm.git",
+    "directory": "packages/sdk-js"
+  },
+  "homepage": "https://github.com/sonicfieldlabs/earworm/tree/main/packages/sdk-js#readme",
+  "bugs": {
+    "url": "https://github.com/sonicfieldlabs/earworm/issues"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "files": [
+    "src",
+    "README.md",
+    "package.json"
+  ],
+  "exports": {
+    ".": {
+      "types": "./src/index.d.ts",
+      "default": "./src/index.js"
+    }
+  },
+  "dependencies": {
+    "@earworm/core": "workspace:*"
+  },
+  "license": "MPL-2.0"
+}

@@ -1,0 +1,35 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://earworm.dev/schemas/retention-policy.schema.json",
+  "title": "RetentionPolicy",
+  "type": "object",
+  "required": ["mode", "local_only", "redaction"],
+  "additionalProperties": false,
+  "properties": {
+    "mode": {
+      "type": "string",
+      "enum": ["ephemeral", "project_lifetime", "expires_at", "custom"]
+    },
+    "expires_at": {
+      "type": "string"
+    },
+    "local_only": {
+      "type": "boolean"
+    },
+    "redaction": {
+      "type": "object",
+      "required": ["sensitive_fields", "agent_safe_omissions"],
+      "additionalProperties": false,
+      "properties": {
+        "sensitive_fields": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "agent_safe_omissions": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    }
+  }
+}

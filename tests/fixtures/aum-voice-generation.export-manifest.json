@@ -1,0 +1,450 @@
+{
+  "manifest_id": "manifest_asset_voice_line_001",
+  "session_id": "sess_aum_voice_001",
+  "app_id": "aum-lite-demo",
+  "created_at": "2026-05-25T17:30:00.000Z",
+  "scope": {
+    "manifest_id": "manifest_asset_voice_line_001",
+    "asset_id": "asset_voice_line_001",
+    "require_complete_provenance": true,
+    "created_at": "2026-05-25T17:30:00.000Z"
+  },
+  "assets": [
+    {
+      "asset_id": "asset_voice_line_001",
+      "type": "audio",
+      "uri": "assets/voice-line-001.wav",
+      "duration_seconds": 3.42,
+      "sample_rate": 48000,
+      "channels": 1,
+      "provenance_id": "prov_voice_line_001"
+    }
+  ],
+  "events": [
+    {
+      "event_id": "evt_prompt_001",
+      "session_id": "sess_aum_voice_001",
+      "type": "prompt.ingested",
+      "time": {
+        "wall_clock": "2026-05-25T17:30:01.000Z",
+        "project_seconds": 0
+      },
+      "source": {
+        "actor": "user",
+        "node_id": "aum.prompt"
+      },
+      "payload": {
+        "prompt": "tired detective, close and breathy",
+        "traits": [
+          "tired",
+          "detective",
+          "close_mic",
+          "breathy"
+        ]
+      },
+      "confidence": 1,
+      "reversible": false,
+      "parent_event_ids": []
+    },
+    {
+      "event_id": "evt_generation_request_001",
+      "session_id": "sess_aum_voice_001",
+      "type": "generation.requested",
+      "time": {
+        "wall_clock": "2026-05-25T17:30:03.000Z",
+        "project_seconds": 0
+      },
+      "source": {
+        "actor": "system",
+        "node_id": "aum.tts"
+      },
+      "payload": {
+        "provider": "example-tts",
+        "model_id": "voice-model-preview",
+        "voice_id": "voice_detective_001",
+        "text": "I kept the light on because the room had started listening back.",
+        "settings": {
+          "stability": 0.42,
+          "similarity_boost": 0.76,
+          "style": 0.35
+        },
+        "provider_request": {
+          "api_key": "test-redacted-key",
+          "endpoint": "https://example.invalid/tts"
+        },
+        "request_hash": "sha256:request001"
+      },
+      "confidence": 1,
+      "reversible": false,
+      "parent_event_ids": [
+        "evt_prompt_001"
+      ],
+      "provenance_id": "prov_voice_line_001"
+    },
+    {
+      "event_id": "evt_audio_generated_001",
+      "session_id": "sess_aum_voice_001",
+      "type": "audio.generated",
+      "time": {
+        "wall_clock": "2026-05-25T17:30:08.000Z",
+        "project_seconds": 0,
+        "asset_seconds": 0,
+        "sample_index": 0
+      },
+      "source": {
+        "actor": "provider",
+        "node_id": "example-tts"
+      },
+      "payload": {
+        "asset_id": "asset_voice_line_001",
+        "duration_seconds": 3.42,
+        "response_metadata": {
+          "request_id": "req_example_001",
+          "latency_ms": 1420
+        }
+      },
+      "confidence": 1,
+      "reversible": false,
+      "parent_event_ids": [
+        "evt_generation_request_001"
+      ],
+      "provenance_id": "prov_voice_line_001"
+    },
+    {
+      "event_id": "evt_alignment_001",
+      "session_id": "sess_aum_voice_001",
+      "type": "alignment.ingested",
+      "time": {
+        "wall_clock": "2026-05-25T17:30:09.000Z",
+        "project_seconds": 0,
+        "asset_seconds": 0,
+        "char_range": [
+          0,
+          66
+        ],
+        "word_range": [
+          0,
+          13
+        ]
+      },
+      "source": {
+        "actor": "system",
+        "node_id": "aum.alignment"
+      },
+      "payload": {
+        "asset_id": "asset_voice_line_001",
+        "words": [
+          {
+            "text": "I",
+            "start": 0.05,
+            "end": 0.18
+          },
+          {
+            "text": "kept",
+            "start": 0.22,
+            "end": 0.48
+          },
+          {
+            "text": "the",
+            "start": 0.5,
+            "end": 0.62
+          },
+          {
+            "text": "light",
+            "start": 0.65,
+            "end": 0.94
+          },
+          {
+            "text": "on",
+            "start": 1.02,
+            "end": 1.2
+          },
+          {
+            "text": "because",
+            "start": 1.42,
+            "end": 1.8
+          },
+          {
+            "text": "the",
+            "start": 1.84,
+            "end": 1.96
+          },
+          {
+            "text": "room",
+            "start": 2,
+            "end": 2.22
+          },
+          {
+            "text": "had",
+            "start": 2.29,
+            "end": 2.45
+          },
+          {
+            "text": "started",
+            "start": 2.5,
+            "end": 2.86
+          },
+          {
+            "text": "listening",
+            "start": 2.9,
+            "end": 3.18
+          },
+          {
+            "text": "back",
+            "start": 3.22,
+            "end": 3.4
+          }
+        ]
+      },
+      "confidence": 0.92,
+      "reversible": false,
+      "parent_event_ids": [
+        "evt_audio_generated_001"
+      ],
+      "provenance_id": "prov_voice_line_001"
+    },
+    {
+      "event_id": "evt_analysis_001",
+      "session_id": "sess_aum_voice_001",
+      "type": "analysis.frame",
+      "time": {
+        "wall_clock": "2026-05-25T17:30:10.000Z",
+        "project_seconds": 0,
+        "asset_seconds": 1.42
+      },
+      "source": {
+        "actor": "system",
+        "node_id": "aum.analysis"
+      },
+      "payload": {
+        "asset_id": "asset_voice_line_001",
+        "frames": [
+          {
+            "frame_id": "frame_001",
+            "asset_ref": "asset_voice_line_001",
+            "time_range": {
+              "start": 1.42,
+              "end": 1.8,
+              "unit": "seconds"
+            },
+            "features": {
+              "loudness_lufs": -24.2,
+              "pitch_hz": 112.4,
+              "spectral_centroid_hz": 1610,
+              "voiced": true
+            },
+            "confidence": 0.88
+          }
+        ]
+      },
+      "confidence": 0.88,
+      "reversible": false,
+      "parent_event_ids": [
+        "evt_audio_generated_001"
+      ]
+    },
+    {
+      "event_id": "evt_intent_001",
+      "session_id": "sess_aum_voice_001",
+      "type": "agent.action.proposed",
+      "time": {
+        "wall_clock": "2026-05-25T17:30:11.000Z",
+        "project_seconds": 0,
+        "asset_seconds": 0
+      },
+      "source": {
+        "actor": "agent",
+        "node_id": "earworm.mapper.breath"
+      },
+      "payload": {
+        "intent": {
+          "intent_id": "intent_breath_001",
+          "target": "dsp.breath.mix",
+          "reason": "prompt_trait",
+          "source_refs": [
+            "evt_prompt_001",
+            "evt_alignment_001"
+          ],
+          "mapping": {
+            "type": "rule",
+            "parameters": {
+              "trait": "breathy",
+              "pause_boost": 0.14
+            }
+          },
+          "constraints": {
+            "min": 0,
+            "max": 0.62,
+            "smoothing_ms": 80,
+            "protect_intelligibility": true
+          },
+          "output_lane_ref": "lane_breath_001",
+          "confidence": 0.78
+        }
+      },
+      "confidence": 0.78,
+      "reversible": true,
+      "parent_event_ids": [
+        "evt_prompt_001",
+        "evt_alignment_001"
+      ]
+    },
+    {
+      "event_id": "evt_automation_001",
+      "session_id": "sess_aum_voice_001",
+      "type": "automation.committed",
+      "time": {
+        "wall_clock": "2026-05-25T17:30:12.000Z",
+        "project_seconds": 0,
+        "asset_seconds": 0
+      },
+      "source": {
+        "actor": "agent",
+        "node_id": "earworm.mapper.breath"
+      },
+      "payload": {
+        "intent": {
+          "intent_id": "intent_breath_001",
+          "target": "dsp.breath.mix",
+          "reason": "prompt_trait",
+          "source_refs": [
+            "evt_prompt_001",
+            "evt_alignment_001"
+          ],
+          "mapping": {
+            "type": "rule",
+            "parameters": {
+              "trait": "breathy",
+              "pause_boost": 0.14
+            }
+          },
+          "constraints": {
+            "min": 0,
+            "max": 0.62,
+            "smoothing_ms": 80,
+            "protect_intelligibility": true
+          },
+          "output_lane_ref": "lane_breath_001",
+          "confidence": 0.78
+        },
+        "lane": {
+          "lane_id": "lane_breath_001",
+          "target": "dsp.breath.mix",
+          "unit": "normalized",
+          "points": [
+            {
+              "time": 0,
+              "value": 0.22,
+              "curve": "linear"
+            },
+            {
+              "time": 1.2,
+              "value": 0.36,
+              "curve": "ease"
+            },
+            {
+              "time": 1.42,
+              "value": 0.29,
+              "curve": "ease"
+            },
+            {
+              "time": 3.42,
+              "value": 0.24,
+              "curve": "linear"
+            }
+          ],
+          "source_intent_id": "intent_breath_001",
+          "reversible": true
+        },
+        "asset_ids": [
+          "asset_voice_line_001"
+        ]
+      },
+      "confidence": 0.78,
+      "reversible": true,
+      "parent_event_ids": [
+        "evt_intent_001"
+      ]
+    },
+    {
+      "event_id": "evt_render_001",
+      "session_id": "sess_aum_voice_001",
+      "type": "render.created",
+      "time": {
+        "wall_clock": "2026-05-25T17:30:15.000Z",
+        "project_seconds": 0
+      },
+      "source": {
+        "actor": "system",
+        "node_id": "aum.render"
+      },
+      "payload": {
+        "render_id": "render_voice_line_001",
+        "asset_id": "asset_voice_line_001",
+        "automation_lanes": [
+          "lane_breath_001"
+        ],
+        "output_uri": "renders/voice-line-001-processed.wav",
+        "asset_hash": "sha256:render001"
+      },
+      "confidence": 1,
+      "reversible": false,
+      "parent_event_ids": [
+        "evt_audio_generated_001",
+        "evt_automation_001"
+      ],
+      "provenance_id": "prov_voice_line_001"
+    }
+  ],
+  "provenance": [
+    {
+      "provenance_id": "prov_voice_line_001",
+      "source_type": "generated",
+      "provider": "example-tts",
+      "model_id": "voice-model-preview",
+      "voice_id": "voice_detective_001",
+      "seed": 1234,
+      "request_hash": "sha256:request001",
+      "asset_hash": "sha256:asset001",
+      "consent_status": "owned",
+      "usage_constraints": [
+        "local_demo_only"
+      ],
+      "created_at": "2026-05-25T17:30:08.000Z"
+    }
+  ],
+  "policy": {
+    "mode": "project_lifetime",
+    "local_only": true,
+    "redaction": {
+      "sensitive_fields": [
+        "payload.provider_request.api_key"
+      ],
+      "agent_safe_omissions": [
+        "payload.provider_request.api_key",
+        "payload.raw_audio_uri"
+      ]
+    }
+  },
+  "views": {
+    "current_state": {
+      "event_count": 8,
+      "active_asset_id": "asset_voice_line_001",
+      "latest_render_id": "render_voice_line_001"
+    },
+    "summaries": [
+      {
+        "summary_id": "summary_voice_001",
+        "kind": "compact",
+        "text": "Voice line trends tired, close, breathy, and low-pitched. Breath automation is applied around pauses."
+      }
+    ]
+  },
+  "audit": {
+    "asset_count": 1,
+    "event_count": 8,
+    "provenance_count": 1,
+    "rights_status": "complete",
+    "warnings": []
+  }
+}

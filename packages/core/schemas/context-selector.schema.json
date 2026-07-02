@@ -1,0 +1,57 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://earworm.dev/schemas/context-selector.schema.json",
+  "title": "ContextSelector",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "time_range": {
+      "type": "object",
+      "required": ["start", "end"],
+      "additionalProperties": false,
+      "properties": {
+        "start": { "type": "number" },
+        "end": { "type": "number" }
+      }
+    },
+    "include": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": ["prompt", "generation", "signal", "alignment", "analysis", "automation", "provenance", "agent_actions", "renders"]
+      }
+    },
+    "asset_id": { "type": "string" },
+    "node_id": { "type": "string" },
+    "event_types": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "prompt.ingested",
+          "generation.requested",
+          "audio.generated",
+          "signal.packet.ingested",
+          "alignment.ingested",
+          "analysis.frame",
+          "dsp.parameter.changed",
+          "agent.action.proposed",
+          "agent.action.applied",
+          "automation.committed",
+          "automation.reverted",
+          "render.created",
+          "snapshot.created"
+        ]
+      }
+    },
+    "summarization": {
+      "type": "string",
+      "enum": ["compact", "full", "agent_safe"]
+    },
+    "max_tokens": { "type": "integer" },
+    "time_domain": {
+      "type": "string",
+      "enum": ["asset", "project", "wall_clock"]
+    }
+  }
+}

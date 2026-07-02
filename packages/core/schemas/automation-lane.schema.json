@@ -1,0 +1,29 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://earworm.dev/schemas/automation-lane.schema.json",
+  "title": "AutomationLane",
+  "type": "object",
+  "required": ["lane_id", "target", "unit", "points", "source_intent_id", "reversible"],
+  "additionalProperties": false,
+  "properties": {
+    "lane_id": { "type": "string" },
+    "target": { "type": "string" },
+    "unit": { "type": "string" },
+    "points": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["time", "value"],
+        "additionalProperties": false,
+        "properties": {
+          "time": { "type": "number" },
+          "value": { "type": "number" },
+          "curve": { "type": "string", "enum": ["step", "linear", "ease"] }
+        }
+      }
+    },
+    "source_intent_id": { "type": "string" },
+    "reversible": { "type": "boolean" },
+    "rollback_lane_ref": { "type": "string" }
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://earworm.dev/schemas/analysis-frame.schema.json",
+  "title": "AnalysisFrame",
+  "type": "object",
+  "required": ["frame_id", "asset_ref", "time_range", "features"],
+  "additionalProperties": false,
+  "properties": {
+    "frame_id": { "type": "string" },
+    "asset_ref": { "type": "string" },
+    "time_range": {
+      "type": "object",
+      "required": ["start", "end", "unit"],
+      "additionalProperties": false,
+      "properties": {
+        "start": { "type": "number" },
+        "end": { "type": "number" },
+        "unit": { "type": "string", "enum": ["seconds"] }
+      }
+    },
+    "features": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "confidence": { "type": "number" }
+  }
+}

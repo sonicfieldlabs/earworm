@@ -1,0 +1,32 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://earworm.dev/schemas/feature-stream-ref.schema.json",
+  "title": "FeatureStreamRef",
+  "type": "object",
+  "required": ["features_ref", "asset_ref", "format", "time_range", "feature_names"],
+  "additionalProperties": false,
+  "properties": {
+    "features_ref": { "type": "string" },
+    "asset_ref": { "type": "string" },
+    "format": {
+      "type": "string",
+      "enum": ["json_frames", "binary_sidecar", "external"]
+    },
+    "uri": { "type": "string" },
+    "time_range": {
+      "type": "object",
+      "required": ["start", "end", "unit"],
+      "additionalProperties": false,
+      "properties": {
+        "start": { "type": "number" },
+        "end": { "type": "number" },
+        "unit": { "type": "string", "enum": ["seconds", "samples"] }
+      }
+    },
+    "sample_rate_hz": { "type": "number" },
+    "feature_names": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  }
+}

@@ -1,0 +1,84 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://earworm.dev/schemas/earworm-event.schema.json",
+  "title": "EarwormEvent",
+  "type": "object",
+  "required": [
+    "event_id",
+    "session_id",
+    "type",
+    "time",
+    "source",
+    "payload",
+    "reversible",
+    "parent_event_ids"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "event_id": { "type": "string" },
+    "session_id": { "type": "string" },
+    "type": {
+      "type": "string",
+      "enum": [
+        "prompt.ingested",
+        "generation.requested",
+        "audio.generated",
+        "signal.packet.ingested",
+        "alignment.ingested",
+        "analysis.frame",
+        "dsp.parameter.changed",
+        "agent.action.proposed",
+        "agent.action.applied",
+        "automation.committed",
+        "automation.reverted",
+        "render.created",
+        "snapshot.created"
+      ]
+    },
+    "time": {
+      "type": "object",
+      "required": ["wall_clock"],
+      "additionalProperties": false,
+      "properties": {
+        "wall_clock": { "type": "string" },
+        "project_seconds": { "type": "number" },
+        "asset_seconds": { "type": "number" },
+        "sample_index": { "type": "integer" },
+        "char_range": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "items": { "type": "integer" }
+        },
+        "word_range": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "items": { "type": "integer" }
+        }
+      }
+    },
+    "source": {
+      "type": "object",
+      "required": ["actor"],
+      "additionalProperties": false,
+      "properties": {
+        "actor": {
+          "type": "string",
+          "enum": ["user", "agent", "system", "provider"]
+        },
+        "node_id": { "type": "string" }
+      }
+    },
+    "payload": { "type": "object" },
+    "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+    "reversible": { "type": "boolean" },
+    "parent_event_ids": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "provenance_id": { "type": "string" },
+    "prev_event_hash": { "type": "string" },
+    "event_hash": { "type": "string" }
+  }
+}

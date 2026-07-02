@@ -1,0 +1,39 @@
+{
+  "name": "@earworm/core",
+  "version": "0.1.0",
+  "description": "Canonical Earworm schemas and event-store primitives.",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sonicfieldlabs/earworm.git",
+    "directory": "packages/core"
+  },
+  "homepage": "https://github.com/sonicfieldlabs/earworm/tree/main/packages/core#readme",
+  "bugs": {
+    "url": "https://github.com/sonicfieldlabs/earworm/issues"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "files": [
+    "dist",
+    "schemas",
+    "fixtures",
+    "README.md",
+    "package.json"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./schemas/*": "./schemas/*",
+    "./fixtures/*": "./fixtures/*"
+  },
+  "scripts": {
+    "prepack": "pnpm -w build"
+  },
+  "license": "MPL-2.0"
+}

@@ -1,0 +1,195 @@
+{
+  "session_id": "sess_germ_mapping_001",
+  "app_id": "germ",
+  "created_at": "2026-06-01T12:00:00.000Z",
+  "policy": {
+    "mode": "project_lifetime",
+    "local_only": true,
+    "redaction": {
+      "sensitive_fields": [],
+      "agent_safe_omissions": []
+    }
+  },
+  "assets": [
+    {
+      "asset_id": "asset_germ_organism_001",
+      "type": "audio",
+      "uri": "germ/organisms/rain-cell-001.wav",
+      "duration_seconds": 8.5,
+      "sample_rate": 48000,
+      "channels": 2,
+      "provenance_id": "prov_germ_organism_001",
+      "organism_id": "organism_rain_cell_001",
+      "strain": "rain-cell"
+    }
+  ],
+  "events": [
+    {
+      "event_id": "evt_germ_prompt_001",
+      "session_id": "sess_germ_mapping_001",
+      "type": "prompt.ingested",
+      "time": {
+        "wall_clock": "2026-06-01T12:00:01.000Z",
+        "project_seconds": 0
+      },
+      "source": {
+        "actor": "user",
+        "node_id": "germ.prompt"
+      },
+      "payload": {
+        "prompt": "small rain organism, granular, returning to the windowsill",
+        "cultivation": {
+          "operation": "germinate",
+          "strain": "rain-cell",
+          "parents": []
+        }
+      },
+      "confidence": 1,
+      "reversible": false,
+      "parent_event_ids": []
+    },
+    {
+      "event_id": "evt_germ_generation_request_001",
+      "session_id": "sess_germ_mapping_001",
+      "type": "generation.requested",
+      "time": {
+        "wall_clock": "2026-06-01T12:00:03.000Z",
+        "project_seconds": 0
+      },
+      "source": {
+        "actor": "system",
+        "node_id": "germ.cultivator"
+      },
+      "payload": {
+        "provider": "local-open-audio-model",
+        "model_id": "open-audio-cultivation-preview",
+        "organism_id": "organism_rain_cell_001",
+        "operation": "germinate",
+        "request_hash": "sha256:germ-request-001"
+      },
+      "confidence": 1,
+      "reversible": false,
+      "parent_event_ids": ["evt_germ_prompt_001"],
+      "provenance_id": "prov_germ_organism_001"
+    },
+    {
+      "event_id": "evt_germ_audio_001",
+      "session_id": "sess_germ_mapping_001",
+      "type": "audio.generated",
+      "time": {
+        "wall_clock": "2026-06-01T12:00:09.000Z",
+        "project_seconds": 0,
+        "asset_seconds": 0,
+        "sample_index": 0
+      },
+      "source": {
+        "actor": "provider",
+        "node_id": "germ.generator"
+      },
+      "payload": {
+        "asset_id": "asset_germ_organism_001",
+        "duration_seconds": 8.5,
+        "response_metadata": {
+          "organism_id": "organism_rain_cell_001",
+          "generation": 1,
+          "lineage": []
+        }
+      },
+      "confidence": 1,
+      "reversible": false,
+      "parent_event_ids": ["evt_germ_generation_request_001"],
+      "provenance_id": "prov_germ_organism_001"
+    },
+    {
+      "event_id": "evt_germ_analysis_001",
+      "session_id": "sess_germ_mapping_001",
+      "type": "analysis.frame",
+      "time": {
+        "wall_clock": "2026-06-01T12:00:10.000Z",
+        "project_seconds": 0,
+        "asset_seconds": 4.25
+      },
+      "source": {
+        "actor": "system",
+        "node_id": "germ.listen"
+      },
+      "payload": {
+        "asset_id": "asset_germ_organism_001",
+        "frames": [
+          {
+            "frame_id": "frame_germ_001",
+            "asset_ref": "asset_germ_organism_001",
+            "time_range": { "start": 3.5, "end": 5.0, "unit": "seconds" },
+            "features": {
+              "grain_density": 0.72,
+              "spectral_centroid_hz": 2440,
+              "lineage_similarity": 1
+            },
+            "confidence": 0.86
+          }
+        ]
+      },
+      "confidence": 0.86,
+      "reversible": false,
+      "parent_event_ids": ["evt_germ_audio_001"],
+      "provenance_id": "prov_germ_organism_001"
+    },
+    {
+      "event_id": "evt_germ_harvest_001",
+      "session_id": "sess_germ_mapping_001",
+      "type": "render.created",
+      "time": {
+        "wall_clock": "2026-06-01T12:00:14.000Z",
+        "project_seconds": 0
+      },
+      "source": {
+        "actor": "system",
+        "node_id": "germ.harvest"
+      },
+      "payload": {
+        "render_id": "render_germ_organism_001",
+        "asset_id": "asset_germ_organism_001",
+        "organism_id": "organism_rain_cell_001",
+        "output_uri": "germ/harvest/rain-cell-001.wav",
+        "asset_hash": "sha256:germ-render-001"
+      },
+      "confidence": 1,
+      "reversible": false,
+      "parent_event_ids": ["evt_germ_audio_001", "evt_germ_analysis_001"],
+      "provenance_id": "prov_germ_organism_001"
+    }
+  ],
+  "provenance": [
+    {
+      "provenance_id": "prov_germ_organism_001",
+      "source_type": "generated",
+      "provider": "local-open-audio-model",
+      "model_id": "open-audio-cultivation-preview",
+      "seed": 91011,
+      "request_hash": "sha256:germ-request-001",
+      "asset_hash": "sha256:germ-asset-001",
+      "consent_status": "owned",
+      "usage_constraints": ["local_cultivation", "lineage_attached"],
+      "created_at": "2026-06-01T12:00:09.000Z"
+    }
+  ],
+  "views": {
+    "current_state": {
+      "active_asset_id": "asset_germ_organism_001",
+      "latest_render_id": "render_germ_organism_001"
+    },
+    "summaries": [
+      {
+        "summary_id": "summary_germ_001",
+        "kind": "compact",
+        "text": "First-generation rain-cell organism, generated locally and harvested with lineage metadata."
+      }
+    ]
+  },
+  "indexes": {
+    "by_time": true,
+    "by_asset": true,
+    "by_node": true,
+    "by_text": true
+  }
+}

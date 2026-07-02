@@ -1,0 +1,113 @@
+{
+  "session_id": "sess_phonostack_sidecar_001",
+  "app_id": "phonostack-studio-sidecar",
+  "created_at": "2026-05-25T18:45:00.000Z",
+  "policy": {
+    "mode": "project_lifetime",
+    "local_only": true,
+    "redaction": {
+      "sensitive_fields": ["payload.project_notes.private"],
+      "agent_safe_omissions": ["payload.project_notes.private"]
+    }
+  },
+  "assets": [
+    {
+      "asset_id": "asset_studio_clip_001",
+      "type": "audio",
+      "uri": "studio/clips/voice-clip-001.wav",
+      "duration_seconds": 4.8,
+      "provenance_id": "prov_studio_clip_001",
+      "track_id": "track_voice_a",
+      "clip_id": "clip_voice_001"
+    }
+  ],
+  "events": [
+    {
+      "event_id": "evt_studio_prompt_001",
+      "session_id": "sess_phonostack_sidecar_001",
+      "type": "prompt.ingested",
+      "time": { "wall_clock": "2026-05-25T18:45:01.000Z", "project_seconds": 12.5 },
+      "source": { "actor": "user", "node_id": "studio.timeline" },
+      "payload": {
+        "prompt": "whispered texture under the chorus",
+        "track_id": "track_voice_a",
+        "clip_id": "clip_voice_001"
+      },
+      "confidence": 1,
+      "reversible": false,
+      "parent_event_ids": []
+    },
+    {
+      "event_id": "evt_studio_audio_001",
+      "session_id": "sess_phonostack_sidecar_001",
+      "type": "audio.generated",
+      "time": { "wall_clock": "2026-05-25T18:45:06.000Z", "project_seconds": 12.5, "asset_seconds": 0 },
+      "source": { "actor": "provider", "node_id": "studio.generator" },
+      "payload": {
+        "asset_id": "asset_studio_clip_001",
+        "duration_seconds": 4.8,
+        "track_id": "track_voice_a",
+        "clip_id": "clip_voice_001"
+      },
+      "confidence": 1,
+      "reversible": false,
+      "parent_event_ids": ["evt_studio_prompt_001"],
+      "provenance_id": "prov_studio_clip_001"
+    },
+    {
+      "event_id": "evt_studio_packet_001",
+      "session_id": "sess_phonostack_sidecar_001",
+      "type": "signal.packet.ingested",
+      "time": { "wall_clock": "2026-05-25T18:45:07.000Z", "project_seconds": 12.5, "asset_seconds": 0 },
+      "source": { "actor": "system", "node_id": "studio.sidecar" },
+      "payload": {
+        "asset_id": "asset_studio_clip_001",
+        "packet": {
+          "packet_id": "packet_studio_clip_001",
+          "signal_type": "audio",
+          "asset_ref": "asset_studio_clip_001",
+          "segment_id": "section_chorus_a",
+          "time_range": { "start": 12.5, "end": 17.3, "unit": "seconds" },
+          "context_refs": ["evt_studio_prompt_001", "evt_studio_audio_001"],
+          "provenance_id": "prov_studio_clip_001",
+          "tags": ["timeline", "voice", "texture"]
+        }
+      },
+      "confidence": 1,
+      "reversible": false,
+      "parent_event_ids": ["evt_studio_audio_001"],
+      "provenance_id": "prov_studio_clip_001"
+    }
+  ],
+  "provenance": [
+    {
+      "provenance_id": "prov_studio_clip_001",
+      "source_type": "generated",
+      "provider": "example-tts",
+      "model_id": "texture-model-preview",
+      "request_hash": "sha256:studio-request-001",
+      "asset_hash": "sha256:studio-asset-001",
+      "consent_status": "owned",
+      "usage_constraints": ["studio_demo"],
+      "created_at": "2026-05-25T18:45:06.000Z"
+    }
+  ],
+  "views": {
+    "current_state": {
+      "active_asset_id": "asset_studio_clip_001"
+    },
+    "summaries": [
+      {
+        "summary_id": "summary_studio_001",
+        "kind": "compact",
+        "text": "Chorus voice texture is generated, whispered, and attached to track_voice_a."
+      }
+    ]
+  },
+  "indexes": {
+    "by_time": true,
+    "by_asset": true,
+    "by_node": true,
+    "by_text": true
+  }
+}

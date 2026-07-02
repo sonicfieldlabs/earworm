@@ -1,0 +1,28 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://earworm.dev/schemas/context-bundle.schema.json",
+  "title": "ContextBundle",
+  "type": "object",
+  "required": ["session_id", "selector", "events", "assets", "provenance", "summaries"],
+  "additionalProperties": false,
+  "properties": {
+    "session_id": { "type": "string" },
+    "selector": { "type": "object" },
+    "events": {
+      "type": "array",
+      "items": { "$ref": "https://earworm.dev/schemas/earworm-event.schema.json" }
+    },
+    "assets": {
+      "type": "array",
+      "items": { "$ref": "https://earworm.dev/schemas/asset-ref.schema.json" }
+    },
+    "provenance": {
+      "type": "array",
+      "items": { "$ref": "https://earworm.dev/schemas/provenance-record.schema.json" }
+    },
+    "summaries": {
+      "type": "array",
+      "items": { "type": "object" }
+    }
+  }
+}

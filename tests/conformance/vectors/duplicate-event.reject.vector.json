@@ -1,0 +1,40 @@
+{
+  "name": "duplicate event_id is rejected",
+  "expect": "reject",
+  "error_contains": "duplicate event_id",
+  "session": {
+    "session_id": "sess_vector_duplicate_001",
+    "app_id": "conformance-vector",
+    "created_at": "2026-05-25T20:10:00.000Z",
+    "policy": {
+      "mode": "project_lifetime",
+      "local_only": true,
+      "redaction": {
+        "sensitive_fields": [],
+        "agent_safe_omissions": []
+      }
+    }
+  },
+  "events": [
+    {
+      "event_id": "evt_vector_duplicate_001",
+      "session_id": "sess_vector_duplicate_001",
+      "type": "prompt.ingested",
+      "time": { "wall_clock": "2026-05-25T20:10:01.000Z" },
+      "source": { "actor": "user" },
+      "payload": { "prompt": "first" },
+      "reversible": false,
+      "parent_event_ids": []
+    },
+    {
+      "event_id": "evt_vector_duplicate_001",
+      "session_id": "sess_vector_duplicate_001",
+      "type": "prompt.ingested",
+      "time": { "wall_clock": "2026-05-25T20:10:02.000Z" },
+      "source": { "actor": "user" },
+      "payload": { "prompt": "second" },
+      "reversible": false,
+      "parent_event_ids": []
+    }
+  ]
+}

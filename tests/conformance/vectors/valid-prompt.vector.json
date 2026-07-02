@@ -1,0 +1,29 @@
+{
+  "name": "valid prompt event is accepted",
+  "expect": "accept",
+  "session": {
+    "session_id": "sess_vector_valid_001",
+    "app_id": "conformance-vector",
+    "created_at": "2026-05-25T20:00:00.000Z",
+    "policy": {
+      "mode": "project_lifetime",
+      "local_only": true,
+      "redaction": {
+        "sensitive_fields": [],
+        "agent_safe_omissions": []
+      }
+    }
+  },
+  "events": [
+    {
+      "event_id": "evt_vector_prompt_001",
+      "session_id": "sess_vector_valid_001",
+      "type": "prompt.ingested",
+      "time": { "wall_clock": "2026-05-25T20:00:01.000Z" },
+      "source": { "actor": "user" },
+      "payload": { "prompt": "remember the rain" },
+      "reversible": false,
+      "parent_event_ids": []
+    }
+  ]
+}

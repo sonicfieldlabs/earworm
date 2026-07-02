@@ -1,0 +1,38 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://earworm.dev/schemas/signal-packet.schema.json",
+  "title": "SignalPacket",
+  "type": "object",
+  "required": ["packet_id", "signal_type", "time_range", "context_refs", "tags"],
+  "additionalProperties": false,
+  "properties": {
+    "packet_id": { "type": "string" },
+    "signal_type": {
+      "type": "string",
+      "enum": ["audio", "midi", "text", "control", "video", "image"]
+    },
+    "asset_ref": { "type": "string" },
+    "segment_id": { "type": "string" },
+    "time_range": {
+      "type": "object",
+      "required": ["start", "end", "unit"],
+      "additionalProperties": false,
+      "properties": {
+        "start": { "type": "number" },
+        "end": { "type": "number" },
+        "unit": { "type": "string", "enum": ["seconds", "samples", "frames"] }
+      }
+    },
+    "context_refs": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "features_ref": { "type": "string" },
+    "feature_stream_ref": { "type": "string" },
+    "provenance_id": { "type": "string" },
+    "tags": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  }
+}

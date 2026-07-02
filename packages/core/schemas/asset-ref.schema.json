@@ -1,0 +1,17 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://earworm.dev/schemas/asset-ref.schema.json",
+  "title": "AssetRef",
+  "type": "object",
+  "required": ["asset_id"],
+  "additionalProperties": true,
+  "properties": {
+    "asset_id": { "type": "string" },
+    "type": { "type": "string" },
+    "uri": { "type": "string" },
+    "duration_seconds": { "type": "number" },
+    "sample_rate": { "type": "integer" },
+    "channels": { "type": "integer" },
+    "provenance_id": { "type": "string" }
+  }
+}
