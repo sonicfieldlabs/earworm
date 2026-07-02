@@ -323,28 +323,32 @@ export class InMemoryEventStore implements EventStore {
   }
 
   append(event: EarwormEvent): string {
-    const appendable = prepareEventForAppend(this.#session, this.indexes, this.#events.at(-1), event);
+    const appendable = prepareEventForAppend(this.#session, this.#events, event);
     this.#events.push(appendable);
     this.syncSession();
     return appendable.event_id;
   }
 
   registerAsset(asset: AssetRef): void {
-    if (this.#session.assets.some((existing) => existing.asset_id === asset.asset_id)) {
+    const existing = this.#session.assets.find((candidate) => candidate.asset_id === asset.asset_id);
+    if (existing) {
+      assertMatchingRegistration("asset", asset.asset_id, existing, asset);
       return;
     }
     this.#session.assets = [...this.#session.assets, deepFreezeCopy(asset)];
   }
 
   registerProvenance(record: ProvenanceRecord): void {
-    if (this.#session.provenance.some((existing) => existing.provenance_id === record.provenance_id)) {
+    const existing = this.#session.provenance.find((candidate) => candidate.provenance_id === record.provenance_id);
+    if (existing) {
+      assertMatchingRegistration("provenance record", record.provenance_id, existing, record);
       return;
     }
     this.#session.provenance = [...this.#session.provenance, deepFreezeCopy(record)];
   }
 
   private appendLoadedEvent(event: EarwormEvent): void {
-    assertAppendableLoadedEvent(this.#session, this.indexes, this.#events.at(-1), event);
+    assertAppendableLoadedEvent(this.#session, this.#events, event);
     this.#events.push(deepFreezeCopy(event));
     this.syncSession();
   }
@@ -426,28 +430,32 @@ export class JsonlEventStore implements EventStore {
   }
 
   append(event: EarwormEvent): string {
-    const appendable = prepareEventForAppend(this.#session, this.indexes, this.#events.at(-1), event);
+    const appendable = prepareEventForAppend(this.#session, this.#events, event);
     this.#events.push(appendable);
     this.syncSession();
     return appendable.event_id;
   }
 
   registerAsset(asset: AssetRef): void {
-    if (this.#session.assets.some((existing) => existing.asset_id === asset.asset_id)) {
+    const existing = this.#session.assets.find((candidate) => candidate.asset_id === asset.asset_id);
+    if (existing) {
+      assertMatchingRegistration("asset", asset.asset_id, existing, asset);
       return;
     }
     this.#session.assets = [...this.#session.assets, deepFreezeCopy(asset)];
   }
 
   registerProvenance(record: ProvenanceRecord): void {
-    if (this.#session.provenance.some((existing) => existing.provenance_id === record.provenance_id)) {
+    const existing = this.#session.provenance.find((candidate) => candidate.provenance_id === record.provenance_id);
+    if (existing) {
+      assertMatchingRegistration("provenance record", record.provenance_id, existing, record);
       return;
     }
     this.#session.provenance = [...this.#session.provenance, deepFreezeCopy(record)];
   }
 
   private appendLoadedEvent(event: EarwormEvent): void {
-    assertAppendableLoadedEvent(this.#session, this.indexes, this.#events.at(-1), event);
+    assertAppendableLoadedEvent(this.#session, this.#events, event);
     this.#events.push(deepFreezeCopy(event));
     this.syncSession();
   }
@@ -1150,10 +1158,10 @@ function appendIndex<K>(index: Map<K, EarwormEvent[]>, key: K, event: EarwormEve
 
 function prepareEventForAppend(
   session: EarwormSession,
-  indexes: Indexes,
-  previousEvent: EarwormEvent | undefined,
+  events: readonly EarwormEvent[],
   event: EarwormEvent
 ): EarwormEvent {
+  const previousEvent = events.at(-1);
   const prev_event_hash = previousEvent ? previousEvent.event_hash ?? hashEvent(previousEvent) : undefined;
   const candidate = deepFreezeCopy(removeUndefined({
     ...event,
@@ -1163,17 +1171,17 @@ function prepareEventForAppend(
     ...candidate,
     event_hash: hashEvent(candidate)
   });
-  assertAppendableEvent(session, indexes, appendable);
+  assertAppendableEvent(session, events, appendable);
   return appendable;
 }
 
 function assertAppendableLoadedEvent(
   session: EarwormSession,
-  indexes: Indexes,
-  previousEvent: EarwormEvent | undefined,
+  events: readonly EarwormEvent[],
   event: EarwormEvent
 ): void {
-  assertAppendableEvent(session, indexes, event);
+  assertAppendableEvent(session, events, event);
+  const previousEvent = events.at(-1);
   const expectedPrevHash = previousEvent ? previousEvent.event_hash ?? hashEvent(previousEvent) : undefined;
   if (event.prev_event_hash !== expectedPrevHash) {
     throw new Error(`event ${event.event_id} has invalid prev_event_hash`);
@@ -1211,16 +1219,17 @@ function assertAppendableGeneratedAsset(store: EventStore, event: EarwormEvent, 
   }
 }
 
-function assertAppendableEvent(session: EarwormSession, indexes: Indexes, event: EarwormEvent): void {
+function assertAppendableEvent(session: EarwormSession, events: readonly EarwormEvent[], event: EarwormEvent): void {
   assertValidEvent(event);
   if (event.session_id !== session.session_id) {
     throw new Error(`event ${event.event_id} belongs to ${event.session_id}, expected ${session.session_id}`);
   }
-  if (indexes.byId.has(event.event_id)) {
+  const appendedIds = new Set(events.map((appended) => appended.event_id));
+  if (appendedIds.has(event.event_id)) {
     throw new Error(`duplicate event_id ${event.event_id}`);
   }
   for (const parentId of event.parent_event_ids) {
-    if (!indexes.byId.has(parentId)) {
+    if (!appendedIds.has(parentId)) {
       throw new Error(`event ${event.event_id} references missing parent ${parentId}`);
     }
   }
@@ -1592,6 +1601,12 @@ function stableJson(value: unknown): string {
       .join(",")}}`;
   }
   return JSON.stringify(value);
+}
+
+function assertMatchingRegistration(kind: "asset" | "provenance record", id: string, existing: unknown, incoming: unknown): void {
+  if (stableJson(removeUndefined(existing)) !== stableJson(removeUndefined(incoming))) {
+    throw new Error(`${kind} ${id} is already registered with different content`);
+  }
 }
 
 function textRangeKey(range: [number, number]): string {
