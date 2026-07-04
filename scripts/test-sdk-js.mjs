@@ -3,7 +3,15 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
 
 import { strict as assert } from "node:assert";
-import { EarwormClient, InMemoryEventStore, createSession } from "../packages/sdk-js/src/index.js";
+import {
+  EarwormClient,
+  InMemoryEventStore,
+  createSession,
+  createAkousma,
+  akousmaShapeErrors,
+  germImportUrl,
+  newAkousmaId
+} from "../packages/sdk-js/src/index.js";
 
 const policy = {
   mode: "project_lifetime",
@@ -55,4 +63,45 @@ storeBackedClient.append({
 assert.equal(storeBackedClient.session_id, "sess_sdk_store_001");
 assert.equal(storeBackedClient.events.length, 1);
 
-console.log("test: sdk-js client passed");
+// ── akousma helpers ──
+
+const parent = createAkousma({
+  audio: { asset_id: "cap_1", uri: "akousmata://objects/x.wav", duration_seconds: 8 },
+  originatingApp: "oida",
+  sourceType: "recorded",
+  origin: "live-input",
+  listening: { "akouo.describe": { summary: "warm synthesizer drone" } },
+  tags: ["drone"]
+});
+assert.equal(akousmaShapeErrors(parent).length, 0);
+assert.ok(parent.akousma_id.startsWith("akm_"));
+assert.equal(parent.provenance.originating_app, "oida");
+
+const child = createAkousma({
+  audio: { asset_id: "gen_1" },
+  originatingApp: "germ",
+  sourceType: "generated",
+  origin: "generated",
+  parentAkousmaIds: [parent.akousma_id],
+  operation: "transform",
+  prompt: "make it metallic",
+  model: "stable-audio-3"
+});
+assert.deepEqual(child.lineage.parent_akousma_ids, [parent.akousma_id]);
+assert.equal(child.lineage.prompt, "make it metallic");
+
+assert.ok(akousmaShapeErrors({ akousma_id: "x" }).length > 0);
+assert.ok(
+  akousmaShapeErrors({ ...parent, provenance: { ...parent.provenance, source_type: "bogus" } }).length > 0
+);
+
+assert.equal(
+  germImportUrl("http://127.0.0.1:5178/", parent.akousma_id, "lineage"),
+  `http://127.0.0.1:5178/import?akousma=${parent.akousma_id}&mode=lineage`
+);
+assert.throws(() => germImportUrl("http://x", "akm_1", "bogus"));
+
+const ids = new Set(Array.from({ length: 50 }, () => newAkousmaId()));
+assert.equal(ids.size, 50);
+
+console.log("test: sdk-js client passed (incl. akousma helpers)");

@@ -44,3 +44,83 @@ export class EarwormClient {
 }
 
 export * from "@earworm/core";
+
+/* ── Akousma (one sound's memory record; see docs/akousma_spec_v1.md) ── */
+
+export const AKOUSMA_SCHEMA_VERSION: string;
+export const AKOUSMA_SOURCE_TYPES: readonly string[];
+export const AKOUSMA_ORIGINS: readonly string[];
+export const GERM_IMPORT_MODES: readonly ["sound", "prompt", "lineage"];
+
+export interface AkousmaAudio {
+  asset_id: string;
+  type?: string;
+  uri?: string;
+  content_hash?: string;
+  duration_seconds?: number;
+  sample_rate?: number;
+  channels?: number;
+  provenance_id?: string;
+}
+
+export interface AkousmaProvenance {
+  provenance_id?: string;
+  source_type: "generated" | "recorded" | "imported" | "cloned" | "designed" | "unknown";
+  origin: "live-input" | "system-output" | "file" | "generated" | "unknown";
+  originating_app: string;
+  device?: string;
+  provider?: string;
+  model_id?: string;
+  seed?: number;
+  consent_status?: "owned" | "licensed" | "public_domain" | "unknown" | "restricted";
+  created_at?: string;
+}
+
+export interface AkousmaLineage {
+  parent_akousma_ids: string[];
+  operation?: string;
+  prompt?: string;
+  model?: string;
+  params?: Record<string, unknown>;
+  event_ids?: string[];
+}
+
+export interface Akousma {
+  akousma_id: string;
+  schema_version: string;
+  created_at: string;
+  session_id?: string;
+  audio: AkousmaAudio;
+  provenance: AkousmaProvenance;
+  listening?: Record<string, unknown>;
+  lineage: AkousmaLineage;
+  tags?: string[];
+  annotations?: Record<string, unknown>;
+  extensions?: Record<string, unknown>;
+}
+
+export function newAkousmaId(prefix?: string): string;
+
+export function createAkousma(input: {
+  audio: AkousmaAudio;
+  originatingApp: string;
+  sourceType?: AkousmaProvenance["source_type"];
+  origin?: AkousmaProvenance["origin"];
+  listening?: Record<string, unknown>;
+  parentAkousmaIds?: string[];
+  operation?: string | null;
+  prompt?: string | null;
+  model?: string | null;
+  params?: Record<string, unknown> | null;
+  tags?: string[];
+  extensions?: Record<string, unknown>;
+  sessionId?: string | null;
+}): Akousma;
+
+export function akousmaShapeErrors(record: unknown): string[];
+
+export function germImportUrl(
+  baseUrl: string,
+  akousmaId: string,
+  mode?: "sound" | "prompt" | "lineage"
+): string;

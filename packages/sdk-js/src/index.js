@@ -108,3 +108,14 @@ export {
   exportManifest,
   revertAutomation
 } from "@earworm/core";
+
+export {
+  AKOUSMA_SCHEMA_VERSION,
+  AKOUSMA_SOURCE_TYPES,
+  AKOUSMA_ORIGINS,
+  GERM_IMPORT_MODES,
+  newAkousmaId,
+  createAkousma,
+  akousmaShapeErrors,
+  germImportUrl
+} from "./akousma.js";
