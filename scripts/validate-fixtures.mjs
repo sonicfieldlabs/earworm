@@ -190,7 +190,8 @@ const schemaBySuffix = {
   ".session.json": "earworm-session.schema.json",
   ".signal-packet.json": "signal-packet.schema.json",
   ".feature-stream-ref.json": "feature-stream-ref.schema.json",
-  ".export-manifest.json": "export-manifest.schema.json"
+  ".export-manifest.json": "export-manifest.schema.json",
+  ".akousma.json": "akousma.schema.json"
 };
 
 const fixtureRoots = [

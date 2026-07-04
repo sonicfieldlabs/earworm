@@ -1,0 +1,37 @@
+{
+  "akousma_id": "akm_01J9Z8ABCDEF0123456789XYZ",
+  "schema_version": "1.0.0",
+  "created_at": "2026-07-04T18:30:00Z",
+  "session_id": "earworm_trace_abc123",
+  "audio": {
+    "asset_id": "asset_abc123",
+    "type": "capture",
+    "uri": "akousmata://objects/sha256/abcd1234/audio.wav",
+    "content_hash": "sha256:abcd1234",
+    "duration_seconds": 10.0,
+    "sample_rate": 16000,
+    "channels": 1,
+    "provenance_id": "prov_abc123"
+  },
+  "provenance": {
+    "provenance_id": "prov_abc123",
+    "source_type": "recorded",
+    "origin": "live-input",
+    "originating_app": "oida",
+    "device": "MacBook Pro Microphone",
+    "consent_status": "owned",
+    "created_at": "2026-07-04T18:30:00Z"
+  },
+  "listening": {
+    "oida.signal": { "class": "music-like", "caption": "steady tonal hum with a slow rhythmic pulse" },
+    "akouo.describe": { "summary": "ambient synthesizer drone, warm low-mid emphasis" }
+  },
+  "lineage": {
+    "parent_akousma_ids": [],
+    "operation": "listen",
+    "event_ids": ["analysis_evt_1"]
+  },
+  "tags": ["ambient", "drone"],
+  "annotations": {},
+  "extensions": {}
+}
