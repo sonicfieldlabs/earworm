@@ -5,3 +5,6 @@ coverage/
 .DS_Store
 *.log
 *.jsonl.tmp
+.env
+.env.local
+.DS_Store
