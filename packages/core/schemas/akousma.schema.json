@@ -3,52 +3,172 @@
   "$id": "https://earworm.dev/schemas/akousma.schema.json",
   "title": "Akousma",
   "type": "object",
-  "required": ["akousma_id", "schema_version", "created_at", "audio", "provenance", "lineage"],
+  "required": [
+    "akousma_id",
+    "schema_version",
+    "created_at",
+    "audio",
+    "provenance",
+    "lineage"
+  ],
   "additionalProperties": false,
   "properties": {
-    "akousma_id": { "type": "string" },
-    "schema_version": { "type": "string" },
-    "created_at": { "type": "string" },
-    "session_id": { "type": "string" },
+    "akousma_id": {
+      "type": "string"
+    },
+    "schema_version": {
+      "type": "string"
+    },
+    "created_at": {
+      "type": "string"
+    },
+    "session_id": {
+      "type": "string"
+    },
     "audio": {
       "type": "object",
-      "required": ["asset_id"],
+      "required": [
+        "asset_id"
+      ],
       "additionalProperties": false,
       "properties": {
-        "asset_id": { "type": "string" },
-        "type": { "type": "string" },
-        "uri": { "type": "string" },
-        "content_hash": { "type": "string" },
-        "duration_seconds": { "type": "number", "minimum": 0 },
-        "sample_rate": { "type": "integer", "minimum": 0 },
-        "channels": { "type": "integer", "minimum": 0 },
-        "provenance_id": { "type": "string" }
+        "asset_id": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        },
+        "uri": {
+          "type": "string"
+        },
+        "content_hash": {
+          "type": "string"
+        },
+        "duration_seconds": {
+          "type": "number",
+          "minimum": 0
+        },
+        "sample_rate": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "channels": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "provenance_id": {
+          "type": "string"
+        },
+        "media": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "container": {
+              "type": "string"
+            },
+            "codec": {
+              "type": "string"
+            },
+            "bit_depth": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "codec_history": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Known encode/transcode steps, oldest first."
+            }
+          }
+        }
       }
     },
     "provenance": {
       "type": "object",
-      "required": ["source_type", "origin", "originating_app"],
+      "required": [
+        "source_type",
+        "origin",
+        "originating_app"
+      ],
       "additionalProperties": false,
       "properties": {
-        "provenance_id": { "type": "string" },
+        "provenance_id": {
+          "type": "string"
+        },
         "source_type": {
           "type": "string",
-          "enum": ["generated", "recorded", "imported", "cloned", "designed", "unknown"]
+          "enum": [
+            "generated",
+            "recorded",
+            "imported",
+            "cloned",
+            "designed",
+            "unknown"
+          ]
         },
         "origin": {
           "type": "string",
-          "enum": ["live-input", "system-output", "file", "generated", "unknown"]
+          "enum": [
+            "live-input",
+            "system-output",
+            "file",
+            "generated",
+            "unknown"
+          ]
         },
-        "originating_app": { "type": "string" },
-        "device": { "type": "string" },
-        "provider": { "type": "string" },
-        "model_id": { "type": "string" },
-        "seed": { "type": "integer" },
+        "originating_app": {
+          "type": "string"
+        },
+        "device": {
+          "type": "string"
+        },
+        "provider": {
+          "type": "string"
+        },
+        "model_id": {
+          "type": "string"
+        },
+        "seed": {
+          "type": "integer"
+        },
         "consent_status": {
           "type": "string",
-          "enum": ["owned", "licensed", "public_domain", "unknown", "restricted"]
+          "enum": [
+            "owned",
+            "licensed",
+            "public_domain",
+            "unknown",
+            "restricted"
+          ]
         },
-        "created_at": { "type": "string" }
+        "created_at": {
+          "type": "string"
+        },
+        "capture_conditions": {
+          "type": "string",
+          "description": "Conditions of capture that travel with the sound: who recorded whom, where, under what agreement."
+        },
+        "rights_note": {
+          "type": "string",
+          "description": "Free-text rights/consent nuance beyond consent_status."
+        },
+        "pipeline_effects": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "capture",
+              "telephony",
+              "acousmatization",
+              "amplification",
+              "phonofixation",
+              "phonogeneration",
+              "reshaping"
+            ]
+          },
+          "description": "Which of the seven technological effects (after Chion) the sound has passed through, oldest first."
+        }
       }
     },
     "listening": {
@@ -57,19 +177,88 @@
     },
     "lineage": {
       "type": "object",
-      "required": ["parent_akousma_ids"],
+      "required": [
+        "parent_akousma_ids"
+      ],
       "additionalProperties": false,
       "properties": {
-        "parent_akousma_ids": { "type": "array", "items": { "type": "string" } },
-        "operation": { "type": "string" },
-        "prompt": { "type": "string" },
-        "model": { "type": "string" },
-        "params": { "type": "object", "additionalProperties": true },
-        "event_ids": { "type": "array", "items": { "type": "string" } }
+        "parent_akousma_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "operation": {
+          "type": "string"
+        },
+        "prompt": {
+          "type": "string"
+        },
+        "model": {
+          "type": "string"
+        },
+        "params": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "event_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "relations": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "type",
+              "target_akousma_id"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "variant_of",
+                  "response_to",
+                  "same_source_as",
+                  "recurrence_of",
+                  "series_with",
+                  "compares_with",
+                  "replaces",
+                  "other"
+                ]
+              },
+              "target_akousma_id": {
+                "type": "string"
+              },
+              "note": {
+                "type": "string"
+              }
+            }
+          },
+          "description": "Typed curatorial links between records. Parents are causal genealogy; relations are kinship: variants, responses, recurrences, series."
+        }
       }
     },
-    "tags": { "type": "array", "items": { "type": "string" } },
-    "annotations": { "type": "object", "additionalProperties": true },
-    "extensions": { "type": "object", "additionalProperties": true }
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "annotations": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "extensions": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "summary": {
+      "type": "string",
+      "description": "One-line human-readable account of the sound for skimming and search; the record stays the source of truth."
+    }
   }
 }

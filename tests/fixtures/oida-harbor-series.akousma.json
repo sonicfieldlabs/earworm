@@ -1,0 +1,61 @@
+{
+  "akousma_id": "akm_01JAZ8ABCDEF0123456789ABC",
+  "schema_version": "1.1.0",
+  "created_at": "2026-07-09T21:00:00Z",
+  "summary": "Harbor at dusk, fourth take in the two-year series: machinery keynote steady, bird layer thinner.",
+  "audio": {
+    "asset_id": "asset_harbor_04",
+    "type": "capture",
+    "uri": "akousmata://objects/ef12ab34.wav",
+    "content_hash": "sha256:ef12ab34",
+    "duration_seconds": 120.0,
+    "sample_rate": 48000,
+    "channels": 2,
+    "media": {
+      "container": "wav",
+      "codec": "pcm_s24le",
+      "bit_depth": 24,
+      "codec_history": ["pcm_s24le capture"]
+    }
+  },
+  "provenance": {
+    "source_type": "recorded",
+    "origin": "live-input",
+    "originating_app": "oida",
+    "device": "Zoom F3 + DPA 4060 pair",
+    "consent_status": "owned",
+    "capture_conditions": "Public harbor walkway, recordist present, no identifiable speech captured.",
+    "rights_note": "Own field recording; free for research export.",
+    "pipeline_effects": ["capture", "phonofixation"],
+    "created_at": "2026-07-09T21:00:00Z"
+  },
+  "listening": {
+    "oida.signal": {
+      "created_at": "2026-07-09T21:00:10Z",
+      "payload": { "class": "environment", "caption": "low machinery tone with sparse high calls" }
+    },
+    "akouo.memory-lineage-listening": {
+      "contract": "akouo/v0.6",
+      "created_at": "2026-07-09T21:00:30Z",
+      "summary": "Recurrence within the harbor series; bird layer thinning across records.",
+      "payload": {
+        "main_reading": "Recurrence of the harbor keynote with reduced bird activity; apparatus varied across the series.",
+        "recommended_next_mode": "signal-inspection-listening"
+      }
+    }
+  },
+  "lineage": {
+    "parent_akousma_ids": [],
+    "relations": [
+      {
+        "type": "series_with",
+        "target_akousma_id": "akm_01J9Z8ABCDEF0123456789XYZ",
+        "note": "Same harbor position, earlier take in the longitudinal series."
+      }
+    ],
+    "event_ids": []
+  },
+  "tags": ["harbor", "field-recording", "series"],
+  "annotations": {},
+  "extensions": {}
+}

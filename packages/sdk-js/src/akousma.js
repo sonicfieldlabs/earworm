@@ -11,7 +11,7 @@
  * build, check, and link records on the JS side.
  */
 
-export const AKOUSMA_SCHEMA_VERSION = "1.0.0";
+export const AKOUSMA_SCHEMA_VERSION = "1.1.0";
 
 export const AKOUSMA_SOURCE_TYPES = [
   "generated",
@@ -28,6 +28,27 @@ export const AKOUSMA_ORIGINS = [
   "file",
   "generated",
   "unknown"
+];
+
+export const AKOUSMA_RELATION_TYPES = [
+  "variant_of",
+  "response_to",
+  "same_source_as",
+  "recurrence_of",
+  "series_with",
+  "compares_with",
+  "replaces",
+  "other"
+];
+
+export const AKOUSMA_PIPELINE_EFFECTS = [
+  "capture",
+  "telephony",
+  "acousmatization",
+  "amplification",
+  "phonofixation",
+  "phonogeneration",
+  "reshaping"
 ];
 
 export const GERM_IMPORT_MODES = ["sound", "prompt", "lineage"];
@@ -65,9 +86,11 @@ export function createAkousma({
   prompt = null,
   model = null,
   params = null,
+  relations = null,
   tags = [],
   extensions = {},
-  sessionId = null
+  sessionId = null,
+  summary = null
 }) {
   if (!audio || typeof audio.asset_id !== "string" || audio.asset_id.length === 0) {
     throw new Error("createAkousma: audio.asset_id is required");
@@ -81,6 +104,9 @@ export function createAkousma({
   if (prompt) lineage.prompt = prompt;
   if (model) lineage.model = model;
   if (params && Object.keys(params).length > 0) lineage.params = params;
+  if (Array.isArray(relations) && relations.length > 0) {
+    lineage.relations = relations.map((rel) => ({ ...rel }));
+  }
 
   const record = {
     akousma_id: newAkousmaId(),
@@ -100,6 +126,33 @@ export function createAkousma({
     extensions
   };
   if (sessionId) record.session_id = sessionId;
+  if (summary) record.summary = summary;
+  return record;
+}
+
+/** Build a typed lineage relation (kinship link, not causal parenthood). */
+export function akousmaRelation(type, targetAkousmaId, note = null) {
+  if (!AKOUSMA_RELATION_TYPES.includes(type)) {
+    throw new Error(`akousmaRelation: type must be one of ${AKOUSMA_RELATION_TYPES.join(", ")}`);
+  }
+  const rel = { type, target_akousma_id: targetAkousmaId };
+  if (note) rel.note = note;
+  return rel;
+}
+
+/**
+ * Attach a producer's listening entry under its namespace using the v1.1
+ * envelope: `{contract?, created_at, summary?, payload}`. Additive — never
+ * reshapes another producer's block.
+ */
+export function addListening(record, namespace, payload, { contract = null, summary = null } = {}) {
+  const entry = {
+    created_at: new Date().toISOString().replace(/\.\d{3}Z$/, "Z"),
+    payload
+  };
+  if (contract) entry.contract = contract;
+  if (summary) entry.summary = summary;
+  record.listening = { ...(record.listening ?? {}), [namespace]: entry };
   return record;
 }
 
@@ -124,6 +177,24 @@ export function akousmaShapeErrors(record) {
   const lineage = record.lineage ?? {};
   if (!Array.isArray(lineage.parent_akousma_ids)) {
     errors.push("lineage.parent_akousma_ids: required array");
+  }
+  if (lineage.relations !== undefined) {
+    if (!Array.isArray(lineage.relations)) {
+      errors.push("lineage.relations: expected array");
+    } else {
+      lineage.relations.forEach((rel, index) => {
+        if (!rel || typeof rel !== "object") {
+          errors.push(`lineage.relations[${index}]: expected object`);
+          return;
+        }
+        if (!AKOUSMA_RELATION_TYPES.includes(rel.type)) {
+          errors.push(`lineage.relations[${index}].type: expected one of ${AKOUSMA_RELATION_TYPES.join(", ")}`);
+        }
+        if (typeof rel.target_akousma_id !== "string" || rel.target_akousma_id.length === 0) {
+          errors.push(`lineage.relations[${index}].target_akousma_id: required`);
+        }
+      });
+    }
   }
   return errors;
 }

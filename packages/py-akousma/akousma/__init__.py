@@ -17,8 +17,29 @@ from hashlib import sha256
 from pathlib import Path
 from typing import Any, Iterable
 
-SCHEMA_VERSION = "1.0.0"
+SCHEMA_VERSION = "1.1.0"
 _SCHEMA_PATH = Path(__file__).with_name("akousma.schema.json")
+
+RELATION_TYPES = (
+    "variant_of",
+    "response_to",
+    "same_source_as",
+    "recurrence_of",
+    "series_with",
+    "compares_with",
+    "replaces",
+    "other",
+)
+
+PIPELINE_EFFECTS = (
+    "capture",
+    "telephony",
+    "acousmatization",
+    "amplification",
+    "phonofixation",
+    "phonogeneration",
+    "reshaping",
+)
 
 _CROCKFORD = "0123456789ABCDEFGHJKMNPQRSTVWXYZ"
 
@@ -89,9 +110,11 @@ def new_akousma(
     prompt: str | None = None,
     model: str | None = None,
     params: dict[str, Any] | None = None,
+    relations: Iterable[dict[str, Any]] | None = None,
     tags: Iterable[str] | None = None,
     extensions: dict[str, Any] | None = None,
     session_id: str | None = None,
+    summary: str | None = None,
 ) -> dict[str, Any]:
     """Build a valid akousma record. ``audio`` must at least contain ``asset_id``."""
     lineage: dict[str, Any] = {"parent_akousma_ids": list(parent_akousma_ids or [])}
@@ -100,6 +123,8 @@ def new_akousma(
             lineage[k] = v
     if params:
         lineage["params"] = params
+    if relations:
+        lineage["relations"] = [dict(rel) for rel in relations]
     record: dict[str, Any] = {
         "akousma_id": new_id(),
         "schema_version": SCHEMA_VERSION,
@@ -119,6 +144,38 @@ def new_akousma(
     }
     if session_id:
         record["session_id"] = session_id
+    if summary:
+        record["summary"] = summary
+    return record
+
+
+def relation(rel_type: str, target_akousma_id: str, note: str | None = None) -> dict[str, Any]:
+    """Build a typed lineage relation (kinship link, not causal parenthood)."""
+    if rel_type not in RELATION_TYPES:
+        raise ValueError(f"unknown relation type: {rel_type}. Valid types: {', '.join(RELATION_TYPES)}")
+    rel: dict[str, Any] = {"type": rel_type, "target_akousma_id": target_akousma_id}
+    if note:
+        rel["note"] = note
+    return rel
+
+
+def add_listening(
+    record: dict[str, Any],
+    namespace: str,
+    payload: dict[str, Any],
+    *,
+    contract: str | None = None,
+    summary: str | None = None,
+) -> dict[str, Any]:
+    """Attach a producer's listening entry under its namespace using the v1.1
+    envelope: ``{contract?, created_at, summary?, payload}``. Additive: never
+    reshapes another producer's block."""
+    entry: dict[str, Any] = {"created_at": _utc_now(), "payload": payload}
+    if contract:
+        entry["contract"] = contract
+    if summary:
+        entry["summary"] = summary
+    record.setdefault("listening", {})[namespace] = entry
     return record
 
 
@@ -165,6 +222,14 @@ class AkousmataStore:
               PRIMARY KEY (child_id, parent_id)
             );
             CREATE INDEX IF NOT EXISTS idx_lineage_parent ON lineage_edges(parent_id);
+            CREATE TABLE IF NOT EXISTS relation_edges (
+              from_id  TEXT NOT NULL,
+              rel_type TEXT NOT NULL,
+              to_id    TEXT NOT NULL,
+              PRIMARY KEY (from_id, rel_type, to_id)
+            );
+            CREATE INDEX IF NOT EXISTS idx_relation_to ON relation_edges(to_id);
+            CREATE INDEX IF NOT EXISTS idx_akousmata_hash ON akousmata(content_hash);
             """
         )
         self.conn.commit()
@@ -214,6 +279,12 @@ class AkousmataStore:
                 "INSERT OR IGNORE INTO lineage_edges (child_id, parent_id) VALUES (?,?)",
                 (rid, parent),
             )
+        self.conn.execute("DELETE FROM relation_edges WHERE from_id=?", (rid,))
+        for rel in record.get("lineage", {}).get("relations", []) or []:
+            self.conn.execute(
+                "INSERT OR IGNORE INTO relation_edges (from_id, rel_type, to_id) VALUES (?,?,?)",
+                (rid, rel.get("type", "other"), rel.get("target_akousma_id", "")),
+            )
         self.conn.commit()
         return rid
 
@@ -229,19 +300,48 @@ class AkousmataStore:
         originating_app: str | None = None,
         source_type: str | None = None,
         origin: str | None = None,
+        session_id: str | None = None,
+        content_hash: str | None = None,
+        tag: str | None = None,
+        text: str | None = None,
+        since: str | None = None,
+        until: str | None = None,
         limit: int = 100,
     ) -> list[dict[str, Any]]:
         clauses, args = [], []
-        for col, val in (("originating_app", originating_app), ("source_type", source_type), ("origin", origin)):
+        for col, val in (
+            ("originating_app", originating_app),
+            ("source_type", source_type),
+            ("origin", origin),
+            ("session_id", session_id),
+            ("content_hash", content_hash),
+        ):
             if val is not None:
                 clauses.append(f"{col}=?")
                 args.append(val)
+        if since is not None:
+            clauses.append("created_at>=?")
+            args.append(since)
+        if until is not None:
+            clauses.append("created_at<=?")
+            args.append(until)
+        if tag is not None:
+            # tags live inside the record JSON; match the quoted string
+            clauses.append("record LIKE ?")
+            args.append(f'%{json.dumps(tag)}%')
+        if text is not None:
+            clauses.append("record LIKE ?")
+            args.append(f"%{text}%")
         where = f"WHERE {' AND '.join(clauses)}" if clauses else ""
         args.append(limit)
         rows = self.conn.execute(
             f"SELECT record FROM akousmata {where} ORDER BY created_at DESC LIMIT ?", args
         ).fetchall()
         return [json.loads(r["record"]) for r in rows]
+
+    def find_by_hash(self, content_hash: str) -> list[dict[str, Any]]:
+        """All records carrying this audio content hash (dedupe / recurrence lookup)."""
+        return self.query(content_hash=content_hash, limit=1000)
 
     def parents(self, akousma_id: str) -> list[str]:
         return [
@@ -270,6 +370,100 @@ class AkousmataStore:
             stack.extend(self.parents(cur))
         return out
 
+    def descendants(self, akousma_id: str) -> list[str]:
+        seen, stack, out = {akousma_id}, list(self.children(akousma_id)), []
+        while stack:
+            cur = stack.pop()
+            if cur in seen:
+                continue
+            seen.add(cur)
+            out.append(cur)
+            stack.extend(self.children(cur))
+        return out
+
+    # --- typed relations (kinship, not parenthood) -------------------------
+    def relations(self, akousma_id: str) -> list[dict[str, str]]:
+        """Outgoing typed relations of a record."""
+        return [
+            {"type": r["rel_type"], "target_akousma_id": r["to_id"]}
+            for r in self.conn.execute(
+                "SELECT rel_type, to_id FROM relation_edges WHERE from_id=?", (akousma_id,)
+            ).fetchall()
+        ]
+
+    def related(self, akousma_id: str, rel_type: str | None = None) -> list[dict[str, str]]:
+        """All records connected to this one through typed relations, both
+        directions. Incoming links are reported with direction 'incoming'."""
+        clause, args = "", [akousma_id, akousma_id]
+        if rel_type is not None:
+            clause = " AND rel_type=?"
+            args.append(rel_type)
+        rows = self.conn.execute(
+            f"SELECT from_id, rel_type, to_id FROM relation_edges WHERE (from_id=? OR to_id=?){clause}",
+            args,
+        ).fetchall()
+        out = []
+        for r in rows:
+            if r["from_id"] == akousma_id:
+                out.append({"type": r["rel_type"], "akousma_id": r["to_id"], "direction": "outgoing"})
+            else:
+                out.append({"type": r["rel_type"], "akousma_id": r["from_id"], "direction": "incoming"})
+        return out
+
+    # --- maintenance --------------------------------------------------------
+    def reindex(self) -> int:
+        """Rebuild lineage and relation edges from the stored records (e.g. after
+        upgrading a store created before relations existed). Returns record count."""
+        rows = self.conn.execute("SELECT record FROM akousmata").fetchall()
+        self.conn.execute("DELETE FROM lineage_edges")
+        self.conn.execute("DELETE FROM relation_edges")
+        for row in rows:
+            record = json.loads(row["record"])
+            rid = record["akousma_id"]
+            for parent in record.get("lineage", {}).get("parent_akousma_ids", []):
+                self.conn.execute(
+                    "INSERT OR IGNORE INTO lineage_edges (child_id, parent_id) VALUES (?,?)",
+                    (rid, parent),
+                )
+            for rel in record.get("lineage", {}).get("relations", []) or []:
+                self.conn.execute(
+                    "INSERT OR IGNORE INTO relation_edges (from_id, rel_type, to_id) VALUES (?,?,?)",
+                    (rid, rel.get("type", "other"), rel.get("target_akousma_id", "")),
+                )
+        self.conn.commit()
+        return len(rows)
+
+    def verify(self) -> dict[str, list[str]]:
+        """Integrity report — the archive of absence. Dangling links and missing
+        audio are reported, never silently discarded: a dead record is still
+        lineage information."""
+        report: dict[str, list[str]] = {
+            "dangling_parents": [],
+            "dangling_relations": [],
+            "missing_audio": [],
+            "invalid_records": [],
+        }
+        ids = {r["akousma_id"] for r in self.conn.execute("SELECT akousma_id FROM akousmata").fetchall()}
+        for row in self.conn.execute("SELECT record FROM akousmata").fetchall():
+            record = json.loads(row["record"])
+            rid = record["akousma_id"]
+            errors = validation_errors(record)
+            if errors:
+                report["invalid_records"].append(f"{rid}: {errors[0]}")
+            for parent in record.get("lineage", {}).get("parent_akousma_ids", []):
+                if parent not in ids:
+                    report["dangling_parents"].append(f"{rid} -> {parent}")
+            for rel in record.get("lineage", {}).get("relations", []) or []:
+                target = rel.get("target_akousma_id", "")
+                if target not in ids:
+                    report["dangling_relations"].append(f"{rid} -[{rel.get('type', 'other')}]-> {target}")
+            uri = record.get("audio", {}).get("uri", "")
+            if uri.startswith("akousmata://objects/"):
+                path = self.resolve_uri(uri)
+                if path is not None and not path.exists():
+                    report["missing_audio"].append(f"{rid}: {uri}")
+        return report
+
     def close(self) -> None:
         self.conn.close()
 
@@ -282,11 +476,15 @@ class AkousmataStore:
 
 __all__ = [
     "SCHEMA_VERSION",
+    "RELATION_TYPES",
+    "PIPELINE_EFFECTS",
     "new_id",
     "load_schema",
     "validation_errors",
     "is_valid",
     "new_akousma",
+    "relation",
+    "add_listening",
     "default_store_path",
     "AkousmataStore",
 ]

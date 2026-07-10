@@ -8,6 +8,8 @@ import {
   InMemoryEventStore,
   createSession,
   createAkousma,
+  akousmaRelation,
+  addListening,
   akousmaShapeErrors,
   germImportUrl,
   newAkousmaId
@@ -94,6 +96,36 @@ assert.ok(akousmaShapeErrors({ akousma_id: "x" }).length > 0);
 assert.ok(
   akousmaShapeErrors({ ...parent, provenance: { ...parent.provenance, source_type: "bogus" } }).length > 0
 );
+
+// v1.1: summary, typed relations, listening envelope
+const sibling = createAkousma({
+  audio: { asset_id: "cap_2" },
+  originatingApp: "oida",
+  summary: "same drone, one year later",
+  relations: [akousmaRelation("series_with", parent.akousma_id, "same position, later take")]
+});
+assert.equal(akousmaShapeErrors(sibling).length, 0);
+assert.equal(sibling.summary, "same drone, one year later");
+assert.deepEqual(sibling.lineage.relations, [
+  { type: "series_with", target_akousma_id: parent.akousma_id, note: "same position, later take" }
+]);
+assert.deepEqual(sibling.lineage.parent_akousma_ids, []);
+
+assert.throws(() => akousmaRelation("cousin_of", parent.akousma_id));
+assert.ok(
+  akousmaShapeErrors({
+    ...sibling,
+    lineage: { ...sibling.lineage, relations: [{ type: "series_with" }] }
+  }).length > 0
+);
+
+addListening(sibling, "akouo.memory-lineage-listening", { main_reading: "recurrence" }, {
+  contract: "akouo/v0.6",
+  summary: "second in series"
+});
+assert.equal(sibling.listening["akouo.memory-lineage-listening"].contract, "akouo/v0.6");
+assert.deepEqual(sibling.listening["akouo.memory-lineage-listening"].payload, { main_reading: "recurrence" });
+assert.equal(akousmaShapeErrors(sibling).length, 0);
 
 assert.equal(
   germImportUrl("http://127.0.0.1:5178/", parent.akousma_id, "lineage"),

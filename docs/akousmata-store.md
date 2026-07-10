@@ -45,10 +45,29 @@ CREATE TABLE lineage_edges (
   PRIMARY KEY (child_id, parent_id)
 );
 CREATE INDEX idx_lineage_parent ON lineage_edges(parent_id);
+CREATE TABLE relation_edges (    -- v0.2: typed kinship links (lineage.relations)
+  from_id  TEXT NOT NULL,        -- akousma_id
+  rel_type TEXT NOT NULL,        -- variant_of | response_to | same_source_as | recurrence_of | series_with | compares_with | replaces | other
+  to_id    TEXT NOT NULL,        -- akousma_id
+  PRIMARY KEY (from_id, rel_type, to_id)
+);
+CREATE INDEX idx_relation_to ON relation_edges(to_id);
+CREATE INDEX idx_akousmata_hash ON akousmata(content_hash);
 ```
 
 `lineage_edges` is denormalized from each record's `lineage.parent_akousma_ids` so the lineage
 explorer (germ) and batch queries (algophony) can walk ancestry/descendants without scanning.
+`relation_edges` (v0.2) is denormalized from `lineage.relations` so kinship — variants, responses,
+recurrences, series — is walkable in both directions without confusing it with causal parenthood.
+
+### Store maintenance (v0.2)
+
+- `reindex()` rebuilds both edge tables from the stored records (run once after upgrading a
+  pre-relations store).
+- `verify()` returns an integrity report — dangling parents, dangling relation targets, missing
+  audio objects, invalid records — reported rather than dropped: absence is information.
+- Richer queries: `query(tag=…, text=…, since=…, until=…, session_id=…, content_hash=…)` and
+  `find_by_hash()` for dedupe/recurrence lookups.
 
 ## Access
 

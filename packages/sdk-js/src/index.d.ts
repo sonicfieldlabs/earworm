@@ -50,6 +50,8 @@ export * from "@earworm/core";
 export const AKOUSMA_SCHEMA_VERSION: string;
 export const AKOUSMA_SOURCE_TYPES: readonly string[];
 export const AKOUSMA_ORIGINS: readonly string[];
+export const AKOUSMA_RELATION_TYPES: readonly string[];
+export const AKOUSMA_PIPELINE_EFFECTS: readonly string[];
 export const GERM_IMPORT_MODES: readonly ["sound", "prompt", "lineage"];
 
 export interface AkousmaAudio {
@@ -74,6 +76,34 @@ export interface AkousmaProvenance {
   seed?: number;
   consent_status?: "owned" | "licensed" | "public_domain" | "unknown" | "restricted";
   created_at?: string;
+  capture_conditions?: string;
+  rights_note?: string;
+  pipeline_effects?: AkousmaPipelineEffect[];
+}
+
+export type AkousmaPipelineEffect =
+  | "capture"
+  | "telephony"
+  | "acousmatization"
+  | "amplification"
+  | "phonofixation"
+  | "phonogeneration"
+  | "reshaping";
+
+export type AkousmaRelationType =
+  | "variant_of"
+  | "response_to"
+  | "same_source_as"
+  | "recurrence_of"
+  | "series_with"
+  | "compares_with"
+  | "replaces"
+  | "other";
+
+export interface AkousmaRelation {
+  type: AkousmaRelationType;
+  target_akousma_id: string;
+  note?: string;
 }
 
 export interface AkousmaLineage {
@@ -82,6 +112,7 @@ export interface AkousmaLineage {
   prompt?: string;
   model?: string;
   params?: Record<string, unknown>;
+  relations?: AkousmaRelation[];
   event_ids?: string[];
 }
 
@@ -97,6 +128,7 @@ export interface Akousma {
   tags?: string[];
   annotations?: Record<string, unknown>;
   extensions?: Record<string, unknown>;
+  summary?: string;
 }
 
 export function newAkousmaId(prefix?: string): string;
@@ -112,10 +144,25 @@ export function createAkousma(input: {
   prompt?: string | null;
   model?: string | null;
   params?: Record<string, unknown> | null;
+  relations?: AkousmaRelation[] | null;
   tags?: string[];
   extensions?: Record<string, unknown>;
   sessionId?: string | null;
+  summary?: string | null;
 }): Akousma;
+
+export function akousmaRelation(
+  type: AkousmaRelationType,
+  targetAkousmaId: string,
+  note?: string | null
+): AkousmaRelation;
+
+export function addListening(
+  record: Akousma,
+  namespace: string,
+  payload: Record<string, unknown>,
+  options?: { contract?: string | null; summary?: string | null }
+): Akousma;
 
 export function akousmaShapeErrors(record: unknown): string[];
 

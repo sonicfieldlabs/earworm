@@ -113,9 +113,13 @@ export {
   AKOUSMA_SCHEMA_VERSION,
   AKOUSMA_SOURCE_TYPES,
   AKOUSMA_ORIGINS,
+  AKOUSMA_RELATION_TYPES,
+  AKOUSMA_PIPELINE_EFFECTS,
   GERM_IMPORT_MODES,
   newAkousmaId,
   createAkousma,
+  akousmaRelation,
+  addListening,
   akousmaShapeErrors,
   germImportUrl
 } from "./akousma.js";

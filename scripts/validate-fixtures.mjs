@@ -32,6 +32,7 @@ function assertSupportedSchema(schema, label, path = "$") {
     "$id",
     "$ref",
     "title",
+    "description",
     "type",
     "required",
     "additionalProperties",
