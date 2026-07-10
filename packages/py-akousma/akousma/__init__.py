@@ -326,7 +326,8 @@ class AkousmataStore:
             clauses.append("created_at<=?")
             args.append(until)
         if tag is not None:
-            # tags live inside the record JSON; match the quoted string
+            # tags live inside the record JSON; the quoted-string LIKE is a
+            # superset pre-filter, exact tag membership is enforced post-query
             clauses.append("record LIKE ?")
             args.append(f'%{json.dumps(tag)}%')
         if text is not None:
@@ -337,7 +338,10 @@ class AkousmataStore:
         rows = self.conn.execute(
             f"SELECT record FROM akousmata {where} ORDER BY created_at DESC LIMIT ?", args
         ).fetchall()
-        return [json.loads(r["record"]) for r in rows]
+        records = [json.loads(r["record"]) for r in rows]
+        if tag is not None:
+            records = [record for record in records if tag in (record.get("tags") or [])]
+        return records
 
     def find_by_hash(self, content_hash: str) -> list[dict[str, Any]]:
         """All records carrying this audio content hash (dedupe / recurrence lookup)."""
@@ -422,12 +426,32 @@ class AkousmataStore:
             for tag, count in sorted(counts.items(), key=lambda item: (-item[1], item[0]))
         ]
 
-    def changed_since(self, iso_timestamp: str, *, limit: int = 200) -> list[dict[str, Any]]:
-        """Records created strictly after ``iso_timestamp`` (for watchers)."""
-        rows = self.conn.execute(
-            "SELECT record FROM akousmata WHERE created_at>? ORDER BY created_at ASC LIMIT ?",
-            (iso_timestamp, limit),
-        ).fetchall()
+    def changed_since(
+        self,
+        iso_timestamp: str,
+        *,
+        limit: int = 200,
+        after_id: str | None = None,
+    ) -> list[dict[str, Any]]:
+        """Records after a durable watcher cursor.
+
+        ``after_id`` disambiguates records sharing the same timestamp, so a
+        bounded batch cannot skip siblings when more than ``limit`` records
+        were captured within one clock tick. Existing callers that omit it
+        retain the original strictly-after timestamp behavior.
+        """
+        if after_id is None:
+            rows = self.conn.execute(
+                "SELECT record FROM akousmata WHERE created_at>? ORDER BY created_at ASC, akousma_id ASC LIMIT ?",
+                (iso_timestamp, limit),
+            ).fetchall()
+        else:
+            rows = self.conn.execute(
+                """SELECT record FROM akousmata
+                   WHERE created_at>? OR (created_at=? AND akousma_id>?)
+                   ORDER BY created_at ASC, akousma_id ASC LIMIT ?""",
+                (iso_timestamp, iso_timestamp, after_id, limit),
+            ).fetchall()
         return [json.loads(r["record"]) for r in rows]
 
     def forget(self, akousma_id: str, *, delete_audio: bool = False) -> bool:

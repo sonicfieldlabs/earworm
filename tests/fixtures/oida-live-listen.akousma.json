@@ -6,7 +6,7 @@
   "audio": {
     "asset_id": "asset_abc123",
     "type": "capture",
-    "uri": "akousmata://objects/sha256/abcd1234/audio.wav",
+    "uri": "akousmata://objects/abcd1234.wav",
     "content_hash": "sha256:abcd1234",
     "duration_seconds": 10.0,
     "sample_rate": 16000,

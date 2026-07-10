@@ -130,6 +130,24 @@ class TestAkousmataStore(unittest.TestCase):
         self.assertEqual(len(self.store.query(since="2020-01-01T00:00:00Z")), 2)
         self.assertEqual(self.store.query(until="2020-01-01T00:00:00Z"), [])
 
+    def test_query_tag_is_exact_membership(self):
+        tagged = akousma.new_akousma(
+            audio={"asset_id": "a1"}, originating_app="oida", tags=["harbor"],
+        )
+        lookalike = akousma.new_akousma(
+            audio={"asset_id": "a2"}, originating_app="oida",
+            tags=["harbor-night"],
+            summary='mentions "harbor" in prose only',
+        )
+        lookalike["annotations"] = {"note": 'she said "harbor" twice'}
+        self.store.put(tagged)
+        self.store.put(lookalike)
+        self.assertEqual(
+            [r["akousma_id"] for r in self.store.query(tag="harbor")],
+            [tagged["akousma_id"]],
+        )
+        self.assertEqual(self.store.query(tag="harb"), [])
+
     def test_descendants_walk(self):
         a = akousma.new_akousma(audio={"asset_id": "a"}, originating_app="oida")
         self.store.put(a)
@@ -187,6 +205,17 @@ class TestAkousmataStore(unittest.TestCase):
         self.store.put(rec)
         self.assertEqual(self.store.changed_since("2000-01-01T00:00:00Z")[0]["akousma_id"], rec["akousma_id"])
         self.assertEqual(self.store.changed_since(rec["created_at"]), [])
+
+    def test_changed_since_tie_safe_cursor(self):
+        records = []
+        for index in range(3):
+            record = akousma.new_akousma(audio={"asset_id": f"tie-{index}"}, originating_app="oida")
+            record["created_at"] = "2026-07-10T12:00:00Z"
+            self.store.put(record)
+            records.append(record)
+        ordered_ids = sorted(record["akousma_id"] for record in records)
+        found = self.store.changed_since("2026-07-10T12:00:00Z", after_id=ordered_ids[0])
+        self.assertEqual([record["akousma_id"] for record in found], ordered_ids[1:])
 
     def test_forget(self):
         data = b"RIFF-forget-me"
