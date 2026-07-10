@@ -174,6 +174,46 @@ class TestAkousmataStore(unittest.TestCase):
         self.assertEqual(self.store.parents(b["akousma_id"]), [a["akousma_id"]])
         self.assertEqual(self.store.relations(b["akousma_id"]), [{"type": "variant_of", "target_akousma_id": a["akousma_id"]}])
 
+    def test_tags_counts(self):
+        for tags in (["harbor", "field"], ["harbor"], []):
+            self.store.put(akousma.new_akousma(audio={"asset_id": f"a{len(tags)}"}, originating_app="oida", tags=tags))
+        self.assertEqual(
+            self.store.tags(),
+            [{"tag": "harbor", "count": 2}, {"tag": "field", "count": 1}],
+        )
+
+    def test_changed_since(self):
+        rec = akousma.new_akousma(audio={"asset_id": "a1"}, originating_app="oida")
+        self.store.put(rec)
+        self.assertEqual(self.store.changed_since("2000-01-01T00:00:00Z")[0]["akousma_id"], rec["akousma_id"])
+        self.assertEqual(self.store.changed_since(rec["created_at"]), [])
+
+    def test_forget(self):
+        data = b"RIFF-forget-me"
+        uri = self.store.put_audio(data, ext="wav")
+        rec = akousma.new_akousma(
+            audio={"asset_id": "a1", "uri": uri, "content_hash": "sha256:" + __import__("hashlib").sha256(data).hexdigest()},
+            originating_app="oida",
+        )
+        self.store.put(rec)
+        path = self.store.resolve_uri(uri)
+        self.assertTrue(path.exists())
+        self.assertTrue(self.store.forget(rec["akousma_id"], delete_audio=True))
+        self.assertIsNone(self.store.get(rec["akousma_id"]))
+        self.assertFalse(path.exists())
+        self.assertFalse(self.store.forget("akm_missing"))
+
+    def test_forget_keeps_shared_audio(self):
+        data = b"RIFF-shared"
+        uri = self.store.put_audio(data, ext="wav")
+        digest = "sha256:" + __import__("hashlib").sha256(data).hexdigest()
+        first = akousma.new_akousma(audio={"asset_id": "a1", "uri": uri, "content_hash": digest}, originating_app="oida")
+        second = akousma.new_akousma(audio={"asset_id": "a2", "uri": uri, "content_hash": digest}, originating_app="germ")
+        self.store.put(first)
+        self.store.put(second)
+        self.assertTrue(self.store.forget(first["akousma_id"], delete_audio=True))
+        self.assertTrue(self.store.resolve_uri(uri).exists())
+
     def test_v1_records_still_valid(self):
         rec = akousma.new_akousma(audio={"asset_id": "a1"}, originating_app="oida")
         rec["schema_version"] = "1.0.0"

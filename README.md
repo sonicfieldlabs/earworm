@@ -4,7 +4,7 @@ Earworm is a project-agnostic framework for persistent listening in agentic sign
 
 It pairs signal processing with a parallel context chain: prompts, generation metadata, timing, analysis, user edits, agent actions, modulation, provenance, and render history. The goal is to let downstream agents and processors query what a signal is, how it was produced, what the user intended, and which actions changed it over time.
 
-Status: `0.2.0` — protocol implementation plus the akousma memory layer (spec v1.1: typed relations between records, skimmable summaries, capture/rights provenance, pipeline effects, and contract-pinned listening entries).
+Status: `0.2.1` — protocol implementation plus the akousma memory layer (spec v1.1: typed relations between records, skimmable summaries, capture/rights provenance, pipeline effects, and contract-pinned listening entries). v0.2.1 adds the navigator surface: `tags()`, `changed_since()`, and `forget()` — consumed by the akousmata listening navigator (`github.com/sonicfieldlabs/akousmata`).
 
 Canonical repository: `https://github.com/sonicfieldlabs/earworm`.
 

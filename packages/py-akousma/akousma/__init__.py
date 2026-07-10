@@ -410,6 +410,56 @@ class AkousmataStore:
                 out.append({"type": r["rel_type"], "akousma_id": r["from_id"], "direction": "incoming"})
         return out
 
+    # --- library operations (akousmata navigator surface) -------------------
+    def tags(self) -> list[dict[str, Any]]:
+        """Distinct tags with usage counts, most used first."""
+        counts: dict[str, int] = {}
+        for row in self.conn.execute("SELECT record FROM akousmata").fetchall():
+            for tag in json.loads(row["record"]).get("tags") or []:
+                counts[str(tag)] = counts.get(str(tag), 0) + 1
+        return [
+            {"tag": tag, "count": count}
+            for tag, count in sorted(counts.items(), key=lambda item: (-item[1], item[0]))
+        ]
+
+    def changed_since(self, iso_timestamp: str, *, limit: int = 200) -> list[dict[str, Any]]:
+        """Records created strictly after ``iso_timestamp`` (for watchers)."""
+        rows = self.conn.execute(
+            "SELECT record FROM akousmata WHERE created_at>? ORDER BY created_at ASC LIMIT ?",
+            (iso_timestamp, limit),
+        ).fetchall()
+        return [json.loads(r["record"]) for r in rows]
+
+    def forget(self, akousma_id: str, *, delete_audio: bool = False) -> bool:
+        """The memory operation 'forget': remove one record and its edges.
+
+        With ``delete_audio`` the content-addressed object is also removed —
+        but only when no other record references the same content hash.
+        Returns False when the record does not exist. Edges pointing AT the
+        forgotten record are kept: absence is information, and ``verify()``
+        will report them as dangling rather than erasing the trace."""
+        record = self.get(akousma_id)
+        if record is None:
+            return False
+        if delete_audio:
+            content_hash = str(record.get("audio", {}).get("content_hash") or "")
+            uri = str(record.get("audio", {}).get("uri") or "")
+            others = [
+                r for r in self.conn.execute(
+                    "SELECT akousma_id FROM akousmata WHERE content_hash=? AND akousma_id<>?",
+                    (content_hash, akousma_id),
+                ).fetchall()
+            ] if content_hash else [True]
+            if uri.startswith("akousmata://objects/") and not others:
+                path = self.resolve_uri(uri)
+                if path is not None and path.exists():
+                    path.unlink()
+        self.conn.execute("DELETE FROM akousmata WHERE akousma_id=?", (akousma_id,))
+        self.conn.execute("DELETE FROM lineage_edges WHERE child_id=?", (akousma_id,))
+        self.conn.execute("DELETE FROM relation_edges WHERE from_id=?", (akousma_id,))
+        self.conn.commit()
+        return True
+
     # --- maintenance --------------------------------------------------------
     def reindex(self) -> int:
         """Rebuild lineage and relation edges from the stored records (e.g. after

@@ -6,11 +6,14 @@ evaluated in algophony while carrying one continuous lineage.
 
 ## Location
 
-- Default: `~/workspace/akousmata/` (private; **never** inside a git repo).
-- Override: `AKOUSMATA_PATH` environment variable.
+- Default: `~/workspace/akousmata/` — which is also the home of the
+  **akousmata navigator app** (`github.com/sonicfieldlabs/akousmata`): the
+  code is public, the data files (`index.sqlite`, `objects/`, `wiki/`,
+  `settings.json`) are gitignored there and never tracked.
+- Override: `AKOUSMATA_PATH` environment variable to separate code and data.
 
-It sits outside every repository, like `SFL/docs`. It is personal listening memory and is never
-pushed. Open-research publication is **export-only** and sanitized (see the spec's consent rule).
+The data is personal listening memory and is never pushed. Open-research
+publication is **export-only** and sanitized (see the spec's consent rule).
 
 ## Layout
 
@@ -68,6 +71,11 @@ recurrences, series — is walkable in both directions without confusing it with
   audio objects, invalid records — reported rather than dropped: absence is information.
 - Richer queries: `query(tag=…, text=…, since=…, until=…, session_id=…, content_hash=…)` and
   `find_by_hash()` for dedupe/recurrence lookups.
+- v0.2.1 library operations for navigators: `tags()` (distinct tags with
+  counts), `changed_since(iso)` (watchers/realtime feeds), and
+  `forget(id, delete_audio=False)` — the memory operation: removes the record
+  and its outgoing edges, keeps inbound edges as reportable absence, and only
+  deletes the audio object when no other record shares its content hash.
 
 ## Access
 
