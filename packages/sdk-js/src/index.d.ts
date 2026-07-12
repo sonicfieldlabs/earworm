@@ -52,6 +52,8 @@ export const AKOUSMA_SOURCE_TYPES: readonly string[];
 export const AKOUSMA_ORIGINS: readonly string[];
 export const AKOUSMA_RELATION_TYPES: readonly string[];
 export const AKOUSMA_PIPELINE_EFFECTS: readonly string[];
+export const AKOUSMA_LOCATION_SOURCES: readonly string[];
+export const AKOUSMA_CAPTURE_DIRECTIONS: readonly string[];
 export const GERM_IMPORT_MODES: readonly ["sound", "prompt", "lineage"];
 
 export interface AkousmaAudio {
@@ -116,6 +118,26 @@ export interface AkousmaLineage {
   event_ids?: string[];
 }
 
+export interface AkousmaLocation {
+  lat: number;
+  lon: number;
+  accuracy_m?: number;
+  altitude_m?: number;
+  label?: string;
+  source?: "gps" | "network" | "manual" | "config" | "inferred";
+  captured_at?: string;
+  [key: string]: unknown;
+}
+
+export interface AkousmaCapture {
+  direction?: "past" | "future" | "live";
+  seconds?: number;
+  trigger?: string;
+  armed_at?: string;
+  triggered_at?: string;
+  [key: string]: unknown;
+}
+
 export interface Akousma {
   akousma_id: string;
   schema_version: string;
@@ -129,6 +151,10 @@ export interface Akousma {
   annotations?: Record<string, unknown>;
   extensions?: Record<string, unknown>;
   summary?: string;
+  location?: AkousmaLocation;
+  capture?: AkousmaCapture;
+  /** Spec v1.2: the record is open — unknown top-level fields are preserved. */
+  [key: string]: unknown;
 }
 
 export function newAkousmaId(prefix?: string): string;
@@ -149,6 +175,8 @@ export function createAkousma(input: {
   extensions?: Record<string, unknown>;
   sessionId?: string | null;
   summary?: string | null;
+  location?: AkousmaLocation | null;
+  capture?: AkousmaCapture | null;
 }): Akousma;
 
 export function akousmaRelation(

@@ -9,6 +9,7 @@ See earworm/docs/akousma_spec_v1.md and earworm/docs/akousmata-store.md.
 from __future__ import annotations
 
 import json
+import math
 import os
 import secrets
 import sqlite3
@@ -17,7 +18,7 @@ from hashlib import sha256
 from pathlib import Path
 from typing import Any, Iterable
 
-SCHEMA_VERSION = "1.1.0"
+SCHEMA_VERSION = "1.2.0"
 _SCHEMA_PATH = Path(__file__).with_name("akousma.schema.json")
 
 RELATION_TYPES = (
@@ -40,6 +41,10 @@ PIPELINE_EFFECTS = (
     "phonogeneration",
     "reshaping",
 )
+
+LOCATION_SOURCES = ("gps", "network", "manual", "config", "inferred")
+
+CAPTURE_DIRECTIONS = ("past", "future", "live")
 
 _CROCKFORD = "0123456789ABCDEFGHJKMNPQRSTVWXYZ"
 
@@ -115,6 +120,8 @@ def new_akousma(
     extensions: dict[str, Any] | None = None,
     session_id: str | None = None,
     summary: str | None = None,
+    location: dict[str, Any] | None = None,
+    capture: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Build a valid akousma record. ``audio`` must at least contain ``asset_id``."""
     lineage: dict[str, Any] = {"parent_akousma_ids": list(parent_akousma_ids or [])}
@@ -146,6 +153,10 @@ def new_akousma(
         record["session_id"] = session_id
     if summary:
         record["summary"] = summary
+    if location:
+        record["location"] = dict(location)
+    if capture:
+        record["capture"] = dict(capture)
     return record
 
 
@@ -177,6 +188,69 @@ def add_listening(
         entry["summary"] = summary
     record.setdefault("listening", {})[namespace] = entry
     return record
+
+
+def location(
+    lat: float,
+    lon: float,
+    *,
+    accuracy_m: float | None = None,
+    altitude_m: float | None = None,
+    label: str | None = None,
+    source: str | None = None,
+    captured_at: str | None = None,
+) -> dict[str, Any]:
+    """Build a v1.2 location block: where the sound was heard. Optional and
+    consent-scoped — attach only when the listener granted it."""
+    lat = float(lat)
+    lon = float(lon)
+    if not -90.0 <= lat <= 90.0:
+        raise ValueError(f"location: lat must be within [-90, 90], got {lat}")
+    if not -180.0 <= lon <= 180.0:
+        raise ValueError(f"location: lon must be within [-180, 180], got {lon}")
+    if source is not None and source not in LOCATION_SOURCES:
+        raise ValueError(f"location: unknown source {source!r}. Valid sources: {', '.join(LOCATION_SOURCES)}")
+    loc: dict[str, Any] = {"lat": lat, "lon": lon}
+    if accuracy_m is not None:
+        loc["accuracy_m"] = float(accuracy_m)
+    if altitude_m is not None:
+        loc["altitude_m"] = float(altitude_m)
+    if label:
+        loc["label"] = label
+    if source:
+        loc["source"] = source
+    loc["captured_at"] = captured_at or _utc_now()
+    return loc
+
+
+def capture(
+    direction: str | None = None,
+    *,
+    seconds: float | None = None,
+    trigger: str | None = None,
+    armed_at: str | None = None,
+    triggered_at: str | None = None,
+) -> dict[str, Any]:
+    """Build a v1.2 capture block: how the listening was triggered. ``past``
+    slices the ring buffer that was already recording when the trigger fired;
+    ``future`` records the window after it; ``live`` is an open-ended session."""
+    if direction is not None and direction not in CAPTURE_DIRECTIONS:
+        raise ValueError(
+            f"capture: unknown direction {direction!r}. Valid directions: {', '.join(CAPTURE_DIRECTIONS)}"
+        )
+    cap: dict[str, Any] = {}
+    if direction:
+        cap["direction"] = direction
+    if seconds is not None:
+        if float(seconds) < 0:
+            raise ValueError(f"capture: seconds must be >= 0, got {seconds}")
+        cap["seconds"] = float(seconds)
+    if trigger:
+        cap["trigger"] = trigger
+    if armed_at:
+        cap["armed_at"] = armed_at
+    cap["triggered_at"] = triggered_at or _utc_now()
+    return cap
 
 
 # ---------------------------------------------------------------------------
@@ -230,9 +304,25 @@ class AkousmataStore:
             );
             CREATE INDEX IF NOT EXISTS idx_relation_to ON relation_edges(to_id);
             CREATE INDEX IF NOT EXISTS idx_akousmata_hash ON akousmata(content_hash);
+            CREATE INDEX IF NOT EXISTS idx_akousmata_created ON akousmata(created_at);
             """
         )
+        # v0.3: location columns, hoisted from record["location"] so the
+        # listening map never scans JSON. Existing stores migrate in place.
+        columns = {row["name"] for row in self.conn.execute("PRAGMA table_info(akousmata)")}
+        if "lat" not in columns:
+            self.conn.execute("ALTER TABLE akousmata ADD COLUMN lat REAL")
+            self.conn.execute("ALTER TABLE akousmata ADD COLUMN lon REAL")
+        self.conn.execute("CREATE INDEX IF NOT EXISTS idx_akousmata_location ON akousmata(lat, lon)")
         self.conn.commit()
+
+    @staticmethod
+    def _latlon(record: dict[str, Any]) -> tuple[float | None, float | None]:
+        loc = record.get("location") or {}
+        lat, lon = loc.get("lat"), loc.get("lon")
+        if isinstance(lat, (int, float)) and isinstance(lon, (int, float)):
+            return float(lat), float(lon)
+        return None, None
 
     # --- content-addressed audio -----------------------------------------
     def put_audio(self, data: bytes, ext: str = "wav") -> str:
@@ -258,10 +348,11 @@ class AkousmataStore:
         if errors:
             raise ValueError("invalid akousma:\n" + "\n".join(errors))
         rid = record["akousma_id"]
+        lat, lon = self._latlon(record)
         self.conn.execute(
             """INSERT OR REPLACE INTO akousmata
-               (akousma_id, created_at, originating_app, source_type, origin, content_hash, session_id, record)
-               VALUES (?,?,?,?,?,?,?,?)""",
+               (akousma_id, created_at, originating_app, source_type, origin, content_hash, session_id, lat, lon, record)
+               VALUES (?,?,?,?,?,?,?,?,?,?)""",
             (
                 rid,
                 record["created_at"],
@@ -270,6 +361,8 @@ class AkousmataStore:
                 record["provenance"].get("origin"),
                 record.get("audio", {}).get("content_hash"),
                 record.get("session_id"),
+                lat,
+                lon,
                 json.dumps(record),
             ),
         )
@@ -306,6 +399,7 @@ class AkousmataStore:
         text: str | None = None,
         since: str | None = None,
         until: str | None = None,
+        has_location: bool | None = None,
         limit: int = 100,
     ) -> list[dict[str, Any]]:
         clauses, args = [], []
@@ -333,6 +427,10 @@ class AkousmataStore:
         if text is not None:
             clauses.append("record LIKE ?")
             args.append(f"%{text}%")
+        if has_location is True:
+            clauses.append("lat IS NOT NULL AND lon IS NOT NULL")
+        elif has_location is False:
+            clauses.append("(lat IS NULL OR lon IS NULL)")
         where = f"WHERE {' AND '.join(clauses)}" if clauses else ""
         args.append(limit)
         rows = self.conn.execute(
@@ -417,14 +515,72 @@ class AkousmataStore:
     # --- library operations (akousmata navigator surface) -------------------
     def tags(self) -> list[dict[str, Any]]:
         """Distinct tags with usage counts, most used first."""
-        counts: dict[str, int] = {}
-        for row in self.conn.execute("SELECT record FROM akousmata").fetchall():
-            for tag in json.loads(row["record"]).get("tags") or []:
-                counts[str(tag)] = counts.get(str(tag), 0) + 1
-        return [
-            {"tag": tag, "count": count}
-            for tag, count in sorted(counts.items(), key=lambda item: (-item[1], item[0]))
-        ]
+        try:
+            # v0.3 fast path: let SQLite's JSON1 unnest tags instead of
+            # parsing every record blob in Python (O(n) json.loads).
+            rows = self.conn.execute(
+                """SELECT je.value AS tag, COUNT(*) AS count
+                   FROM akousmata, json_each(akousmata.record, '$.tags') AS je
+                   GROUP BY je.value ORDER BY count DESC, tag ASC"""
+            ).fetchall()
+            return [{"tag": str(row["tag"]), "count": row["count"]} for row in rows]
+        except sqlite3.OperationalError:
+            counts: dict[str, int] = {}
+            for row in self.conn.execute("SELECT record FROM akousmata").fetchall():
+                for tag in json.loads(row["record"]).get("tags") or []:
+                    counts[str(tag)] = counts.get(str(tag), 0) + 1
+            return [
+                {"tag": tag, "count": count}
+                for tag, count in sorted(counts.items(), key=lambda item: (-item[1], item[0]))
+            ]
+
+    def locations(self, *, limit: int = 10000) -> list[dict[str, Any]]:
+        """Records that carry a location, newest first — the listening map's feed."""
+        rows = self.conn.execute(
+            """SELECT record FROM akousmata
+               WHERE lat IS NOT NULL AND lon IS NOT NULL
+               ORDER BY created_at DESC LIMIT ?""",
+            (limit,),
+        ).fetchall()
+        return [json.loads(r["record"]) for r in rows]
+
+    def near(
+        self,
+        lat: float,
+        lon: float,
+        *,
+        radius_km: float = 1.0,
+        limit: int = 100,
+    ) -> list[dict[str, Any]]:
+        """Located records within ``radius_km`` of a point, nearest first.
+        Bounding-box prefilter on the indexed lat/lon columns, exact
+        great-circle (haversine) distance in Python. Boxes that would cross
+        the antimeridian fall back to a latitude-band scan."""
+        dlat = radius_km / 111.32
+        dlon = radius_km / (111.32 * max(math.cos(math.radians(lat)), 0.01))
+        clauses = "lat BETWEEN ? AND ?"
+        args: list[Any] = [lat - dlat, lat + dlat]
+        if -180.0 <= lon - dlon and lon + dlon <= 180.0:
+            clauses += " AND lon BETWEEN ? AND ?"
+            args.extend([lon - dlon, lon + dlon])
+        rows = self.conn.execute(
+            f"SELECT record, lat, lon FROM akousmata WHERE lat IS NOT NULL AND lon IS NOT NULL AND {clauses}",
+            args,
+        ).fetchall()
+
+        def haversine_km(row: sqlite3.Row) -> float:
+            phi1, phi2 = math.radians(row["lat"]), math.radians(lat)
+            dphi = math.radians(lat - row["lat"])
+            dlmb = math.radians(lon - row["lon"])
+            h = math.sin(dphi / 2) ** 2 + math.cos(phi1) * math.cos(phi2) * math.sin(dlmb / 2) ** 2
+            return 2 * 6371.0088 * math.asin(math.sqrt(h))
+
+        measured = ((haversine_km(row), row) for row in rows)
+        scored = sorted(
+            (pair for pair in measured if pair[0] <= radius_km),
+            key=lambda pair: pair[0],
+        )
+        return [json.loads(row["record"]) for _, row in scored[:limit]]
 
     def changed_since(
         self,
@@ -504,6 +660,10 @@ class AkousmataStore:
                     "INSERT OR IGNORE INTO relation_edges (from_id, rel_type, to_id) VALUES (?,?,?)",
                     (rid, rel.get("type", "other"), rel.get("target_akousma_id", "")),
                 )
+            lat, lon = self._latlon(record)
+            self.conn.execute(
+                "UPDATE akousmata SET lat=?, lon=? WHERE akousma_id=?", (lat, lon, rid)
+            )
         self.conn.commit()
         return len(rows)
 
@@ -552,6 +712,8 @@ __all__ = [
     "SCHEMA_VERSION",
     "RELATION_TYPES",
     "PIPELINE_EFFECTS",
+    "LOCATION_SOURCES",
+    "CAPTURE_DIRECTIONS",
     "new_id",
     "load_schema",
     "validation_errors",
@@ -559,6 +721,8 @@ __all__ = [
     "new_akousma",
     "relation",
     "add_listening",
+    "location",
+    "capture",
     "default_store_path",
     "AkousmataStore",
 ]

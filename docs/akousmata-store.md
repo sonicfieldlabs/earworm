@@ -40,6 +40,8 @@ CREATE TABLE akousmata (
   origin          TEXT,           -- live-input | system-output | file | generated
   content_hash    TEXT,
   session_id      TEXT,
+  lat             REAL,           -- v0.3: hoisted from record["location"] (nullable)
+  lon             REAL,           -- v0.3: hoisted from record["location"] (nullable)
   record          TEXT NOT NULL   -- the full akousma JSON
 );
 CREATE TABLE lineage_edges (
@@ -56,6 +58,8 @@ CREATE TABLE relation_edges (    -- v0.2: typed kinship links (lineage.relations
 );
 CREATE INDEX idx_relation_to ON relation_edges(to_id);
 CREATE INDEX idx_akousmata_hash ON akousmata(content_hash);
+CREATE INDEX idx_akousmata_created ON akousmata(created_at);   -- v0.3
+CREATE INDEX idx_akousmata_location ON akousmata(lat, lon);    -- v0.3
 ```
 
 `lineage_edges` is denormalized from each record's `lineage.parent_akousma_ids` so the lineage
@@ -76,6 +80,20 @@ recurrences, series — is walkable in both directions without confusing it with
   `forget(id, delete_audio=False)` — the memory operation: removes the record
   and its outgoing edges, keeps inbound edges as reportable absence, and only
   deletes the audio object when no other record shares its content hash.
+
+### The location surface (v0.3, spec v1.2)
+
+- Records' `location.lat` / `location.lon` are hoisted into indexed `lat`/`lon`
+  columns on `put()`; existing stores migrate in place on open (`ALTER TABLE`,
+  nullable, no data rewrite). `reindex()` re-hoists after bulk edits.
+- `locations()` returns every located record newest-first — the listening
+  map's feed. `near(lat, lon, radius_km=…)` answers "what did I hear around
+  here": bounding-box prefilter on the indexed columns, exact haversine
+  distance in Python, nearest first. `query(has_location=…)` filters either way.
+- Performance housekeeping shipped with it: `created_at` is now indexed
+  (every list/timeline/cursor query sorts on it), and `tags()` uses SQLite's
+  JSON1 `json_each` instead of parsing every record blob in Python, with the
+  old scan kept as a fallback for JSON1-less builds.
 
 ## Access
 

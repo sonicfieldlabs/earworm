@@ -11,7 +11,7 @@
  * build, check, and link records on the JS side.
  */
 
-export const AKOUSMA_SCHEMA_VERSION = "1.1.0";
+export const AKOUSMA_SCHEMA_VERSION = "1.2.0";
 
 export const AKOUSMA_SOURCE_TYPES = [
   "generated",
@@ -50,6 +50,10 @@ export const AKOUSMA_PIPELINE_EFFECTS = [
   "phonogeneration",
   "reshaping"
 ];
+
+export const AKOUSMA_LOCATION_SOURCES = ["gps", "network", "manual", "config", "inferred"];
+
+export const AKOUSMA_CAPTURE_DIRECTIONS = ["past", "future", "live"];
 
 export const GERM_IMPORT_MODES = ["sound", "prompt", "lineage"];
 
@@ -90,13 +94,23 @@ export function createAkousma({
   tags = [],
   extensions = {},
   sessionId = null,
-  summary = null
+  summary = null,
+  location = null,
+  capture = null
 }) {
   if (!audio || typeof audio.asset_id !== "string" || audio.asset_id.length === 0) {
     throw new Error("createAkousma: audio.asset_id is required");
   }
   if (typeof originatingApp !== "string" || originatingApp.length === 0) {
     throw new Error("createAkousma: originatingApp is required");
+  }
+  if (location) {
+    const problems = locationErrors(location, "location");
+    if (problems.length > 0) throw new Error(`createAkousma: ${problems.join("; ")}`);
+  }
+  if (capture) {
+    const problems = captureErrors(capture, "capture");
+    if (problems.length > 0) throw new Error(`createAkousma: ${problems.join("; ")}`);
   }
 
   const lineage = { parent_akousma_ids: [...parentAkousmaIds] };
@@ -127,7 +141,42 @@ export function createAkousma({
   };
   if (sessionId) record.session_id = sessionId;
   if (summary) record.summary = summary;
+  if (location) record.location = { ...location };
+  if (capture) record.capture = { ...capture };
   return record;
+}
+
+/* v1.2 blocks: location (where the sound was heard — consent-scoped) and
+ * capture (how the listening was triggered: past/future direction + seconds). */
+function locationErrors(location, path) {
+  if (!location || typeof location !== "object" || Array.isArray(location)) {
+    return [`${path}: expected object`];
+  }
+  const errors = [];
+  if (typeof location.lat !== "number" || location.lat < -90 || location.lat > 90) {
+    errors.push(`${path}.lat: expected number in [-90, 90]`);
+  }
+  if (typeof location.lon !== "number" || location.lon < -180 || location.lon > 180) {
+    errors.push(`${path}.lon: expected number in [-180, 180]`);
+  }
+  if (location.source != null && !AKOUSMA_LOCATION_SOURCES.includes(location.source)) {
+    errors.push(`${path}.source: expected one of ${AKOUSMA_LOCATION_SOURCES.join(", ")}`);
+  }
+  return errors;
+}
+
+function captureErrors(capture, path) {
+  if (!capture || typeof capture !== "object" || Array.isArray(capture)) {
+    return [`${path}: expected object`];
+  }
+  const errors = [];
+  if (capture.direction != null && !AKOUSMA_CAPTURE_DIRECTIONS.includes(capture.direction)) {
+    errors.push(`${path}.direction: expected one of ${AKOUSMA_CAPTURE_DIRECTIONS.join(", ")}`);
+  }
+  if (capture.seconds != null && (typeof capture.seconds !== "number" || capture.seconds < 0)) {
+    errors.push(`${path}.seconds: expected number >= 0`);
+  }
+  return errors;
 }
 
 /** Build a typed lineage relation (kinship link, not causal parenthood). */
@@ -195,6 +244,12 @@ export function akousmaShapeErrors(record) {
         }
       });
     }
+  }
+  if (record.location !== undefined) {
+    errors.push(...locationErrors(record.location, "location"));
+  }
+  if (record.capture !== undefined) {
+    errors.push(...captureErrors(record.capture, "capture"));
   }
   return errors;
 }

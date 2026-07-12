@@ -34,6 +34,56 @@ class TestAkousmaRecord(unittest.TestCase):
         ids = [akousma.new_id() for _ in range(50)]
         self.assertEqual(len(set(ids)), 50)
 
+    def test_location_and_capture_are_valid(self):
+        rec = akousma.new_akousma(
+            audio={"asset_id": "a1"},
+            originating_app="oida",
+            origin="live-input",
+            location=akousma.location(6.2442, -75.5812, label="río Medellín", source="gps"),
+            capture=akousma.capture("past", seconds=30, trigger="remote-ear"),
+        )
+        self.assertEqual(akousma.validation_errors(rec), [])
+        self.assertEqual(rec["location"]["lat"], 6.2442)
+        self.assertEqual(rec["capture"]["direction"], "past")
+        self.assertIn("captured_at", rec["location"])
+        self.assertIn("triggered_at", rec["capture"])
+
+    def test_location_builder_validates(self):
+        with self.assertRaises(ValueError):
+            akousma.location(91.0, 0.0)
+        with self.assertRaises(ValueError):
+            akousma.location(0.0, 181.0)
+        with self.assertRaises(ValueError):
+            akousma.location(0.0, 0.0, source="astral")
+
+    def test_capture_builder_validates(self):
+        with self.assertRaises(ValueError):
+            akousma.capture("sideways")
+        with self.assertRaises(ValueError):
+            akousma.capture("past", seconds=-1)
+
+    def test_out_of_range_location_fails_schema(self):
+        rec = akousma.new_akousma(audio={"asset_id": "a1"}, originating_app="oida")
+        rec["location"] = {"lat": 123.0, "lon": 0.0}
+        self.assertTrue(akousma.validation_errors(rec))
+
+    def test_unknown_top_level_field_is_tolerated(self):
+        rec = akousma.new_akousma(audio={"asset_id": "a1"}, originating_app="oida")
+        rec["weather"] = "light rain"
+        self.assertEqual(akousma.validation_errors(rec), [])
+
+    def test_v1_1_records_still_valid(self):
+        rec = akousma.new_akousma(
+            audio={"asset_id": "a1"},
+            originating_app="oida",
+            location=akousma.location(6.0, -75.0),
+            capture=akousma.capture("future", seconds=10),
+        )
+        rec["schema_version"] = "1.1.0"
+        rec.pop("location", None)
+        rec.pop("capture", None)
+        self.assertEqual(akousma.validation_errors(rec), [])
+
 
 class TestAkousmataStore(unittest.TestCase):
     def setUp(self):
@@ -249,6 +299,56 @@ class TestAkousmataStore(unittest.TestCase):
         rec["lineage"].pop("relations", None)
         rec.pop("summary", None)
         self.assertEqual(akousma.validation_errors(rec), [])
+
+    def test_location_roundtrip_and_queries(self):
+        here = akousma.new_akousma(
+            audio={"asset_id": "a1"},
+            originating_app="oida",
+            location=akousma.location(6.2442, -75.5812, label="río Medellín", source="gps"),
+            capture=akousma.capture("past", seconds=30),
+        )
+        far = akousma.new_akousma(
+            audio={"asset_id": "a2"},
+            originating_app="oida",
+            location=akousma.location(52.52, 13.405, label="Berlin"),
+        )
+        unlocated = akousma.new_akousma(audio={"asset_id": "a3"}, originating_app="germ")
+        for rec in (here, far, unlocated):
+            self.store.put(rec)
+
+        located_ids = {r["akousma_id"] for r in self.store.locations()}
+        self.assertEqual(located_ids, {here["akousma_id"], far["akousma_id"]})
+        self.assertEqual(
+            [r["akousma_id"] for r in self.store.query(has_location=False)],
+            [unlocated["akousma_id"]],
+        )
+        nearby = self.store.near(6.2450, -75.5800, radius_km=2.0)
+        self.assertEqual([r["akousma_id"] for r in nearby], [here["akousma_id"]])
+        self.assertEqual(self.store.near(0.0, 0.0, radius_km=5.0), [])
+        fetched = self.store.get(here["akousma_id"])
+        self.assertEqual(fetched["capture"]["direction"], "past")
+        self.assertEqual(fetched["location"]["label"], "río Medellín")
+
+    def test_unknown_fields_roundtrip_through_store(self):
+        rec = akousma.new_akousma(audio={"asset_id": "a1"}, originating_app="oida")
+        rec["weather"] = {"condition": "light rain"}
+        self.store.put(rec)
+        self.assertEqual(self.store.get(rec["akousma_id"])["weather"], {"condition": "light rain"})
+
+    def test_reindex_rehoists_location(self):
+        rec = akousma.new_akousma(
+            audio={"asset_id": "a1"},
+            originating_app="oida",
+            location=akousma.location(6.2442, -75.5812),
+        )
+        self.store.put(rec)
+        self.store.conn.execute("UPDATE akousmata SET lat=NULL, lon=NULL")
+        self.store.conn.commit()
+        self.assertEqual(self.store.locations(), [])
+        self.store.reindex()
+        self.assertEqual(
+            [r["akousma_id"] for r in self.store.locations()], [rec["akousma_id"]]
+        )
 
 
 if __name__ == "__main__":

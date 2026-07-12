@@ -133,6 +133,27 @@ assert.equal(
 );
 assert.throws(() => germImportUrl("http://x", "akm_1", "bogus"));
 
+// v1.2: location, capture, open records
+const walk = createAkousma({
+  audio: { asset_id: "walk_1" },
+  originatingApp: "oida",
+  origin: "live-input",
+  location: { lat: 6.2442, lon: -75.5812, label: "río Medellín", source: "gps" },
+  capture: { direction: "past", seconds: 30, trigger: "remote-ear" }
+});
+assert.equal(akousmaShapeErrors(walk).length, 0);
+assert.equal(walk.location.lat, 6.2442);
+assert.equal(walk.capture.direction, "past");
+assert.ok(akousmaShapeErrors({ ...walk, location: { lat: 123, lon: 0 } }).length > 0);
+assert.ok(akousmaShapeErrors({ ...walk, capture: { direction: "sideways" } }).length > 0);
+assert.throws(() =>
+  createAkousma({ audio: { asset_id: "x" }, originatingApp: "oida", location: { lat: 91, lon: 0 } })
+);
+assert.throws(() =>
+  createAkousma({ audio: { asset_id: "x" }, originatingApp: "oida", capture: { direction: "sideways" } })
+);
+assert.equal(akousmaShapeErrors({ ...walk, weather: "light rain" }).length, 0);
+
 const ids = new Set(Array.from({ length: 50 }, () => newAkousmaId()));
 assert.equal(ids.size, 50);
 

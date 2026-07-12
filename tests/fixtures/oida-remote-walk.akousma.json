@@ -1,0 +1,69 @@
+{
+  "akousma_id": "akm_01JZKM8W5H3F6T9C2R7XPVQD4N",
+  "schema_version": "1.2.0",
+  "created_at": "2026-07-11T02:18:40Z",
+  "session_id": "sess_oida_remote_0007",
+  "summary": "Night walk under light rain — the river louder than the avenue, one motorbike crossing left to right.",
+  "audio": {
+    "asset_id": "asset_remote_walk_001",
+    "type": "capture",
+    "uri": "akousmata://objects/3f2b6c1a9d8e7f4051a2b3c4d5e6f7089a1b2c3d4e5f60718293a4b5c6d7e8f9.wav",
+    "content_hash": "sha256:3f2b6c1a9d8e7f4051a2b3c4d5e6f7089a1b2c3d4e5f60718293a4b5c6d7e8f9",
+    "duration_seconds": 30.0,
+    "sample_rate": 48000,
+    "channels": 1,
+    "media": {
+      "container": "wav",
+      "codec": "pcm_s16le",
+      "bit_depth": 16,
+      "codec_history": ["pcm_f32le", "pcm_s16le"]
+    }
+  },
+  "provenance": {
+    "source_type": "recorded",
+    "origin": "live-input",
+    "originating_app": "oida",
+    "device": "phone mic via oída remote ear",
+    "consent_status": "owned",
+    "created_at": "2026-07-11T02:18:40Z",
+    "capture_conditions": "solo night walk, self-recorded on own phone, public street",
+    "pipeline_effects": ["capture", "phonofixation"]
+  },
+  "listening": {
+    "oida.signal": {
+      "contract": "oida/gateway/v0.2",
+      "created_at": "2026-07-11T02:18:44Z",
+      "summary": "broadband water wash with sparse transients",
+      "payload": {
+        "class": "field-like",
+        "features": {
+          "rms_dbfs": -31.4,
+          "spectral_centroid_hz": 2140.0
+        }
+      }
+    }
+  },
+  "lineage": {
+    "parent_akousma_ids": []
+  },
+  "tags": ["night", "rain", "river", "walk"],
+  "annotations": {},
+  "extensions": {},
+  "location": {
+    "lat": 6.2442,
+    "lon": -75.5812,
+    "accuracy_m": 12.0,
+    "altitude_m": 1495.0,
+    "label": "río Medellín, puente de la 4 sur",
+    "source": "gps",
+    "captured_at": "2026-07-11T02:18:10Z"
+  },
+  "capture": {
+    "direction": "past",
+    "seconds": 30,
+    "trigger": "remote-ear",
+    "armed_at": "2026-07-11T02:12:03Z",
+    "triggered_at": "2026-07-11T02:18:40Z"
+  },
+  "weather": "light rain"
+}

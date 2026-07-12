@@ -1,4 +1,4 @@
-# Akousma — the sonic memory record (spec v1.1)
+# Akousma — the sonic memory record (spec v1.2)
 
 > **akousma** (ἄκουσμα, "a thing heard"; plural **akousmata**) — one sound's memory:
 > its audio, where it came from, what was heard in it, and how it relates to other sounds.
@@ -18,6 +18,12 @@ remain valid. New in v1.1: top-level `summary`, typed `lineage.relations`,
 `audio.media`, and provenance `capture_conditions` / `rights_note` /
 `pipeline_effects`, plus a recommended envelope for `listening` entries.
 
+Spec v1.2 (Earworm v0.3) is additive over v1.1: records with `schema_version` `1.0.0`
+or `1.1.0` remain valid. New in v1.2: top-level `location` (where the sound was heard)
+and `capture` (how the listening was triggered — past/future direction, window seconds),
+plus the open-record rule: unknown top-level fields are tolerated and preserved, so the
+record can keep growing new details without breaking older readers.
+
 ## Blocks
 
 | Block | Meaning |
@@ -33,6 +39,8 @@ remain valid. New in v1.1: top-level `summary`, typed `lineage.relations`,
 | `lineage` | How it relates: `parent_akousma_ids[]` (the causal genealogy every app must understand), `operation`, `prompt`, `model`, `params`, `event_ids[]` linking to the Earworm event log, and *(v1.1)* `relations[]` — typed curatorial links (`variant_of`, `response_to`, `same_source_as`, `recurrence_of`, `series_with`, `compares_with`, `replaces`, `other`) with `target_akousma_id` and optional `note`. |
 | `tags` / `annotations` | Free labels and user notes. |
 | `extensions` | **Namespaced per-app** blocks so apps extend without breaking the core: `songid`, `algophony.eval`, `germ.*`, … Open object. |
+| `location` | *(v1.2)* Where the sound was heard: `lat` / `lon` (required inside the block), `accuracy_m`, `altitude_m`, `label` (human place name), `source` (gps / network / manual / config / inferred), `captured_at`. Optional and consent-scoped — producers attach it only when the listener granted it; navigators may add or correct it afterwards. The listening map reads this block. |
+| `capture` | *(v1.2)* How the listening was triggered: `direction` (`past` = the seconds already in the ring buffer when the trigger fired; `future` = the seconds recorded after it; `live` = an open-ended or manual session), `seconds` (window length), `trigger` (hotkey / remote-ear / mcp / dashboard / watcher / …), `armed_at`, `triggered_at`. Device and format detail stay in `provenance` / `audio`. |
 
 ## Rules
 
@@ -40,13 +48,18 @@ remain valid. New in v1.1: top-level `summary`, typed `lineage.relations`,
    behind a sound." oída, germ, and algophony all read and write this block identically.
 2. **Listening is additive.** Producers write under their own namespace; nobody reshapes another's block.
    Prefer the v1.1 envelope (`contract`/`created_at`/`summary`/`payload`) so entries stay comparable.
-3. **Extensions are namespaced.** Never add top-level keys for app-specific data — use `extensions.<app>`.
+3. **Extensions are namespaced; the record is open.** App-specific data goes in `extensions.<app>`,
+   never in new top-level keys. *(v1.2)* Unknown top-level fields MUST be preserved — stores
+   round-trip them verbatim — and MAY be ignored by consumers: a field a reader doesn't
+   recognize is future vocabulary, not an error. Shared top-level vocabulary (like `summary`,
+   `location`, `capture`) enters through this spec.
 4. **Audio lives in the store, not the record.** `audio.uri` points into the akousmata store
    (`akousmata://objects/...`) or an absolute path; records stay small and portable.
 5. **Provenance carries consent.** Exports for open research strip records whose `consent_status`
    is not `owned`/`licensed`/`public_domain`, and drop personal `listening`/`annotations`.
    `capture_conditions` and `rights_note` travel with the record: the conditions of capture follow
-   the sound into every later context.
+   the sound into every later context. *(v1.2)* `location` is dropped from open-research exports
+   by default — where someone listens is as sensitive as what they heard.
 6. **Parents are causal, relations are kinship.** `parent_akousma_ids` means "this sound was made
    from those"; `relations` means "this sound belongs with those" (variants, responses, recurrences,
    series). Never encode kinship as parenthood — it corrupts ancestry walks. The akousmata is not a
@@ -59,6 +72,8 @@ remain valid. New in v1.1: top-level `summary`, typed `lineage.relations`,
 - **oída** (generative ears): writes an akousma on every listen — `provenance.origin` = live-input /
   system-output / file; `listening` from the signal listener + MOSS + AKOÚŌ skills. The three UI
   buttons ("open as sound", "open as prompt", "explore lineage") hand an `akousma_id` to germ.
+  *(v1.2)* oída fills `capture` on every triggered listen (direction past/future + seconds) and
+  `location` when the capturing device grants it — the remote ear sends the phone's GPS fix.
 - **germ** (generative voice): on every transform/generation, writes a new akousma whose
   `lineage.parent_akousma_ids` point at the source(s), with `operation`/`prompt`/`model`/`params`.
   Its lineage explorer walks `parent_akousma_ids`.

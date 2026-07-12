@@ -1,6 +1,6 @@
 {
   "name": "@earworm/sdk-js",
-  "version": "0.2.2",
+  "version": "0.3.0",
   "description": "Developer-facing JavaScript SDK for Earworm.",
   "type": "module",
   "main": "src/index.js",

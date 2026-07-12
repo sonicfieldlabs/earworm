@@ -11,7 +11,8 @@
     "provenance",
     "lineage"
   ],
-  "additionalProperties": false,
+  "additionalProperties": true,
+  "description": "Spec v1.2: the record is open at the top level — unknown top-level fields MUST be preserved by stores and MAY be ignored by consumers. App-specific data still belongs in extensions.<app>; shared vocabulary enters through the spec.",
   "properties": {
     "akousma_id": {
       "type": "string"
@@ -259,6 +260,81 @@
     "summary": {
       "type": "string",
       "description": "One-line human-readable account of the sound for skimming and search; the record stays the source of truth."
+    },
+    "location": {
+      "type": "object",
+      "required": [
+        "lat",
+        "lon"
+      ],
+      "additionalProperties": true,
+      "description": "Where the sound was heard (v1.2). Optional and consent-scoped: producers attach it only when the listener granted it; navigators may add or correct it afterwards. Stripped from open-research exports.",
+      "properties": {
+        "lat": {
+          "type": "number",
+          "minimum": -90,
+          "maximum": 90
+        },
+        "lon": {
+          "type": "number",
+          "minimum": -180,
+          "maximum": 180
+        },
+        "accuracy_m": {
+          "type": "number",
+          "minimum": 0
+        },
+        "altitude_m": {
+          "type": "number"
+        },
+        "label": {
+          "type": "string",
+          "description": "Human place name that travels with the sound."
+        },
+        "source": {
+          "type": "string",
+          "enum": [
+            "gps",
+            "network",
+            "manual",
+            "config",
+            "inferred"
+          ]
+        },
+        "captured_at": {
+          "type": "string"
+        }
+      }
+    },
+    "capture": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "How the listening was triggered (v1.2): temporal direction relative to the trigger and the window length. Device and format detail stay in provenance/audio.",
+      "properties": {
+        "direction": {
+          "type": "string",
+          "enum": [
+            "past",
+            "future",
+            "live"
+          ],
+          "description": "past = the seconds already in the ring buffer when the trigger fired; future = the seconds recorded after it; live = an open-ended or manual session."
+        },
+        "seconds": {
+          "type": "number",
+          "minimum": 0
+        },
+        "trigger": {
+          "type": "string",
+          "description": "What initiated the listen: hotkey, remote-ear, mcp, dashboard, watcher, schedule…"
+        },
+        "armed_at": {
+          "type": "string"
+        },
+        "triggered_at": {
+          "type": "string"
+        }
+      }
     }
   }
 }
