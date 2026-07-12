@@ -1,6 +1,6 @@
 {
   "name": "earworm",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "private": true,
   "description": "Project-agnostic protocol and SDK for persistent listening in agentic signal chains.",
   "type": "module",

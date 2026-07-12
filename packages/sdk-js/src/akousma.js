@@ -11,7 +11,7 @@
  * build, check, and link records on the JS side.
  */
 
-export const AKOUSMA_SCHEMA_VERSION = "1.2.0";
+export const AKOUSMA_SCHEMA_VERSION = "1.3.0";
 
 export const AKOUSMA_SOURCE_TYPES = [
   "generated",
@@ -96,7 +96,8 @@ export function createAkousma({
   sessionId = null,
   summary = null,
   location = null,
-  capture = null
+  capture = null,
+  covenant = null
 }) {
   if (!audio || typeof audio.asset_id !== "string" || audio.asset_id.length === 0) {
     throw new Error("createAkousma: audio.asset_id is required");
@@ -110,6 +111,10 @@ export function createAkousma({
   }
   if (capture) {
     const problems = captureErrors(capture, "capture");
+    if (problems.length > 0) throw new Error(`createAkousma: ${problems.join("; ")}`);
+  }
+  if (covenant) {
+    const problems = covenantErrors(covenant, "covenant");
     if (problems.length > 0) throw new Error(`createAkousma: ${problems.join("; ")}`);
   }
 
@@ -143,6 +148,7 @@ export function createAkousma({
   if (summary) record.summary = summary;
   if (location) record.location = { ...location };
   if (capture) record.capture = { ...capture };
+  if (covenant) record.covenant = { ...covenant };
   return record;
 }
 
@@ -175,6 +181,25 @@ function captureErrors(capture, path) {
   }
   if (capture.seconds != null && (typeof capture.seconds !== "number" || capture.seconds < 0)) {
     errors.push(`${path}.seconds: expected number >= 0`);
+  }
+  return errors;
+}
+
+/* v1.3: covenant — under which ethics this was listened. Identity plus honest
+ * absence (withheld, counted and attributed, never described). */
+function covenantErrors(covenant, path) {
+  if (!covenant || typeof covenant !== "object" || Array.isArray(covenant)) {
+    return [`${path}: expected object`];
+  }
+  const errors = [];
+  if (typeof covenant.id !== "string" || covenant.id.length === 0) {
+    errors.push(`${path}.id: required non-empty string`);
+  }
+  if (covenant.commitments != null && (!Number.isInteger(covenant.commitments) || covenant.commitments < 0)) {
+    errors.push(`${path}.commitments: expected integer >= 0`);
+  }
+  if (covenant.withheld != null && !Array.isArray(covenant.withheld)) {
+    errors.push(`${path}.withheld: expected array`);
   }
   return errors;
 }
@@ -250,6 +275,9 @@ export function akousmaShapeErrors(record) {
   }
   if (record.capture !== undefined) {
     errors.push(...captureErrors(record.capture, "capture"));
+  }
+  if (record.covenant !== undefined) {
+    errors.push(...covenantErrors(record.covenant, "covenant"));
   }
   return errors;
 }

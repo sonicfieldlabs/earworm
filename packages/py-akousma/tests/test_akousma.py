@@ -72,6 +72,35 @@ class TestAkousmaRecord(unittest.TestCase):
         rec["weather"] = "light rain"
         self.assertEqual(akousma.validation_errors(rec), [])
 
+    def test_covenant_block_is_valid(self):
+        rec = akousma.new_akousma(
+            audio={"asset_id": "a1"},
+            originating_app="oida",
+            origin="live-input",
+            covenant=akousma.covenant(
+                "river-covenant/2",
+                name="river covenant",
+                contract="akouo/v0.7",
+                extends=["algophonya/v7"],
+                withheld=[{"rule": "do_not_reveal", "subject": "transcript", "count": 1}],
+                commitments=1,
+            ),
+        )
+        self.assertEqual(akousma.validation_errors(rec), [])
+        self.assertEqual(rec["covenant"]["id"], "river-covenant/2")
+        self.assertEqual(rec["covenant"]["withheld"][0]["subject"], "transcript")
+
+    def test_covenant_builder_validates(self):
+        with self.assertRaises(ValueError):
+            akousma.covenant("")
+        with self.assertRaises(ValueError):
+            akousma.covenant("x", commitments=-1)
+
+    def test_covenant_without_id_fails_schema(self):
+        rec = akousma.new_akousma(audio={"asset_id": "a1"}, originating_app="oida")
+        rec["covenant"] = {"name": "anonymous rules"}
+        self.assertTrue(akousma.validation_errors(rec))
+
     def test_v1_1_records_still_valid(self):
         rec = akousma.new_akousma(
             audio={"asset_id": "a1"},
@@ -334,6 +363,29 @@ class TestAkousmataStore(unittest.TestCase):
         rec["weather"] = {"condition": "light rain"}
         self.store.put(rec)
         self.assertEqual(self.store.get(rec["akousma_id"])["weather"], {"condition": "light rain"})
+
+    def test_covenant_query_and_reindex(self):
+        under = akousma.new_akousma(
+            audio={"asset_id": "a1"},
+            originating_app="oida",
+            covenant=akousma.covenant("river-covenant/2"),
+        )
+        free = akousma.new_akousma(audio={"asset_id": "a2"}, originating_app="oida")
+        self.store.put(under)
+        self.store.put(free)
+        self.assertEqual(
+            [r["akousma_id"] for r in self.store.query(covenant_id="river-covenant/2")],
+            [under["akousma_id"]],
+        )
+        self.assertEqual(self.store.query(covenant_id="other-covenant"), [])
+        self.store.conn.execute("UPDATE akousmata SET covenant_id=NULL")
+        self.store.conn.commit()
+        self.assertEqual(self.store.query(covenant_id="river-covenant/2"), [])
+        self.store.reindex()
+        self.assertEqual(
+            [r["akousma_id"] for r in self.store.query(covenant_id="river-covenant/2")],
+            [under["akousma_id"]],
+        )
 
     def test_reindex_rehoists_location(self):
         rec = akousma.new_akousma(

@@ -1,6 +1,6 @@
 [project]
 name = "earworm-sdk-python"
-version = "0.3.0"
+version = "0.4.0"
 description = "Read-only Python helpers for Earworm session and manifest fixtures."
 requires-python = ">=3.11"
 license = { text = "MPL-2.0" }

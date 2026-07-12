@@ -18,7 +18,7 @@ from hashlib import sha256
 from pathlib import Path
 from typing import Any, Iterable
 
-SCHEMA_VERSION = "1.2.0"
+SCHEMA_VERSION = "1.3.0"
 _SCHEMA_PATH = Path(__file__).with_name("akousma.schema.json")
 
 RELATION_TYPES = (
@@ -122,6 +122,7 @@ def new_akousma(
     summary: str | None = None,
     location: dict[str, Any] | None = None,
     capture: dict[str, Any] | None = None,
+    covenant: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Build a valid akousma record. ``audio`` must at least contain ``asset_id``."""
     lineage: dict[str, Any] = {"parent_akousma_ids": list(parent_akousma_ids or [])}
@@ -157,6 +158,8 @@ def new_akousma(
         record["location"] = dict(location)
     if capture:
         record["capture"] = dict(capture)
+    if covenant:
+        record["covenant"] = dict(covenant)
     return record
 
 
@@ -253,6 +256,52 @@ def capture(
     return cap
 
 
+def covenant(
+    covenant_id: str,
+    *,
+    name: str | None = None,
+    version: str | None = None,
+    contract: str | None = None,
+    sha256_hex: str | None = None,
+    extends: Iterable[str] | None = None,
+    rules_applied: Iterable[str] | None = None,
+    withheld: Iterable[dict[str, Any]] | None = None,
+    commitments: int | None = None,
+    note: str | None = None,
+) -> dict[str, Any]:
+    """Build a v1.3 covenant block: under which ethics this was listened.
+
+    Carries the listening covenant's identity (id, hash, lineage) and its
+    honest absence — what was withheld under its rules, counted and attributed,
+    never described. The covenant's full text stays with its author; the
+    record stays export-safe by construction."""
+    covenant_id = str(covenant_id).strip()
+    if not covenant_id:
+        raise ValueError("covenant: id must be a non-empty string")
+    if commitments is not None and int(commitments) < 0:
+        raise ValueError(f"covenant: commitments must be >= 0, got {commitments}")
+    block: dict[str, Any] = {"id": covenant_id}
+    if name:
+        block["name"] = name
+    if version:
+        block["version"] = version
+    if contract:
+        block["contract"] = contract
+    if sha256_hex:
+        block["sha256"] = sha256_hex
+    if extends:
+        block["extends"] = [str(item) for item in extends]
+    if rules_applied:
+        block["rules_applied"] = [str(item) for item in rules_applied]
+    if withheld:
+        block["withheld"] = [dict(item) for item in withheld]
+    if commitments is not None:
+        block["commitments"] = int(commitments)
+    if note:
+        block["note"] = note
+    return block
+
+
 # ---------------------------------------------------------------------------
 # the shared akousmata store
 # ---------------------------------------------------------------------------
@@ -314,6 +363,11 @@ class AkousmataStore:
             self.conn.execute("ALTER TABLE akousmata ADD COLUMN lat REAL")
             self.conn.execute("ALTER TABLE akousmata ADD COLUMN lon REAL")
         self.conn.execute("CREATE INDEX IF NOT EXISTS idx_akousmata_location ON akousmata(lat, lon)")
+        # v0.4: covenant identity, hoisted from record["covenant"]["id"] so
+        # "everything listened under this covenant" is an indexed question.
+        if "covenant_id" not in columns:
+            self.conn.execute("ALTER TABLE akousmata ADD COLUMN covenant_id TEXT")
+        self.conn.execute("CREATE INDEX IF NOT EXISTS idx_akousmata_covenant ON akousmata(covenant_id)")
         self.conn.commit()
 
     @staticmethod
@@ -323,6 +377,12 @@ class AkousmataStore:
         if isinstance(lat, (int, float)) and isinstance(lon, (int, float)):
             return float(lat), float(lon)
         return None, None
+
+    @staticmethod
+    def _covenant_id(record: dict[str, Any]) -> str | None:
+        block = record.get("covenant") or {}
+        value = block.get("id")
+        return str(value) if isinstance(value, str) and value else None
 
     # --- content-addressed audio -----------------------------------------
     def put_audio(self, data: bytes, ext: str = "wav") -> str:
@@ -351,8 +411,8 @@ class AkousmataStore:
         lat, lon = self._latlon(record)
         self.conn.execute(
             """INSERT OR REPLACE INTO akousmata
-               (akousma_id, created_at, originating_app, source_type, origin, content_hash, session_id, lat, lon, record)
-               VALUES (?,?,?,?,?,?,?,?,?,?)""",
+               (akousma_id, created_at, originating_app, source_type, origin, content_hash, session_id, lat, lon, covenant_id, record)
+               VALUES (?,?,?,?,?,?,?,?,?,?,?)""",
             (
                 rid,
                 record["created_at"],
@@ -363,6 +423,7 @@ class AkousmataStore:
                 record.get("session_id"),
                 lat,
                 lon,
+                self._covenant_id(record),
                 json.dumps(record),
             ),
         )
@@ -400,6 +461,7 @@ class AkousmataStore:
         since: str | None = None,
         until: str | None = None,
         has_location: bool | None = None,
+        covenant_id: str | None = None,
         limit: int = 100,
     ) -> list[dict[str, Any]]:
         clauses, args = [], []
@@ -409,6 +471,7 @@ class AkousmataStore:
             ("origin", origin),
             ("session_id", session_id),
             ("content_hash", content_hash),
+            ("covenant_id", covenant_id),
         ):
             if val is not None:
                 clauses.append(f"{col}=?")
@@ -662,7 +725,8 @@ class AkousmataStore:
                 )
             lat, lon = self._latlon(record)
             self.conn.execute(
-                "UPDATE akousmata SET lat=?, lon=? WHERE akousma_id=?", (lat, lon, rid)
+                "UPDATE akousmata SET lat=?, lon=?, covenant_id=? WHERE akousma_id=?",
+                (lat, lon, self._covenant_id(record), rid),
             )
         self.conn.commit()
         return len(rows)
@@ -723,6 +787,7 @@ __all__ = [
     "add_listening",
     "location",
     "capture",
+    "covenant",
     "default_store_path",
     "AkousmataStore",
 ]

@@ -1,4 +1,4 @@
-# Akousma — the sonic memory record (spec v1.2)
+# Akousma — the sonic memory record (spec v1.3)
 
 > **akousma** (ἄκουσμα, "a thing heard"; plural **akousmata**) — one sound's memory:
 > its audio, where it came from, what was heard in it, and how it relates to other sounds.
@@ -24,6 +24,14 @@ and `capture` (how the listening was triggered — past/future direction, window
 plus the open-record rule: unknown top-level fields are tolerated and preserved, so the
 record can keep growing new details without breaking older readers.
 
+Spec v1.3 (Earworm v0.4) is additive over v1.2: all earlier records remain valid. New in
+v1.3: the top-level `covenant` block — **under which ethics this was listened**. When a
+hearing happens under a listening covenant (AKOÚŌ v0.7's sovereignty layer), the record
+carries the covenant's identity (id, name, version, hash, `extends` lineage) and its
+honest absence: which rules acted, what was withheld — counted and attributed to the rule
+that asked for it, never described — and how many commitments the covenant carries. The
+covenant's full text stays with its author; records stay export-safe by construction.
+
 ## Blocks
 
 | Block | Meaning |
@@ -41,6 +49,7 @@ record can keep growing new details without breaking older readers.
 | `extensions` | **Namespaced per-app** blocks so apps extend without breaking the core: `songid`, `algophony.eval`, `germ.*`, … Open object. |
 | `location` | *(v1.2)* Where the sound was heard: `lat` / `lon` (required inside the block), `accuracy_m`, `altitude_m`, `label` (human place name), `source` (gps / network / manual / config / inferred), `captured_at`. Optional and consent-scoped — producers attach it only when the listener granted it; navigators may add or correct it afterwards. The listening map reads this block. |
 | `capture` | *(v1.2)* How the listening was triggered: `direction` (`past` = the seconds already in the ring buffer when the trigger fired; `future` = the seconds recorded after it; `live` = an open-ended or manual session), `seconds` (window length), `trigger` (hotkey / remote-ear / mcp / dashboard / watcher / …), `armed_at`, `triggered_at`. Device and format detail stay in `provenance` / `audio`. |
+| `covenant` | *(v1.3)* Under which ethics this was listened: the listening covenant's `id` (required inside the block), `name`, `version`, `contract` (e.g. `akouo/v0.7`), `sha256` of its source text, `extends` (declared lineage — manifestos, community protocols, parent covenants), `rules_applied`, `withheld[]` (`{rule, subject, count}` — honest absence: named by category, never described), `commitments` (count). Identity and consequences travel; the covenant's text stays with its author. |
 
 ## Rules
 
@@ -66,6 +75,13 @@ record can keep growing new details without breaking older readers.
    pile of records but the network these two link kinds weave.
 7. **Absence is information.** A dangling parent, a missing object, or an unreadable record is
    reported (store `verify()`), never silently dropped: a dead record is still lineage.
+8. **Sovereignty is recorded.** *(v1.3)* A hearing made under a listening covenant carries the
+   covenant's identity, and its withholding is honest absence: counted, named at category level,
+   and attributed to the rule that asked for it — never described, and never conflated with
+   `undetermined` (which means the evidence could not support a claim; withheld means the
+   covenant declined it). Absence without attribution is indistinguishable from a bad ear;
+   attribution is what makes it sovereignty. Consumers may filter, group, and audit by
+   `covenant.id`; no consumer may reconstruct or guess at withheld content.
 
 ## How each app uses it
 

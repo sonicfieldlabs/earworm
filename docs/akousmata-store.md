@@ -81,6 +81,16 @@ recurrences, series — is walkable in both directions without confusing it with
   and its outgoing edges, keeps inbound edges as reportable absence, and only
   deletes the audio object when no other record shares its content hash.
 
+### The covenant surface (v0.4, spec v1.3)
+
+- Records' `covenant.id` is hoisted into an indexed `covenant_id` column on
+  `put()` (in-place migration, like lat/lon); `query(covenant_id=…)` makes
+  "everything listened under this covenant" one indexed call, and
+  `reindex()` re-hoists. The block itself carries the covenant's identity
+  and honest absence — what was withheld, counted and attributed, never
+  described — so filtering and auditing by ethics never exposes withheld
+  content.
+
 ### The location surface (v0.3, spec v1.2)
 
 - Records' `location.lat` / `location.lon` are hoisted into indexed `lat`/`lon`

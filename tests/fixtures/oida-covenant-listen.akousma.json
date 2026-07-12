@@ -1,0 +1,79 @@
+{
+  "akousma_id": "akm_01JZQR4T8V2W6X9A3B5C7D1E0F",
+  "schema_version": "1.3.0",
+  "created_at": "2026-07-12T04:40:12Z",
+  "session_id": "sess_oida_sovereign_0003",
+  "summary": "Two people talk near moving water; words and identities withheld under the river covenant. Broadband water wash, one motorbike crossing.",
+  "audio": {
+    "asset_id": "asset_covenant_listen_001",
+    "type": "capture",
+    "uri": "akousmata://objects/9c4d2e1f8a7b6c5d4e3f2a1b0c9d8e7f6a5b4c3d2e1f0a9b8c7d6e5f4a3b2c1d.wav",
+    "content_hash": "sha256:9c4d2e1f8a7b6c5d4e3f2a1b0c9d8e7f6a5b4c3d2e1f0a9b8c7d6e5f4a3b2c1d",
+    "duration_seconds": 30.0,
+    "sample_rate": 48000,
+    "channels": 1
+  },
+  "provenance": {
+    "source_type": "recorded",
+    "origin": "live-input",
+    "originating_app": "oida",
+    "device": "phone mic via oída remote ear",
+    "consent_status": "owned",
+    "created_at": "2026-07-12T04:40:12Z",
+    "capture_conditions": "riverside walk under an adopted household covenant",
+    "pipeline_effects": ["capture", "phonofixation"]
+  },
+  "listening": {
+    "oida.signal": {
+      "contract": "oida/gateway/v0.2",
+      "created_at": "2026-07-12T04:40:16Z",
+      "summary": "broadband water wash with sparse transients",
+      "payload": {
+        "class": "field-like",
+        "features": {
+          "rms_dbfs": -30.8
+        }
+      }
+    }
+  },
+  "lineage": {
+    "parent_akousma_ids": []
+  },
+  "tags": ["river", "walk", "covenant"],
+  "annotations": {},
+  "extensions": {},
+  "location": {
+    "lat": 6.2401,
+    "lon": -75.5896,
+    "accuracy_m": 950.0,
+    "label": "río Medellín (coarsened to 1 km under the covenant)",
+    "source": "gps",
+    "captured_at": "2026-07-12T04:39:40Z"
+  },
+  "capture": {
+    "direction": "past",
+    "seconds": 30,
+    "trigger": "remote-ear",
+    "triggered_at": "2026-07-12T04:40:12Z"
+  },
+  "covenant": {
+    "id": "river-covenant/2",
+    "name": "river covenant",
+    "version": "2",
+    "contract": "akouo/v0.7",
+    "sha256": "e3a1b9c7d5f2e8a6b4c2d0e9f7a5b3c1d8e6f4a2b0c9d7e5f3a1b8c6d4e2f0a9",
+    "extends": ["algophonya/v7"],
+    "rules_applied": [
+      "do not reveal: transcript, speaker identity",
+      "ignore: music",
+      "coarsen: location to 1 km"
+    ],
+    "withheld": [
+      { "rule": "do_not_reveal", "subject": "transcript", "count": 1 },
+      { "rule": "do_not_reveal", "subject": "speaker-identity", "count": 1 },
+      { "rule": "ignore", "subject": "music", "count": 0 }
+    ],
+    "commitments": 1,
+    "note": "the river is a neighbor, not a resource"
+  }
+}

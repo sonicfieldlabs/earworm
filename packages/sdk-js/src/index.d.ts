@@ -138,6 +138,27 @@ export interface AkousmaCapture {
   [key: string]: unknown;
 }
 
+export interface AkousmaCovenantWithheld {
+  rule?: string;
+  subject?: string;
+  count?: number;
+  [key: string]: unknown;
+}
+
+export interface AkousmaCovenant {
+  id: string;
+  name?: string;
+  version?: string;
+  contract?: string;
+  sha256?: string;
+  extends?: string[];
+  rules_applied?: string[];
+  withheld?: AkousmaCovenantWithheld[];
+  commitments?: number;
+  note?: string;
+  [key: string]: unknown;
+}
+
 export interface Akousma {
   akousma_id: string;
   schema_version: string;
@@ -153,6 +174,7 @@ export interface Akousma {
   summary?: string;
   location?: AkousmaLocation;
   capture?: AkousmaCapture;
+  covenant?: AkousmaCovenant;
   /** Spec v1.2: the record is open — unknown top-level fields are preserved. */
   [key: string]: unknown;
 }
@@ -177,6 +199,7 @@ export function createAkousma(input: {
   summary?: string | null;
   location?: AkousmaLocation | null;
   capture?: AkousmaCapture | null;
+  covenant?: AkousmaCovenant | null;
 }): Akousma;
 
 export function akousmaRelation(

@@ -335,6 +335,76 @@
           "type": "string"
         }
       }
+    },
+    "covenant": {
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "additionalProperties": true,
+      "description": "Under which ethics this was listened (v1.3). The listening covenant's identity plus honest absence: what was withheld under its rules, counted and attributed, never described. The covenant's full text stays with its author — records carry identity and hash, so exports stay safe by construction.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "The covenant's stable slug, optionally versioned: 'river-covenant/2'."
+        },
+        "name": {
+          "type": "string"
+        },
+        "version": {
+          "type": "string"
+        },
+        "contract": {
+          "type": "string",
+          "description": "The AKOÚŌ contract the covenant was parsed under, e.g. 'akouo/v0.7'."
+        },
+        "sha256": {
+          "type": "string",
+          "description": "SHA-256 of the covenant's source text: identity without content."
+        },
+        "extends": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "The covenant's declared lineage (manifestos, community protocols, parent covenants)."
+        },
+        "rules_applied": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "The covenant rules that acted on this hearing, as normalized rule lines."
+        },
+        "withheld": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": true,
+            "properties": {
+              "rule": {
+                "type": "string"
+              },
+              "subject": {
+                "type": "string"
+              },
+              "count": {
+                "type": "integer",
+                "minimum": 0
+              }
+            }
+          },
+          "description": "Honest absence: what was withheld, named at category level and attributed to its rule."
+        },
+        "commitments": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "How many non-executable commitments the covenant carries."
+        },
+        "note": {
+          "type": "string"
+        }
+      }
     }
   }
 }

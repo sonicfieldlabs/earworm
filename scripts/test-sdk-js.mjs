@@ -154,6 +154,27 @@ assert.throws(() =>
 );
 assert.equal(akousmaShapeErrors({ ...walk, weather: "light rain" }).length, 0);
 
+// v1.3: the covenant — under which ethics this was listened
+const sovereign = createAkousma({
+  audio: { asset_id: "cov_1" },
+  originatingApp: "oida",
+  origin: "live-input",
+  covenant: {
+    id: "river-covenant/2",
+    contract: "akouo/v0.7",
+    extends: ["algophonya/v7"],
+    withheld: [{ rule: "do_not_reveal", subject: "transcript", count: 1 }],
+    commitments: 1
+  }
+});
+assert.equal(akousmaShapeErrors(sovereign).length, 0);
+assert.equal(sovereign.covenant.id, "river-covenant/2");
+assert.ok(akousmaShapeErrors({ ...sovereign, covenant: { name: "no id" } }).length > 0);
+assert.ok(akousmaShapeErrors({ ...sovereign, covenant: { id: "x", commitments: -2 } }).length > 0);
+assert.throws(() =>
+  createAkousma({ audio: { asset_id: "x" }, originatingApp: "oida", covenant: { name: "no id" } })
+);
+
 const ids = new Set(Array.from({ length: 50 }, () => newAkousmaId()));
 assert.equal(ids.size, 50);
 
