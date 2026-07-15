@@ -347,12 +347,6 @@ export class InMemoryEventStore implements EventStore {
     this.#session.provenance = [...this.#session.provenance, deepFreezeCopy(record)];
   }
 
-  private appendLoadedEvent(event: EarwormEvent): void {
-    assertAppendableLoadedEvent(this.#session, this.#events, event);
-    this.#events.push(deepFreezeCopy(event));
-    this.syncSession();
-  }
-
   private syncSession(): void {
     this.indexes = buildIndexes(this.#events);
     this.#session = {
@@ -1135,12 +1129,15 @@ function applyContextBudget(events: EarwormEvent[], maxTokens?: number): Earworm
 }
 
 function deletePath(target: JsonObject, parts: string[]): void {
+  if (parts.some((part) => part === "__proto__" || part === "prototype" || part === "constructor")) {
+    return;
+  }
   let cursor: unknown = target;
   for (const part of parts.slice(0, -1)) {
     if (!isJsonObject(cursor)) {
       return;
     }
-    cursor = cursor[part];
+    cursor = cursor[part]; // nosemgrep: javascript.lang.security.audit.prototype-pollution.prototype-pollution-loop.prototype-pollution-loop -- all prototype-bearing segments are rejected above
   }
   if (isJsonObject(cursor)) {
     const last = parts.at(-1);

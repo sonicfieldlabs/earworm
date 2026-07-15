@@ -507,7 +507,8 @@ class AkousmataStore:
             clauses.append("(lat IS NULL OR lon IS NULL)")
         where = f"WHERE {' AND '.join(clauses)}" if clauses else ""
         args.append(limit)
-        rows = self.conn.execute(
+        # Column names and clauses above come only from fixed literals; all caller values are bound parameters.
+        rows = self.conn.execute(  # nosemgrep: python.sqlalchemy.security.sqlalchemy-execute-raw-query.sqlalchemy-execute-raw-query
             f"SELECT record FROM akousmata {where} ORDER BY created_at DESC LIMIT ?", args
         ).fetchall()
         records = [json.loads(r["record"]) for r in rows]
@@ -570,14 +571,16 @@ class AkousmataStore:
     def related(self, akousma_id: str, rel_type: str | None = None) -> list[dict[str, str]]:
         """All records connected to this one through typed relations, both
         directions. Incoming links are reported with direction 'incoming'."""
-        clause, args = "", [akousma_id, akousma_id]
-        if rel_type is not None:
-            clause = " AND rel_type=?"
-            args.append(rel_type)
-        rows = self.conn.execute(
-            f"SELECT from_id, rel_type, to_id FROM relation_edges WHERE (from_id=? OR to_id=?){clause}",
-            args,
-        ).fetchall()
+        if rel_type is None:
+            rows = self.conn.execute(
+                "SELECT from_id, rel_type, to_id FROM relation_edges WHERE from_id=? OR to_id=?",
+                (akousma_id, akousma_id),
+            ).fetchall()
+        else:
+            rows = self.conn.execute(
+                "SELECT from_id, rel_type, to_id FROM relation_edges WHERE (from_id=? OR to_id=?) AND rel_type=?",
+                (akousma_id, akousma_id, rel_type),
+            ).fetchall()
         out = []
         for r in rows:
             if r["from_id"] == akousma_id:
@@ -632,15 +635,20 @@ class AkousmataStore:
         the antimeridian fall back to a latitude-band scan."""
         dlat = radius_km / 111.32
         dlon = radius_km / (111.32 * max(math.cos(math.radians(lat)), 0.01))
-        clauses = "lat BETWEEN ? AND ?"
-        args: list[Any] = [lat - dlat, lat + dlat]
         if -180.0 <= lon - dlon and lon + dlon <= 180.0:
-            clauses += " AND lon BETWEEN ? AND ?"
-            args.extend([lon - dlon, lon + dlon])
-        rows = self.conn.execute(
-            f"SELECT record, lat, lon FROM akousmata WHERE lat IS NOT NULL AND lon IS NOT NULL AND {clauses}",
-            args,
-        ).fetchall()
+            rows = self.conn.execute(
+                """SELECT record, lat, lon FROM akousmata
+                   WHERE lat IS NOT NULL AND lon IS NOT NULL
+                   AND lat BETWEEN ? AND ? AND lon BETWEEN ? AND ?""",
+                (lat - dlat, lat + dlat, lon - dlon, lon + dlon),
+            ).fetchall()
+        else:
+            rows = self.conn.execute(
+                """SELECT record, lat, lon FROM akousmata
+                   WHERE lat IS NOT NULL AND lon IS NOT NULL
+                   AND lat BETWEEN ? AND ?""",
+                (lat - dlat, lat + dlat),
+            ).fetchall()
 
         def haversine_km(row: sqlite3.Row) -> float:
             phi1, phi2 = math.radians(row["lat"]), math.radians(lat)
@@ -779,7 +787,7 @@ class AkousmataStore:
     def __enter__(self) -> "AkousmataStore":
         return self
 
-    def __exit__(self, *exc: object) -> None:
+    def __exit__(self, *_exc: object) -> None:
         self.close()
 
 

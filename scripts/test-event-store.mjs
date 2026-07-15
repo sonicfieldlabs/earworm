@@ -80,6 +80,20 @@ const redactedDefault = queryContext(store.session, store.events, { include: ["g
 const redactedGeneration = redactedDefault.events.find((event) => event.type === "generation.requested");
 assert.equal(redactedGeneration.payload.provider_request.api_key, undefined);
 
+const objectToString = Object.prototype.toString;
+queryContext(
+  {
+    ...store.session,
+    policy: {
+      ...store.session.policy,
+      redaction: { ...store.session.policy.redaction, sensitive_fields: ["__proto__.toString"] }
+    }
+  },
+  store.events,
+  { include: ["generation"] }
+);
+assert.equal(Object.prototype.toString, objectToString);
+
 const manifest = exportManifest(store.session, store.events, {
   manifest_id: "manifest_voice_line_001",
   asset_id: "asset_voice_line_001",
