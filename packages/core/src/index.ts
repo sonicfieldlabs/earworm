@@ -1137,12 +1137,16 @@ function deletePath(target: JsonObject, parts: string[]): void {
     if (!isJsonObject(cursor)) {
       return;
     }
-    cursor = cursor[part]; // nosemgrep: javascript.lang.security.audit.prototype-pollution.prototype-pollution-loop.prototype-pollution-loop -- all prototype-bearing segments are rejected above
+    const descriptor = Object.getOwnPropertyDescriptor(cursor, part);
+    if (!descriptor || !("value" in descriptor)) {
+      return;
+    }
+    cursor = descriptor.value;
   }
   if (isJsonObject(cursor)) {
     const last = parts.at(-1);
-    if (last) {
-      delete cursor[last];
+    if (last && Object.prototype.hasOwnProperty.call(cursor, last)) {
+      Reflect.deleteProperty(cursor, last);
     }
   }
 }
