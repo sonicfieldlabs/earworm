@@ -1,13 +1,14 @@
 node_modules/
 dist/
 packages/*/dist/
+packages/*/.venv/
+packages/*/uv.lock
 coverage/
 .DS_Store
 *.log
 *.jsonl.tmp
 .env
 .env.local
-.DS_Store
 __pycache__/
 *.pyc
 .pytest_cache/

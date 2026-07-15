@@ -6,7 +6,16 @@ import { readFile, readdir } from "node:fs/promises";
 import { extname, join } from "node:path";
 
 const root = new URL("..", import.meta.url).pathname;
-const ignoredDirs = new Set([".git", "node_modules", "dist"]);
+const ignoredDirs = new Set([
+  ".git",
+  ".mypy_cache",
+  ".pytest_cache",
+  ".ruff_cache",
+  ".venv",
+  "__pycache__",
+  "dist",
+  "node_modules"
+]);
 const textExtensions = new Set([".md", ".json", ".yaml", ".yml", ".js", ".mjs", ".ts", ".py", ".toml"]);
 
 async function walk(dir) {

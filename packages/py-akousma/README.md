@@ -10,7 +10,8 @@ Store: [`earworm/docs/akousmata-store.md`](../../docs/akousmata-store.md)
 ## Install
 
 ```sh
-pip install -e ~/workspace/earworm/packages/py-akousma
+cd packages/py-akousma
+pip install -e .
 ```
 
 ## Use
@@ -26,7 +27,7 @@ rec = akousma.new_akousma(
 )
 assert akousma.is_valid(rec)
 
-# Shared store (defaults to ~/workspace/akousmata, or $AKOUSMATA_PATH)
+# Shared store (platform application-data directory, or $AKOUSMATA_PATH)
 with akousma.AkousmataStore() as store:
     uri = store.put_audio(open("clip.wav", "rb").read())   # content-addressed
     rec["audio"]["uri"] = uri

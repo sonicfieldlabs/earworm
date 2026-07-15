@@ -1,75 +1,121 @@
 # Earworm
 
-Earworm is a project-agnostic framework for persistent listening in agentic signal chains.
+Earworm is a project-agnostic protocol and SDK for persistent listening in
+agentic signal chains. It keeps audio events, intent, generation metadata,
+analysis, user edits, agent actions, modulation, provenance, retention, and
+render history in one queryable context chain.
 
-It pairs signal processing with a parallel context chain: prompts, generation metadata, timing, analysis, user edits, agent actions, modulation, provenance, and render history. The goal is to let downstream agents and processors query what a signal is, how it was produced, what the user intended, and which actions changed it over time.
+Current release: `0.4.0`.
 
-Status: `0.4.0` — protocol implementation plus the akousma memory layer (spec v1.3: the sovereignty layer's `covenant` block — under which ethics a sound was listened: the listening covenant's identity and lineage plus honest absence, what was withheld counted and attributed to its rule, never described; `query(covenant_id=…)` and an indexed, in-place-migrated `covenant_id` column make "everything heard under this covenant" one call). v0.3.0 added spec v1.2: consent-scoped `location`, `capture` direction/window (past ring-buffer slices vs. future recording), the open-record rule, `locations()`/`near()`, and store fast paths. v0.2.2 documented and tested Oída's provider-neutral host-perception provenance; v0.2.1 added the navigator surface.
+## Packages
 
-Canonical repository: `https://github.com/sonicfieldlabs/earworm`.
+| Package | Version | Purpose |
+| --- | --- | --- |
+| `@earworm/core` | 0.4.0 | Canonical TypeScript event/session types, schemas, event stores, state reconstruction, context queries, modulation, snapshots, and consent-gated manifest export. |
+| `@earworm/sdk-js` | 0.4.0 | JavaScript client plus akousma record helpers. |
+| `akousma` | 0.4.0 | Python reference store for sonic-memory records, objects, queries, lineage, kinship, location, covenants, change cursors, reindexing, and verification. |
+| `earworm-sdk-python` | 0.4.0 | Read-only Python helpers for Earworm fixtures and sessions. |
 
-## License and Trademarks
+## Protocol capabilities
 
-Earworm code is licensed under the Mozilla Public License 2.0 (`MPL-2.0`). You can use, modify, fork, and integrate it into other open-source or commercial projects. If you distribute modified Earworm source files, those modified files must remain available under `MPL-2.0`.
+- Append-only events with wall-clock, project, and asset-time references.
+- In-memory and JSONL stores with deterministic state reconstruction.
+- Prompt, generation, asset, signal, analysis, alignment, modulation,
+  automation, agent-action, and snapshot event families.
+- Context-bundle queries scoped by assets, event types, time ranges, and
+  retention policy.
+- Manifest export with provenance, redaction, consent, policy, and audit
+  records.
+- Cross-package conformance fixtures and runnable integration examples.
 
-The `Earworm` and `PhonoStack` names, logos, and related branding are handled separately. See [TRADEMARKS.md](TRADEMARKS.md). In short: you can build with Earworm, but you cannot present a fork or product as the official Earworm project without permission.
+## Akousma memory
 
-## Current Scope
+An **akousma** is an open sonic-memory record. Spec v1.3 supports:
 
-The repository is being built phase by phase from the system master document:
+- content-addressed audio objects and portable source references;
+- producer-owned listening namespaces;
+- causal lineage and typed kinship;
+- tags, summaries, consent, rights, and provenance;
+- consent-scoped `location` and directed `capture` metadata;
+- listening covenants and attributed withholding;
+- unknown top-level fields preserved for future producers.
 
-- M-1: repository bootstrap.
-- M0: schema lock.
-- M1: event store and state reconstruction.
-- M2: timing, assets, and analysis ingestion.
-- M3: query API and context bundles.
-- M4: modulation intent and automation output.
-- M5: manifest export and audit.
-- M6: open-source package readiness.
+The Python store implements `put`, `get`, filtered `query`, content-hash
+recurrence, parents/children/ancestors/descendants, typed relations, tags,
+locations, distance search, a tie-safe `changed_since` cursor, forget with
+honest absence, reindex, and verify.
 
-## Quick Start
+## Listening Stack compatibility
 
-Requirements: Node.js `>=22` and pnpm `>=10`.
+| Component | Version / contract | Relationship |
+| --- | --- | --- |
+| [AKOÚŌ](https://github.com/sonicfieldlabs/akouo) | `akouo/v0.7` | Defines the listening modes, evidence permissions, apparatus, memory-lineage output, and covenant shape stored by producers. |
+| [OÍDA](https://github.com/sonicfieldlabs/oida) | 0.6.0 / `oida/gateway/v0.2` | Reference gateway. OÍDA-owned and host-owned perception emit the same Earworm event families and declare their apparatus. |
+| [Akousmata](https://github.com/sonicfieldlabs/akousmata) | 0.4.0 | Reference navigator over the Python store. |
+| [GERM](https://github.com/sonicfieldlabs/germ) | 0.2.0 | Writes lineage-bearing generations and Earworm context exports. |
+| [Algophony](https://github.com/sonicfieldlabs/algophony) | 0.5.0 | Uses Earworm context and akousma relations for traceable batch evaluation. |
+| [ORAM](https://github.com/sonicfieldlabs/oram) | 0.4.0 | Does not write the protocol directly; ORAM audio can be captured into akousma records by OÍDA or GERM. |
 
-```sh
-pnpm install
-pnpm validate
-pnpm test
+## Quick start
+
+Requirements: Node.js 22+ and pnpm 10.32.1+.
+
+```bash
+pnpm install --frozen-lockfile
 pnpm check
-pnpm examples:smoke
 ```
 
-The current validation path uses local scripts and JSON fixtures so the protocol can be tested before adding external dependencies.
+`pnpm check` validates fixtures, builds packages, runs JS and conformance
+tests, type-checks, lints, validates manifests, and runs all examples.
 
-## Repository Layout
+Use the Python akousma store from this checkout:
+
+```bash
+uv run --project packages/py-akousma --extra dev pytest -q packages/py-akousma/tests
+```
+
+Minimal Python example:
+
+```python
+from akousma import AkousmataStore, new_akousma
+
+with AkousmataStore("./listening-store") as store:
+    record = new_akousma(
+        audio={"asset_id": "asset_example", "uri": "objects/example.wav"},
+        originating_app="example",
+        source_type="generated",
+        summary="A short metallic recurrence",
+        tags=["metal", "loop"],
+    )
+    store.put(record)
+```
+
+## Repository layout
 
 ```text
-packages/core/        Canonical schemas, fixtures, and event-store primitives.
-packages/sdk-js/      Thin JavaScript client wrapper over the core store.
-packages/sdk-python/  Read-only Python fixture/session reader for integrations.
-docs/                 Concepts, ADRs, governance, and API notes.
-examples/             Runnable integration examples.
-tests/                Cross-package conformance fixtures and tests.
-scripts/              Repository validation and test entry points.
+packages/core/          canonical contracts and event-store primitives
+packages/sdk-js/        JavaScript SDK and akousma helpers
+packages/sdk-python/    read-only Python session helpers
+packages/py-akousma/    Python akousma store
+docs/                   protocol, concepts, API, governance, and ADRs
+examples/               runnable integrations
+tests/conformance/      shared conformance vectors
+scripts/                validation, tests, examples, and export tools
 ```
 
-## Akousmata Surface
+## Documentation
 
-In the Listening Stack, Akousmata names the memory-operations surface over Earworm chains: remember, list, search, relate, and forget. Earworm provides the persistence protocol underneath that surface — append-only events, queryable context bundles, manifest export, retention/redaction policy, and reversible automation records — and `py-akousma` ships the store implementing it: put/get, filtered query (app, source, origin, session, content hash, tag, text, time), lineage and typed-relation walks, tag listing, a tie-safe `changed_since` cursor, forget with honest absence, reindex, and verify. Similarity today means content-hash recurrence (`find_by_hash`) plus typed relations; consent-gated export lives in `@earworm/core` (`exportManifest`).
+- [Concept overview](docs/concepts/overview.md)
+- [Core API](docs/api/core.md)
+- [Akousma spec v1.3](docs/akousma_spec_v1.md)
+- [Akousmata store](docs/akousmata-store.md)
+- [OÍDA gateway integration](docs/oida-gateway.md)
+- [Schemas](docs/schemas/index.md)
+- [Provenance and policy](docs/governance/provenance-and-policy.md)
+- [Architecture decision: schemas are canonical](docs/adr/0001-json-schema-is-canonical.md)
+- [Changelog](CHANGELOG.md)
 
-## Oída gateway sessions
+## License and trademarks
 
-Oída is the reference unified distribution of AKOÚŌ, Earworm, and Akousmata.
-Its gateway supports both Oída-owned audio perception and observations supplied
-by an audio-capable host such as Hermes, Codex, or Claude. Both paths emit the
-same Earworm event families and preserve the perception apparatus in event
-payloads and provenance; a host model's observations are never rewritten as
-DSP measurement. See [docs/oida-gateway.md](docs/oida-gateway.md).
-
-## Contributing
-
-Pull requests are welcome. By contributing, you agree that your contributions are licensed under `MPL-2.0`. See [CONTRIBUTING.md](CONTRIBUTING.md).
-
-## Core Thesis
-
-Earworm turns a signal chain into an agentic signal chain by giving every stage access to persistent, time-indexed, queryable memory of intent, provenance, analysis, and previous actions.
+Code is licensed under MPL-2.0. See [LICENSE](LICENSE). Project names and
+branding are handled separately; see [TRADEMARKS.md](TRADEMARKS.md).

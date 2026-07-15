@@ -13,6 +13,7 @@ import math
 import os
 import secrets
 import sqlite3
+import sys
 import time
 from hashlib import sha256
 from pathlib import Path
@@ -310,7 +311,17 @@ def default_store_path() -> Path:
     env = os.getenv("AKOUSMATA_PATH")
     if env:
         return Path(env).expanduser()
-    return Path.home() / "Documents" / "SFL" / "akousmata"
+    # Preserve an existing adjacent navigator store in source-checkout layouts.
+    source_sibling = Path(__file__).resolve().parents[3].parent / "akousmata"
+    if (source_sibling / "index.sqlite").exists():
+        return source_sibling
+    if sys.platform == "darwin":
+        return Path.home() / "Library" / "Application Support" / "akousmata"
+    if os.name == "nt":
+        base = Path(os.getenv("LOCALAPPDATA") or (Path.home() / "AppData" / "Local"))
+        return base / "akousmata"
+    base = Path(os.getenv("XDG_DATA_HOME") or (Path.home() / ".local" / "share"))
+    return base / "akousmata"
 
 
 class AkousmataStore:

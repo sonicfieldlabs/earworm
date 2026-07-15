@@ -6,11 +6,12 @@ evaluated in algophony while carrying one continuous lineage.
 
 ## Location
 
-- Default: `~/workspace/akousmata/` — which is also the home of the
-  **akousmata navigator app** (`github.com/sonicfieldlabs/akousmata`): the
-  code is public, the data files (`index.sqlite`, `objects/`, `wiki/`,
-  `settings.json`) are gitignored there and never tracked.
-- Override: `AKOUSMATA_PATH` environment variable to separate code and data.
+- Default: the platform application-data directory
+  (`~/Library/Application Support/akousmata` on macOS,
+  `${XDG_DATA_HOME:-~/.local/share}/akousmata` on Linux, or
+  `%LOCALAPPDATA%\akousmata` on Windows).
+- Override: set `AKOUSMATA_PATH` when every stack component should share a
+  different store location.
 
 The data is personal listening memory and is never pushed. Open-research
 publication is **export-only** and sanitized (see the spec's consent rule).
