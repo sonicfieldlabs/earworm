@@ -11,7 +11,24 @@
  * build, check, and link records on the JS side.
  */
 
-export const AKOUSMA_SCHEMA_VERSION = "1.3.0";
+export const AKOUSMA_SCHEMA_VERSION = "1.4.0";
+
+export const AUDITUM_CONTRACT = "earworm/auditum/v1";
+
+export const AUDITUM_LISTENER_TYPES = ["human", "agent", "hybrid"];
+
+export const AUDITUM_ABSENCE_KINDS = [
+  "unavailable",
+  "withheld",
+  "refused",
+  "not_retained",
+  "forgotten",
+  "undetermined"
+];
+
+export const AUDITUM_DISAGREEMENT_STATUSES = ["preserved", "resolved", "undetermined"];
+
+export const AUDITUM_ACTION_STATUSES = ["proposed", "authorized", "refused", "executed", "failed", "reverted"];
 
 export const AKOUSMA_SOURCE_TYPES = [
   "generated",
@@ -97,7 +114,8 @@ export function createAkousma({
   summary = null,
   location = null,
   capture = null,
-  covenant = null
+  covenant = null,
+  auditum = null
 }) {
   if (!audio || typeof audio.asset_id !== "string" || audio.asset_id.length === 0) {
     throw new Error("createAkousma: audio.asset_id is required");
@@ -115,6 +133,10 @@ export function createAkousma({
   }
   if (covenant) {
     const problems = covenantErrors(covenant, "covenant");
+    if (problems.length > 0) throw new Error(`createAkousma: ${problems.join("; ")}`);
+  }
+  if (auditum) {
+    const problems = auditumErrors(auditum, "auditum");
     if (problems.length > 0) throw new Error(`createAkousma: ${problems.join("; ")}`);
   }
 
@@ -149,6 +171,7 @@ export function createAkousma({
   if (location) record.location = { ...location };
   if (capture) record.capture = { ...capture };
   if (covenant) record.covenant = { ...covenant };
+  if (auditum) record.auditum = structuredClone(auditum);
   return record;
 }
 
@@ -202,6 +225,93 @@ function covenantErrors(covenant, path) {
     errors.push(`${path}.withheld: expected array`);
   }
   return errors;
+}
+
+function auditumErrors(auditum, path) {
+  if (!auditum || typeof auditum !== "object" || Array.isArray(auditum)) {
+    return [`${path}: expected object`];
+  }
+  const errors = [];
+  if (auditum.contract !== AUDITUM_CONTRACT) {
+    errors.push(`${path}.contract: expected ${AUDITUM_CONTRACT}`);
+  }
+  if (!Array.isArray(auditum.listenings) || auditum.listenings.length === 0) {
+    errors.push(`${path}.listenings: expected non-empty array`);
+  } else {
+    const ids = new Set();
+    auditum.listenings.forEach((listening, index) => {
+      for (const key of ["listening_id", "listener_id", "created_at", "report_namespace", "contract"]) {
+        if (typeof listening?.[key] !== "string" || listening[key].length === 0) {
+          errors.push(`${path}.listenings[${index}].${key}: required non-empty string`);
+        }
+      }
+      if (!AUDITUM_LISTENER_TYPES.includes(listening?.listener_type)) {
+        errors.push(`${path}.listenings[${index}].listener_type: expected one of ${AUDITUM_LISTENER_TYPES.join(", ")}`);
+      }
+      if (ids.has(listening?.listening_id)) {
+        errors.push(`${path}.listenings[${index}].listening_id: duplicate`);
+      }
+      ids.add(listening?.listening_id);
+    });
+    for (const [index, disagreement] of (auditum.disagreements ?? []).entries()) {
+      const listeningIds = disagreement?.listening_ids;
+      if (!Array.isArray(listeningIds) || new Set(listeningIds).size < 2) {
+        errors.push(`${path}.disagreements[${index}].listening_ids: expected at least two distinct ids`);
+      } else if (listeningIds.some((id) => !ids.has(id))) {
+        errors.push(`${path}.disagreements[${index}].listening_ids: references unknown listening`);
+      }
+      if (!AUDITUM_DISAGREEMENT_STATUSES.includes(disagreement?.status)) {
+        errors.push(`${path}.disagreements[${index}].status: expected one of ${AUDITUM_DISAGREEMENT_STATUSES.join(", ")}`);
+      }
+      if (!Array.isArray(disagreement?.positions) || disagreement.positions.length < 2) {
+        errors.push(`${path}.disagreements[${index}].positions: expected at least two positions`);
+      }
+    }
+  }
+  if (!Array.isArray(auditum.disagreements)) errors.push(`${path}.disagreements: expected array`);
+  if (!Array.isArray(auditum.honest_absences)) {
+    errors.push(`${path}.honest_absences: expected array`);
+  } else {
+    auditum.honest_absences.forEach((absence, index) => {
+      if (!AUDITUM_ABSENCE_KINDS.includes(absence?.kind)) {
+        errors.push(`${path}.honest_absences[${index}].kind: expected one of ${AUDITUM_ABSENCE_KINDS.join(", ")}`);
+      }
+    });
+  }
+  if (!Array.isArray(auditum.actions)) {
+    errors.push(`${path}.actions: expected array`);
+  } else {
+    auditum.actions.forEach((action, index) => {
+      if (!AUDITUM_ACTION_STATUSES.includes(action?.status)) {
+        errors.push(`${path}.actions[${index}].status: expected one of ${AUDITUM_ACTION_STATUSES.join(", ")}`);
+      }
+    });
+  }
+  return errors;
+}
+
+/**
+ * Build an akousma v1.4 auditum block. "Tokenized" means structured,
+ * attributable, versioned, and addressable — never a financial token.
+ */
+export function createAuditum({
+  listenings,
+  disagreements = [],
+  honestAbsences = [],
+  actions = [],
+  revision = null
+}) {
+  const block = {
+    contract: AUDITUM_CONTRACT,
+    listenings: (listenings ?? []).map((item) => ({ ...item })),
+    disagreements: disagreements.map((item) => structuredClone(item)),
+    honest_absences: honestAbsences.map((item) => ({ ...item })),
+    actions: actions.map((item) => structuredClone(item))
+  };
+  if (revision) block.revision = structuredClone(revision);
+  const errors = auditumErrors(block, "auditum");
+  if (errors.length > 0) throw new Error(`createAuditum: ${errors.join("; ")}`);
+  return block;
 }
 
 /** Build a typed lineage relation (kinship link, not causal parenthood). */
@@ -278,6 +388,9 @@ export function akousmaShapeErrors(record) {
   }
   if (record.covenant !== undefined) {
     errors.push(...covenantErrors(record.covenant, "covenant"));
+  }
+  if (record.auditum !== undefined) {
+    errors.push(...auditumErrors(record.auditum, "auditum"));
   }
   return errors;
 }

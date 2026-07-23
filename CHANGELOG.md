@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.5.0 — Addressable auditums
+
+- Added akousma spec v1.4's `auditum` block: attributable listening routes,
+  preserved disagreement, honest absence, scoped action authority and
+  receipts, and additive revision lineage.
+- Added matching Python and JavaScript builders, TypeScript declarations,
+  shape validation, fixtures, and indexed store queries.
+- Added semantic listening, disagreement, action, revision, and forgetting
+  event families plus context-selector groups.
+- Strengthened the fixture harness to resolve internal schema references and
+  validate constants, nullable types, minimum lengths, and uniqueness.
+- Clarified ownership: AKOÚŌ owns claim semantics; Earworm owns durable,
+  addressable listening history. “Tokenized” is structural, never financial.
+
 ## 0.4.0 — Covenant-aware memory
 
 - Added akousma spec v1.3 covenant identity, lineage, commitments, and

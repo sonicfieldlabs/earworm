@@ -18,3 +18,28 @@ client.ingestPrompt({
   prompt: "tired detective, close and breathy"
 });
 ```
+
+Akousma v1.4 helpers make accountable hearings addressable while keeping
+producer reports namespaced:
+
+```js
+import { createAkousma, createAuditum } from "@earworm/sdk-js";
+
+const record = createAkousma({
+  audio: { asset_id: "asset_1" },
+  originatingApp: "oida",
+  auditum: createAuditum({
+    listenings: [{
+      listening_id: "lst_1",
+      listener_id: "oida",
+      listener_type: "agent",
+      created_at: new Date().toISOString(),
+      report_namespace: "oida.signal",
+      contract: "akouo/v0.8"
+    }]
+  })
+});
+```
+
+Each listening stays attributable. Disagreement, absence, action authority,
+receipts, and revision are recorded rather than flattened into a consensus.

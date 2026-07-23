@@ -100,6 +100,93 @@ class TestAkousmaRecord(unittest.TestCase):
         rec["covenant"] = {"name": "anonymous rules"}
         self.assertTrue(akousma.validation_errors(rec))
 
+    def test_accountable_auditum_is_valid_and_plural(self):
+        listenings = [
+            {
+                "listening_id": "lst_signal",
+                "listener_id": "oida-signal",
+                "listener_type": "agent",
+                "created_at": "2026-07-22T12:00:00Z",
+                "report_namespace": "oida.signal",
+                "contract": "akouo/v0.8",
+                "claim_set_ref": "#/listening/oida.signal/payload/listening_claims",
+                "route": ["signal-inspection-listening"],
+            },
+            {
+                "listening_id": "lst_context",
+                "listener_id": "oida-context",
+                "listener_type": "agent",
+                "created_at": "2026-07-22T12:00:01Z",
+                "report_namespace": "akouo.ecological-posthuman-listening",
+                "contract": "akouo/v0.8",
+                "route": ["ecological-posthuman-listening"],
+            },
+        ]
+        block = akousma.auditum(
+            listenings=listenings,
+            disagreements=[{
+                "id": "dis_1",
+                "subject": "source identity",
+                "listening_ids": ["lst_signal", "lst_context"],
+                "positions": [
+                    {"listening_id": "lst_signal", "statement": "Source remains undetermined", "claim_category": "undetermined"},
+                    {"listening_id": "lst_context", "statement": "Water is a contextual possibility", "claim_category": "interpreted"},
+                ],
+                "status": "preserved",
+            }],
+            honest_absences=[{
+                "id": "abs_1",
+                "kind": "not_retained",
+                "subject": "raw audio",
+                "attributed_to": "local retention boundary",
+                "count": 1,
+            }],
+            actions=[{
+                "action_id": "act_1",
+                "proposal": "Recommend a calibrated re-listening",
+                "status": "proposed",
+                "authority": {
+                    "mode": "recommend",
+                    "scopes": ["recommend_next_listening"],
+                    "requires_confirmation": True,
+                    "reversible": True,
+                },
+            }],
+        )
+        rec = akousma.new_akousma(
+            audio={"asset_id": "a1"}, originating_app="oida", auditum=block
+        )
+        self.assertEqual(akousma.validation_errors(rec), [])
+        self.assertEqual(rec["schema_version"], "1.4.0")
+        self.assertEqual(len(rec["auditum"]["listenings"]), 2)
+        self.assertEqual(rec["auditum"]["disagreements"][0]["status"], "preserved")
+
+    def test_auditum_builder_rejects_false_plurality(self):
+        listening = {
+            "listening_id": "lst_1",
+            "listener_id": "listener_1",
+            "listener_type": "agent",
+            "created_at": "2026-07-22T12:00:00Z",
+            "report_namespace": "oida.signal",
+            "contract": "akouo/v0.8",
+        }
+        with self.assertRaises(ValueError):
+            akousma.auditum(listenings=[listening, listening])
+        with self.assertRaises(ValueError):
+            akousma.auditum(
+                listenings=[listening],
+                disagreements=[{
+                    "id": "dis_1",
+                    "subject": "identity",
+                    "listening_ids": ["lst_1", "lst_missing"],
+                    "positions": [
+                        {"listening_id": "lst_1", "statement": "unknown"},
+                        {"listening_id": "lst_missing", "statement": "known"},
+                    ],
+                    "status": "preserved",
+                }],
+            )
+
     def test_v1_1_records_still_valid(self):
         rec = akousma.new_akousma(
             audio={"asset_id": "a1"},
@@ -384,6 +471,64 @@ class TestAkousmataStore(unittest.TestCase):
         self.assertEqual(
             [r["akousma_id"] for r in self.store.query(covenant_id="river-covenant/2")],
             [under["akousma_id"]],
+        )
+
+    def test_auditum_query_and_reindex(self):
+        listenings = [
+            {
+                "listening_id": "lst_1",
+                "listener_id": "oida",
+                "listener_type": "agent",
+                "created_at": "2026-07-22T12:00:00Z",
+                "report_namespace": "oida.signal",
+                "contract": "akouo/v0.8",
+            },
+            {
+                "listening_id": "lst_2",
+                "listener_id": "akouo",
+                "listener_type": "agent",
+                "created_at": "2026-07-22T12:00:01Z",
+                "report_namespace": "akouo.acoulogical-object-listening",
+                "contract": "akouo/v0.8",
+            },
+        ]
+        accountable = akousma.new_akousma(
+            audio={"asset_id": "a1"},
+            originating_app="oida",
+            auditum=akousma.auditum(
+                listenings=listenings,
+                disagreements=[{
+                    "id": "dis_1",
+                    "subject": "source",
+                    "listening_ids": ["lst_1", "lst_2"],
+                    "positions": [
+                        {"listening_id": "lst_1", "statement": "undetermined"},
+                        {"listening_id": "lst_2", "statement": "ambiguous object"},
+                    ],
+                    "status": "preserved",
+                }],
+            ),
+        )
+        legacy = akousma.new_akousma(audio={"asset_id": "a2"}, originating_app="oida")
+        self.store.put(accountable)
+        self.store.put(legacy)
+        self.assertEqual(
+            [record["akousma_id"] for record in self.store.query(has_auditum=True)],
+            [accountable["akousma_id"]],
+        )
+        self.assertEqual(
+            [record["akousma_id"] for record in self.store.query(has_disagreement=True)],
+            [accountable["akousma_id"]],
+        )
+        self.store.conn.execute(
+            "UPDATE akousmata SET auditum_contract=NULL, listening_count=0, disagreement_count=0, honest_absence_count=0"
+        )
+        self.store.conn.commit()
+        self.assertEqual(self.store.query(has_auditum=True), [])
+        self.store.reindex()
+        self.assertEqual(
+            [record["akousma_id"] for record in self.store.query(has_disagreement=True)],
+            [accountable["akousma_id"]],
         )
 
     def test_reindex_rehoists_location(self):

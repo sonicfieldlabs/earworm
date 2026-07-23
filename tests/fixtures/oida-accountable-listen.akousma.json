@@ -1,0 +1,138 @@
+{
+  "akousma_id": "akm_01JACCOUNTABLELISTEN000001",
+  "schema_version": "1.4.0",
+  "created_at": "2026-07-22T12:00:02Z",
+  "audio": {
+    "asset_id": "asset_accountable_001",
+    "duration_seconds": 8.0,
+    "sample_rate": 48000,
+    "channels": 2
+  },
+  "provenance": {
+    "source_type": "recorded",
+    "origin": "live-input",
+    "originating_app": "oida",
+    "consent_status": "owned",
+    "created_at": "2026-07-22T12:00:00Z"
+  },
+  "listening": {
+    "oida.signal": {
+      "contract": "akouo/v0.8",
+      "created_at": "2026-07-22T12:00:00Z",
+      "summary": "Bounded local signal inspection",
+      "payload": {
+        "listening_claims": {
+          "heard": [],
+          "measured": [],
+          "inferred": [],
+          "interpreted": [],
+          "speculative": [],
+          "undetermined": [
+            {
+              "statement": "Source identity remains undetermined.",
+              "confidence": "high"
+            }
+          ]
+        }
+      }
+    },
+    "akouo.acoulogical-object-listening": {
+      "contract": "akouo/v0.8",
+      "created_at": "2026-07-22T12:00:01Z",
+      "summary": "Auditum-first description",
+      "payload": {
+        "main_reading": "The sound is approached as an ambiguous perceptual object."
+      }
+    }
+  },
+  "lineage": {
+    "parent_akousma_ids": [],
+    "event_ids": [
+      "evt_accountable_listening_001"
+    ]
+  },
+  "tags": [
+    "accountable-listening",
+    "plural-listening"
+  ],
+  "annotations": {},
+  "extensions": {},
+  "summary": "Two attributable routes preserve a difference about source identity.",
+  "auditum": {
+    "contract": "earworm/auditum/v1",
+    "listenings": [
+      {
+        "listening_id": "lst_signal",
+        "listener_id": "oida-signal",
+        "listener_type": "agent",
+        "created_at": "2026-07-22T12:00:00Z",
+        "report_namespace": "oida.signal",
+        "contract": "akouo/v0.8",
+        "claim_set_ref": "#/listening/oida.signal/payload/listening_claims",
+        "route": [
+          "signal-inspection-listening"
+        ]
+      },
+      {
+        "listening_id": "lst_object",
+        "listener_id": "akouo-object",
+        "listener_type": "agent",
+        "created_at": "2026-07-22T12:00:01Z",
+        "report_namespace": "akouo.acoulogical-object-listening",
+        "contract": "akouo/v0.8",
+        "claim_set_ref": null,
+        "route": [
+          "acoulogical-object-listening"
+        ]
+      }
+    ],
+    "disagreements": [
+      {
+        "id": "dis_source_identity",
+        "subject": "source identity",
+        "listening_ids": [
+          "lst_signal",
+          "lst_object"
+        ],
+        "positions": [
+          {
+            "listening_id": "lst_signal",
+            "statement": "Source identity is unsupported by the available evidence.",
+            "claim_category": "undetermined"
+          },
+          {
+            "listening_id": "lst_object",
+            "statement": "Source identity is deliberately bracketed in this route.",
+            "claim_category": "interpreted"
+          }
+        ],
+        "status": "preserved"
+      }
+    ],
+    "honest_absences": [
+      {
+        "id": "abs_raw_audio",
+        "kind": "not_retained",
+        "subject": "raw audio",
+        "attributed_to": "local retention boundary",
+        "count": 1
+      }
+    ],
+    "actions": [
+      {
+        "action_id": "act_relisten",
+        "proposal": "Recommend a calibrated re-listening before making level claims.",
+        "status": "proposed",
+        "authority": {
+          "mode": "recommend",
+          "scopes": [
+            "recommend_next_listening"
+          ],
+          "granted_by": "current user request",
+          "requires_confirmation": true,
+          "reversible": true
+        }
+      }
+    ]
+  }
+}

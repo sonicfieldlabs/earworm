@@ -8,6 +8,7 @@ import {
   InMemoryEventStore,
   createSession,
   createAkousma,
+  createAuditum,
   akousmaRelation,
   addListening,
   akousmaShapeErrors,
@@ -174,6 +175,68 @@ assert.ok(akousmaShapeErrors({ ...sovereign, covenant: { id: "x", commitments: -
 assert.throws(() =>
   createAkousma({ audio: { asset_id: "x" }, originatingApp: "oida", covenant: { name: "no id" } })
 );
+
+// v1.4: accountable auditums preserve plural listening and scoped authority
+const accountable = createAkousma({
+  audio: { asset_id: "auditum_1" },
+  originatingApp: "oida",
+  auditum: createAuditum({
+    listenings: [
+      {
+        listening_id: "lst_signal",
+        listener_id: "oida-signal",
+        listener_type: "agent",
+        created_at: "2026-07-22T12:00:00Z",
+        report_namespace: "oida.signal",
+        contract: "akouo/v0.8",
+        route: ["signal-inspection-listening"]
+      },
+      {
+        listening_id: "lst_object",
+        listener_id: "akouo-object",
+        listener_type: "agent",
+        created_at: "2026-07-22T12:00:01Z",
+        report_namespace: "akouo.acoulogical-object-listening",
+        contract: "akouo/v0.8",
+        route: ["acoulogical-object-listening"]
+      }
+    ],
+    disagreements: [
+      {
+        id: "dis_source",
+        subject: "source identity",
+        listening_ids: ["lst_signal", "lst_object"],
+        positions: [
+          { listening_id: "lst_signal", statement: "Source is undetermined", claim_category: "undetermined" },
+          { listening_id: "lst_object", statement: "Source identity is bracketed", claim_category: "interpreted" }
+        ],
+        status: "preserved"
+      }
+    ],
+    honestAbsences: [
+      { id: "abs_audio", kind: "not_retained", subject: "raw audio", attributed_to: "local retention boundary", count: 1 }
+    ],
+    actions: [
+      {
+        action_id: "act_relisten",
+        proposal: "Recommend a calibrated re-listening",
+        status: "proposed",
+        authority: {
+          mode: "recommend",
+          scopes: ["recommend_next_listening"],
+          requires_confirmation: true,
+          reversible: true
+        }
+      }
+    ]
+  })
+});
+assert.equal(accountable.schema_version, "1.4.0");
+assert.equal(accountable.auditum.contract, "earworm/auditum/v1");
+assert.equal(accountable.auditum.listenings.length, 2);
+assert.equal(accountable.auditum.disagreements[0].status, "preserved");
+assert.equal(akousmaShapeErrors(accountable).length, 0);
+assert.throws(() => createAuditum({ listenings: [] }));
 
 const ids = new Set(Array.from({ length: 50 }, () => newAkousmaId()));
 assert.equal(ids.size, 50);

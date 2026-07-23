@@ -19,7 +19,8 @@ from hashlib import sha256
 from pathlib import Path
 from typing import Any, Iterable
 
-SCHEMA_VERSION = "1.3.0"
+SCHEMA_VERSION = "1.4.0"
+AUDITUM_CONTRACT = "earworm/auditum/v1"
 _SCHEMA_PATH = Path(__file__).with_name("akousma.schema.json")
 
 RELATION_TYPES = (
@@ -46,6 +47,18 @@ PIPELINE_EFFECTS = (
 LOCATION_SOURCES = ("gps", "network", "manual", "config", "inferred")
 
 CAPTURE_DIRECTIONS = ("past", "future", "live")
+
+AUDITUM_LISTENER_TYPES = ("human", "agent", "hybrid")
+AUDITUM_ABSENCE_KINDS = (
+    "unavailable",
+    "withheld",
+    "refused",
+    "not_retained",
+    "forgotten",
+    "undetermined",
+)
+AUDITUM_DISAGREEMENT_STATUSES = ("preserved", "resolved", "undetermined")
+AUDITUM_ACTION_STATUSES = ("proposed", "authorized", "refused", "executed", "failed", "reverted")
 
 _CROCKFORD = "0123456789ABCDEFGHJKMNPQRSTVWXYZ"
 
@@ -124,6 +137,7 @@ def new_akousma(
     location: dict[str, Any] | None = None,
     capture: dict[str, Any] | None = None,
     covenant: dict[str, Any] | None = None,
+    auditum: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Build a valid akousma record. ``audio`` must at least contain ``asset_id``."""
     lineage: dict[str, Any] = {"parent_akousma_ids": list(parent_akousma_ids or [])}
@@ -161,6 +175,8 @@ def new_akousma(
         record["capture"] = dict(capture)
     if covenant:
         record["covenant"] = dict(covenant)
+    if auditum:
+        record["auditum"] = dict(auditum)
     return record
 
 
@@ -303,6 +319,94 @@ def covenant(
     return block
 
 
+def auditum(
+    *,
+    listenings: Iterable[dict[str, Any]],
+    disagreements: Iterable[dict[str, Any]] | None = None,
+    honest_absences: Iterable[dict[str, Any]] | None = None,
+    actions: Iterable[dict[str, Any]] | None = None,
+    revision: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    """Build the v1.4 addressable auditum block.
+
+    Each listening remains attributable to one listener and report namespace;
+    disagreement is preserved between listening ids rather than collapsed into
+    consensus. Action proposals carry authority separately from capability.
+    "Tokenized" in the protocol means structured and referenceable, never a
+    financial token.
+    """
+    listening_items = [dict(item) for item in listenings]
+    if not listening_items:
+        raise ValueError("auditum: at least one listening is required")
+
+    required_listening = (
+        "listening_id",
+        "listener_id",
+        "listener_type",
+        "created_at",
+        "report_namespace",
+        "contract",
+    )
+    listening_ids: set[str] = set()
+    for index, item in enumerate(listening_items):
+        for key in required_listening:
+            if not isinstance(item.get(key), str) or not item[key]:
+                raise ValueError(f"auditum: listenings[{index}].{key} must be a non-empty string")
+        if item["listener_type"] not in AUDITUM_LISTENER_TYPES:
+            raise ValueError(
+                f"auditum: listenings[{index}].listener_type must be one of "
+                f"{', '.join(AUDITUM_LISTENER_TYPES)}"
+            )
+        if item["listening_id"] in listening_ids:
+            raise ValueError(f"auditum: duplicate listening_id {item['listening_id']!r}")
+        listening_ids.add(item["listening_id"])
+
+    disagreement_items = [dict(item) for item in disagreements or []]
+    for index, item in enumerate(disagreement_items):
+        ids = item.get("listening_ids")
+        if not isinstance(ids, list) or len(set(ids)) < 2:
+            raise ValueError(f"auditum: disagreements[{index}] needs at least two listening_ids")
+        if not set(ids).issubset(listening_ids):
+            raise ValueError(f"auditum: disagreements[{index}] references an unknown listening_id")
+        if item.get("status") not in AUDITUM_DISAGREEMENT_STATUSES:
+            raise ValueError(
+                f"auditum: disagreements[{index}].status must be one of "
+                f"{', '.join(AUDITUM_DISAGREEMENT_STATUSES)}"
+            )
+        positions = item.get("positions")
+        if not isinstance(positions, list) or len(positions) < 2:
+            raise ValueError(f"auditum: disagreements[{index}] needs at least two positions")
+        if any(position.get("listening_id") not in ids for position in positions if isinstance(position, dict)):
+            raise ValueError(f"auditum: disagreements[{index}] position is not attributable to its listenings")
+
+    absence_items = [dict(item) for item in honest_absences or []]
+    for index, item in enumerate(absence_items):
+        if item.get("kind") not in AUDITUM_ABSENCE_KINDS:
+            raise ValueError(
+                f"auditum: honest_absences[{index}].kind must be one of "
+                f"{', '.join(AUDITUM_ABSENCE_KINDS)}"
+            )
+
+    action_items = [dict(item) for item in actions or []]
+    for index, item in enumerate(action_items):
+        if item.get("status") not in AUDITUM_ACTION_STATUSES:
+            raise ValueError(
+                f"auditum: actions[{index}].status must be one of "
+                f"{', '.join(AUDITUM_ACTION_STATUSES)}"
+            )
+
+    block: dict[str, Any] = {
+        "contract": AUDITUM_CONTRACT,
+        "listenings": listening_items,
+        "disagreements": disagreement_items,
+        "honest_absences": absence_items,
+        "actions": action_items,
+    }
+    if revision:
+        block["revision"] = dict(revision)
+    return block
+
+
 # ---------------------------------------------------------------------------
 # the shared akousmata store
 # ---------------------------------------------------------------------------
@@ -379,6 +483,18 @@ class AkousmataStore:
         if "covenant_id" not in columns:
             self.conn.execute("ALTER TABLE akousmata ADD COLUMN covenant_id TEXT")
         self.conn.execute("CREATE INDEX IF NOT EXISTS idx_akousmata_covenant ON akousmata(covenant_id)")
+        # v0.5 / akousma v1.4: hoist only audit indexes. Full reports stay in
+        # the canonical JSON record, preserving open-record round trips.
+        if "auditum_contract" not in columns:
+            self.conn.execute("ALTER TABLE akousmata ADD COLUMN auditum_contract TEXT")
+        if "listening_count" not in columns:
+            self.conn.execute("ALTER TABLE akousmata ADD COLUMN listening_count INTEGER NOT NULL DEFAULT 0")
+        if "disagreement_count" not in columns:
+            self.conn.execute("ALTER TABLE akousmata ADD COLUMN disagreement_count INTEGER NOT NULL DEFAULT 0")
+        if "honest_absence_count" not in columns:
+            self.conn.execute("ALTER TABLE akousmata ADD COLUMN honest_absence_count INTEGER NOT NULL DEFAULT 0")
+        self.conn.execute("CREATE INDEX IF NOT EXISTS idx_akousmata_auditum ON akousmata(auditum_contract)")
+        self.conn.execute("CREATE INDEX IF NOT EXISTS idx_akousmata_disagreement ON akousmata(disagreement_count)")
         self.conn.commit()
 
     @staticmethod
@@ -394,6 +510,22 @@ class AkousmataStore:
         block = record.get("covenant") or {}
         value = block.get("id")
         return str(value) if isinstance(value, str) and value else None
+
+    @staticmethod
+    def _auditum_index(record: dict[str, Any]) -> tuple[str | None, int, int, int]:
+        block = record.get("auditum")
+        if not isinstance(block, dict):
+            return None, 0, 0, 0
+        contract = block.get("contract")
+        listenings = block.get("listenings")
+        disagreements = block.get("disagreements")
+        absences = block.get("honest_absences")
+        return (
+            str(contract) if isinstance(contract, str) and contract else None,
+            len(listenings) if isinstance(listenings, list) else 0,
+            len(disagreements) if isinstance(disagreements, list) else 0,
+            len(absences) if isinstance(absences, list) else 0,
+        )
 
     # --- content-addressed audio -----------------------------------------
     def put_audio(self, data: bytes, ext: str = "wav") -> str:
@@ -420,10 +552,13 @@ class AkousmataStore:
             raise ValueError("invalid akousma:\n" + "\n".join(errors))
         rid = record["akousma_id"]
         lat, lon = self._latlon(record)
+        auditum_contract, listening_count, disagreement_count, honest_absence_count = self._auditum_index(record)
         self.conn.execute(
             """INSERT OR REPLACE INTO akousmata
-               (akousma_id, created_at, originating_app, source_type, origin, content_hash, session_id, lat, lon, covenant_id, record)
-               VALUES (?,?,?,?,?,?,?,?,?,?,?)""",
+               (akousma_id, created_at, originating_app, source_type, origin,
+                content_hash, session_id, lat, lon, covenant_id, auditum_contract,
+                listening_count, disagreement_count, honest_absence_count, record)
+               VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
             (
                 rid,
                 record["created_at"],
@@ -435,6 +570,10 @@ class AkousmataStore:
                 lat,
                 lon,
                 self._covenant_id(record),
+                auditum_contract,
+                listening_count,
+                disagreement_count,
+                honest_absence_count,
                 json.dumps(record),
             ),
         )
@@ -473,6 +612,8 @@ class AkousmataStore:
         until: str | None = None,
         has_location: bool | None = None,
         covenant_id: str | None = None,
+        has_auditum: bool | None = None,
+        has_disagreement: bool | None = None,
         limit: int = 100,
     ) -> list[dict[str, Any]]:
         clauses, args = [], []
@@ -505,6 +646,14 @@ class AkousmataStore:
             clauses.append("lat IS NOT NULL AND lon IS NOT NULL")
         elif has_location is False:
             clauses.append("(lat IS NULL OR lon IS NULL)")
+        if has_auditum is True:
+            clauses.append("auditum_contract IS NOT NULL")
+        elif has_auditum is False:
+            clauses.append("auditum_contract IS NULL")
+        if has_disagreement is True:
+            clauses.append("disagreement_count>0")
+        elif has_disagreement is False:
+            clauses.append("disagreement_count=0")
         where = f"WHERE {' AND '.join(clauses)}" if clauses else ""
         args.append(limit)
         # Column names and clauses above come only from fixed literals; all caller values are bound parameters.
@@ -743,9 +892,22 @@ class AkousmataStore:
                     (rid, rel.get("type", "other"), rel.get("target_akousma_id", "")),
                 )
             lat, lon = self._latlon(record)
+            auditum_contract, listening_count, disagreement_count, honest_absence_count = self._auditum_index(record)
             self.conn.execute(
-                "UPDATE akousmata SET lat=?, lon=?, covenant_id=? WHERE akousma_id=?",
-                (lat, lon, self._covenant_id(record), rid),
+                """UPDATE akousmata
+                   SET lat=?, lon=?, covenant_id=?, auditum_contract=?,
+                       listening_count=?, disagreement_count=?, honest_absence_count=?
+                   WHERE akousma_id=?""",
+                (
+                    lat,
+                    lon,
+                    self._covenant_id(record),
+                    auditum_contract,
+                    listening_count,
+                    disagreement_count,
+                    honest_absence_count,
+                    rid,
+                ),
             )
         self.conn.commit()
         return len(rows)
@@ -793,10 +955,15 @@ class AkousmataStore:
 
 __all__ = [
     "SCHEMA_VERSION",
+    "AUDITUM_CONTRACT",
     "RELATION_TYPES",
     "PIPELINE_EFFECTS",
     "LOCATION_SOURCES",
     "CAPTURE_DIRECTIONS",
+    "AUDITUM_LISTENER_TYPES",
+    "AUDITUM_ABSENCE_KINDS",
+    "AUDITUM_DISAGREEMENT_STATUSES",
+    "AUDITUM_ACTION_STATUSES",
     "new_id",
     "load_schema",
     "validation_errors",
@@ -807,6 +974,7 @@ __all__ = [
     "location",
     "capture",
     "covenant",
+    "auditum",
     "default_store_path",
     "AkousmataStore",
 ]

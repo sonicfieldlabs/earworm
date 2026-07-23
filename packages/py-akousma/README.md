@@ -27,6 +27,17 @@ rec = akousma.new_akousma(
 )
 assert akousma.is_valid(rec)
 
+# Optional v1.4 accountable-listening index. The full producer report remains
+# namespaced in `listening`; the auditum keeps attribution and references.
+rec["auditum"] = akousma.auditum(listenings=[{
+    "listening_id": "lst_1",
+    "listener_id": "oida",
+    "listener_type": "agent",
+    "created_at": rec["created_at"],
+    "report_namespace": "oida.signal",
+    "contract": "akouo/v0.8",
+}])
+
 # Shared store (platform application-data directory, or $AKOUSMATA_PATH)
 with akousma.AkousmataStore() as store:
     uri = store.put_audio(open("clip.wav", "rb").read())   # content-addressed
@@ -41,6 +52,8 @@ with akousma.AkousmataStore() as store:
     store.put(child)
     store.ancestors(child["akousma_id"])   # -> [rec["akousma_id"]]  (germ lineage explorer)
     store.query(originating_app="oida")    # -> [rec]                (algophony batch)
+    store.query(has_auditum=True)          # accountable v1.4 records
+    store.query(has_disagreement=True)     # plural hearings with preserved differences
 ```
 
 The bundled `akousma/akousma.schema.json` is the canonical schema, kept in sync with

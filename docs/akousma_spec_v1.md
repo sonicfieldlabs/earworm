@@ -1,4 +1,4 @@
-# Akousma — the sonic memory record (spec v1.3)
+# Akousma — the sonic memory record (spec v1.4)
 
 > **akousma** (ἄκουσμα, "a thing heard"; plural **akousmata**) — one sound's memory:
 > its audio, where it came from, what was heard in it, and how it relates to other sounds.
@@ -32,12 +32,20 @@ honest absence: which rules acted, what was withheld — counted and attributed 
 that asked for it, never described — and how many commitments the covenant carries. The
 covenant's full text stays with its author; records stay export-safe by construction.
 
+Spec v1.4 (Earworm v0.5) is additive over v1.3. The optional top-level
+`auditum` block makes a hearing addressable without turning it into a flattened
+answer. It retains one or more attributable listenings, their routes and
+contract references, disagreements between them, honest absences, action
+authority and receipts, and additive revision lineage. “Tokenized auditum” in
+this specification means structured, versioned, and referenceable by
+`akousma_id`; it has no financial or blockchain meaning.
+
 ## Blocks
 
 | Block | Meaning |
 |---|---|
 | `akousma_id` | Stable id for this record (`akm_` + 26-char base32, ULID-style). |
-| `schema_version` | Semver of this record's shape (`1.1.0`; `1.0.0` records remain valid). |
+| `schema_version` | Semver of this record's shape (`1.4.0`; all v1.x records remain valid). |
 | `created_at` | ISO-8601 UTC. |
 | `session_id` | Optional link to the Earworm session this record was reconstructed from. |
 | `summary` | *(v1.1)* One-line human-readable account of the sound for skimming and search. Audio has no skim affordance of its own — the summary is the record's answer to the demand of duration. |
@@ -50,6 +58,7 @@ covenant's full text stays with its author; records stay export-safe by construc
 | `location` | *(v1.2)* Where the sound was heard: `lat` / `lon` (required inside the block), `accuracy_m`, `altitude_m`, `label` (human place name), `source` (gps / network / manual / config / inferred), `captured_at`. Optional and consent-scoped — producers attach it only when the listener granted it; navigators may add or correct it afterwards. The listening map reads this block. |
 | `capture` | *(v1.2)* How the listening was triggered: `direction` (`past` = the seconds already in the ring buffer when the trigger fired; `future` = the seconds recorded after it; `live` = an open-ended or manual session), `seconds` (window length), `trigger` (hotkey / remote-ear / mcp / dashboard / watcher / …), `armed_at`, `triggered_at`. Device and format detail stay in `provenance` / `audio`. |
 | `covenant` | *(v1.3)* Under which ethics this was listened: the listening covenant's `id` (required inside the block), `name`, `version`, `contract` (e.g. `akouo/v0.7`), `sha256` of its source text, `extends` (declared lineage — manifestos, community protocols, parent covenants), `rules_applied`, `withheld[]` (`{rule, subject, count}` — honest absence: named by category, never described), `commitments` (count). Identity and consequences travel; the covenant's text stays with its author. |
+| `auditum` | *(v1.4)* Durable accountable-listening index: contract `earworm/auditum/v1`; distinct `listenings[]` with listener, route, producer contract and references; `disagreements[]`; `honest_absences[]`; `actions[]` with authority and optional receipts; and optional `revision`. It references producer reports in `listening`; it does not redefine AKOÚŌ claims. |
 
 ## Rules
 
@@ -82,6 +91,19 @@ covenant's full text stays with its author; records stay export-safe by construc
    covenant declined it). Absence without attribution is indistinguishable from a bad ear;
    attribution is what makes it sovereignty. Consumers may filter, group, and audit by
    `covenant.id`; no consumer may reconstruct or guess at withheld content.
+9. **Plural listening stays plural.** *(v1.4)* Every listening has its own id,
+   listener, route, producer namespace, and contract. A disagreement records
+   the participants' positions; a consumer may resolve it only with an
+   attributable note and must never manufacture consensus by merging claims.
+10. **Capability is not authority.** *(v1.4)* An action records its proposal,
+    status, scoped authority, confirmation requirement, reversibility, and
+    receipt. A listener's ability to detect, retain, reveal, or trigger
+    something never grants permission to do so.
+11. **Re-listening is revision, not overwrite.** *(v1.4)* A changed account is
+    stored as a new akousma whose `auditum.revision.revises_akousma_id` points
+    to the earlier record. Forgetting, refusal, withholding, non-retention,
+    unavailability, and undetermined evidence remain different attributed
+    absences.
 
 ## How each app uses it
 

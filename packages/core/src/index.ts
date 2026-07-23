@@ -21,6 +21,14 @@ export type EventType =
   | "automation.committed"
   | "automation.reverted"
   | "render.created"
+  | "listening.report.created"
+  | "listening.disagreement.recorded"
+  | "listening.action.proposed"
+  | "listening.action.authorized"
+  | "listening.action.refused"
+  | "listening.action.executed"
+  | "listening.revision.created"
+  | "memory.forgotten"
   | "snapshot.created";
 
 export type JsonObject = Record<string, unknown>;
@@ -261,7 +269,17 @@ const includeTypeGroups = {
   automation: new Set<EventType>(["automation.committed", "automation.reverted", "dsp.parameter.changed"]),
   provenance: new Set<EventType>([]),
   agent_actions: new Set<EventType>(["agent.action.proposed", "agent.action.applied"]),
-  renders: new Set<EventType>(["render.created"])
+  renders: new Set<EventType>(["render.created"]),
+  listening: new Set<EventType>([
+    "listening.report.created",
+    "listening.disagreement.recorded",
+    "listening.action.proposed",
+    "listening.action.authorized",
+    "listening.action.refused",
+    "listening.action.executed",
+    "listening.revision.created"
+  ]),
+  memory: new Set<EventType>(["memory.forgotten"])
 };
 
 export function createSession({
@@ -1296,6 +1314,14 @@ const includeAllEventTypes = new Set<EventType>([
   "automation.committed",
   "automation.reverted",
   "render.created",
+  "listening.report.created",
+  "listening.disagreement.recorded",
+  "listening.action.proposed",
+  "listening.action.authorized",
+  "listening.action.refused",
+  "listening.action.executed",
+  "listening.revision.created",
+  "memory.forgotten",
   "snapshot.created"
 ]);
 

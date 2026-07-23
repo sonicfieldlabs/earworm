@@ -92,6 +92,18 @@ recurrences, series — is walkable in both directions without confusing it with
   described — so filtering and auditing by ethics never exposes withheld
   content.
 
+### The accountable-auditum surface (v0.5, spec v1.4)
+
+- `auditum.contract`, listening count, disagreement count, and honest-absence
+  count are hoisted into indexed columns while the canonical JSON block stays
+  intact.
+- `query(has_auditum=…)` separates current accountable records from legacy
+  records; `query(has_disagreement=…)` finds plural hearings whose differences
+  need inspection. `reindex()` reconstructs these indexes in place.
+- Indexing never collapses the underlying listenings. Each listener, route,
+  position, authority decision, receipt, absence, and revision remains in the
+  record that supplied it.
+
 ### The location surface (v0.3, spec v1.2)
 
 - Records' `location.lat` / `location.lon` are hoisted into indexed `lat`/`lon`
