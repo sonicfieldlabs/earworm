@@ -19,11 +19,11 @@ client.ingestPrompt({
 });
 ```
 
-Akousma v1.4 helpers make accountable hearings addressable while keeping
+Akousma v1.5 helpers make accountable hearings and pre-capture decisions addressable while keeping
 producer reports namespaced:
 
 ```js
-import { createAkousma, createAuditum } from "@earworm/sdk-js";
+import { createAkousma, createAuditum, createRouteDecision } from "@earworm/sdk-js";
 
 const record = createAkousma({
   audio: { asset_id: "asset_1" },
@@ -35,8 +35,18 @@ const record = createAkousma({
       listener_type: "agent",
       created_at: new Date().toISOString(),
       report_namespace: "oida.signal",
-      contract: "akouo/v0.8"
-    }]
+      contract: "akouo/v0.9"
+    }],
+    routeDecisions: [createRouteDecision({
+      decisionId: "decision-listen-1",
+      gate: "inference",
+      outcome: "proceed",
+      subject: "accountable listening pass",
+      reason: "The user requested an observe-only pass.",
+      actor: "oida-router",
+      listeningId: "lst_1",
+      producerContract: "akouo/v0.9"
+    })]
   })
 });
 ```

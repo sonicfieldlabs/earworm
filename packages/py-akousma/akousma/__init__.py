@@ -19,8 +19,10 @@ from hashlib import sha256
 from pathlib import Path
 from typing import Any, Iterable
 
-SCHEMA_VERSION = "1.4.0"
-AUDITUM_CONTRACT = "earworm/auditum/v1"
+SCHEMA_VERSION = "1.5.0"
+AUDITUM_CONTRACT = "earworm/auditum/v2"
+LEGACY_AUDITUM_CONTRACT = "earworm/auditum/v1"
+FORGETTING_RECEIPT_CONTRACT = "earworm/forgetting-receipt/v1"
 _SCHEMA_PATH = Path(__file__).with_name("akousma.schema.json")
 
 RELATION_TYPES = (
@@ -48,17 +50,21 @@ LOCATION_SOURCES = ("gps", "network", "manual", "config", "inferred")
 
 CAPTURE_DIRECTIONS = ("past", "future", "live")
 
-AUDITUM_LISTENER_TYPES = ("human", "agent", "hybrid")
+AUDITUM_LISTENER_TYPES = (
+    "human", "agent", "hybrid", "community", "institution", "sensor",
+    "habitat", "other_animal", "ensemble", "other",
+)
 AUDITUM_ABSENCE_KINDS = (
     "unavailable",
     "withheld",
     "refused",
     "not_retained",
     "forgotten",
-    "undetermined",
 )
 AUDITUM_DISAGREEMENT_STATUSES = ("preserved", "resolved", "undetermined")
 AUDITUM_ACTION_STATUSES = ("proposed", "authorized", "refused", "executed", "failed", "reverted")
+AUDITUM_DECISION_GATES = ("input", "capture", "inference", "memory", "output", "disclosure", "retention", "action")
+AUDITUM_DECISION_OUTCOMES = ("proceed", "pause", "defer", "abstain", "refuse", "withhold", "forget", "do_not_act")
 
 _CROCKFORD = "0123456789ABCDEFGHJKMNPQRSTVWXYZ"
 
@@ -86,6 +92,42 @@ def load_schema() -> dict[str, Any]:
     return json.loads(_SCHEMA_PATH.read_text())
 
 
+def _fallback_validation_errors(record: dict[str, Any]) -> list[str]:
+    """Validate the record's required structural boundary without jsonschema."""
+    errors: list[str] = []
+    for key in ("akousma_id", "schema_version", "created_at", "provenance", "lineage"):
+        if key not in record:
+            errors.append(f"<root>: '{key}' is required")
+
+    audio = record.get("audio")
+    if audio is not None:
+        if not isinstance(audio, dict):
+            errors.append("audio: must be an object")
+        elif "asset_id" not in audio:
+            errors.append("audio: 'asset_id' is required")
+    else:
+        auditum_block = record.get("auditum")
+        decisions = auditum_block.get("route_decisions", []) if isinstance(auditum_block, dict) else []
+        has_precapture_stop = any(
+            isinstance(item, dict)
+            and item.get("gate") in {"input", "capture"}
+            and item.get("outcome") in {"pause", "defer", "abstain", "refuse", "withhold"}
+            for item in decisions
+        )
+        if (
+            not isinstance(record.get("subject"), str)
+            or not record["subject"]
+            or not isinstance(auditum_block, dict)
+            or auditum_block.get("contract") != AUDITUM_CONTRACT
+            or not has_precapture_stop
+        ):
+            errors.append("<root>: audio or a decision-only subject/auditum is required")
+
+    if isinstance(record.get("lineage"), dict) and "parent_akousma_ids" not in record["lineage"]:
+        errors.append("lineage: 'parent_akousma_ids' is required")
+    return errors
+
+
 def validation_errors(record: dict[str, Any]) -> list[str]:
     """Return human-readable validation errors ([] if valid). Uses jsonschema if
     available, else a minimal built-in check of required blocks."""
@@ -98,15 +140,7 @@ def validation_errors(record: dict[str, Any]) -> list[str]:
             for e in sorted(validator.iter_errors(record), key=lambda e: list(e.path))
         ]
     except ModuleNotFoundError:
-        errors: list[str] = []
-        for key in ("akousma_id", "schema_version", "created_at", "audio", "provenance", "lineage"):
-            if key not in record:
-                errors.append(f"<root>: '{key}' is required")
-        if isinstance(record.get("audio"), dict) and "asset_id" not in record["audio"]:
-            errors.append("audio: 'asset_id' is required")
-        if isinstance(record.get("lineage"), dict) and "parent_akousma_ids" not in record["lineage"]:
-            errors.append("lineage: 'parent_akousma_ids' is required")
-        return errors
+        return _fallback_validation_errors(record)
 
 
 def is_valid(record: dict[str, Any]) -> bool:
@@ -119,7 +153,7 @@ def _utc_now() -> str:
 
 def new_akousma(
     *,
-    audio: dict[str, Any],
+    audio: dict[str, Any] | None = None,
     originating_app: str,
     source_type: str = "recorded",
     origin: str = "file",
@@ -138,8 +172,28 @@ def new_akousma(
     capture: dict[str, Any] | None = None,
     covenant: dict[str, Any] | None = None,
     auditum: dict[str, Any] | None = None,
+    subject: str | None = None,
 ) -> dict[str, Any]:
-    """Build a valid akousma record. ``audio`` must at least contain ``asset_id``."""
+    """Build an akousma v1.5 record.
+
+    Normal records require ``audio.asset_id``. A decision-only record may omit
+    audio only when ``subject`` is category-level text and an auditum/v2
+    capture/input decision records why the ear never opened.
+    """
+    if audio is not None and (not isinstance(audio.get("asset_id"), str) or not audio["asset_id"]):
+        raise ValueError("new_akousma: audio.asset_id is required when audio is supplied")
+    if audio is None:
+        decisions = auditum.get("route_decisions") if isinstance(auditum, dict) else None
+        has_precapture_stop = any(
+            isinstance(item, dict)
+            and item.get("gate") in {"input", "capture"}
+            and item.get("outcome") in {"pause", "defer", "abstain", "refuse", "withhold"}
+            for item in (decisions or [])
+        )
+        if not subject or not isinstance(auditum, dict) or auditum.get("contract") != AUDITUM_CONTRACT or not has_precapture_stop:
+            raise ValueError(
+                "new_akousma: audio may be omitted only with a subject and an auditum/v2 input or capture stop decision"
+            )
     lineage: dict[str, Any] = {"parent_akousma_ids": list(parent_akousma_ids or [])}
     for k, v in (("operation", operation), ("prompt", prompt), ("model", model)):
         if v is not None:
@@ -152,7 +206,6 @@ def new_akousma(
         "akousma_id": new_id(),
         "schema_version": SCHEMA_VERSION,
         "created_at": _utc_now(),
-        "audio": audio,
         "provenance": {
             "source_type": source_type,
             "origin": origin,
@@ -165,6 +218,10 @@ def new_akousma(
         "annotations": {},
         "extensions": extensions or {},
     }
+    if audio is not None:
+        record["audio"] = audio
+    if subject:
+        record["subject"] = subject
     if session_id:
         record["session_id"] = session_id
     if summary:
@@ -319,15 +376,69 @@ def covenant(
     return block
 
 
+def route_decision(
+    decision_id: str,
+    *,
+    gate: str,
+    outcome: str,
+    subject: str,
+    reason: str,
+    actor: str,
+    decided_at: str | None = None,
+    authority_mode: str = "observe_only",
+    listening_id: str | None = None,
+    producer_contract: str | None = None,
+    producer_decision_ref: str | None = None,
+    covenant_ref: str | None = None,
+    granted_by: str | None = None,
+    requires_confirmation: bool = True,
+    reversible: bool = True,
+    note: str | None = None,
+) -> dict[str, Any]:
+    """Build one addressable auditum/v2 gate decision."""
+    if gate not in AUDITUM_DECISION_GATES:
+        raise ValueError(f"route_decision: gate must be one of {', '.join(AUDITUM_DECISION_GATES)}")
+    if outcome not in AUDITUM_DECISION_OUTCOMES:
+        raise ValueError(f"route_decision: outcome must be one of {', '.join(AUDITUM_DECISION_OUTCOMES)}")
+    decision: dict[str, Any] = {
+        "decision_id": decision_id,
+        "gate": gate,
+        "outcome": outcome,
+        "subject": subject,
+        "reason": reason,
+        "decided_at": decided_at or _utc_now(),
+        "authority": {
+            "mode": authority_mode,
+            "actor": actor,
+            "requires_confirmation": bool(requires_confirmation),
+            "reversible": bool(reversible),
+        },
+    }
+    for key, value in (
+        ("listening_id", listening_id),
+        ("producer_contract", producer_contract),
+        ("producer_decision_ref", producer_decision_ref),
+        ("note", note),
+    ):
+        if value is not None:
+            decision[key] = value
+    for key, value in (("covenant_ref", covenant_ref), ("granted_by", granted_by)):
+        if value is not None:
+            decision["authority"][key] = value
+    return decision
+
+
 def auditum(
     *,
-    listenings: Iterable[dict[str, Any]],
+    listenings: Iterable[dict[str, Any]] | None = None,
     disagreements: Iterable[dict[str, Any]] | None = None,
     honest_absences: Iterable[dict[str, Any]] | None = None,
     actions: Iterable[dict[str, Any]] | None = None,
+    route_decisions: Iterable[dict[str, Any]] | None = None,
+    ensemble: dict[str, Any] | None = None,
     revision: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
-    """Build the v1.4 addressable auditum block.
+    """Build the v1.5 addressable auditum/v2 block.
 
     Each listening remains attributable to one listener and report namespace;
     disagreement is preserved between listening ids rather than collapsed into
@@ -335,9 +446,7 @@ def auditum(
     "Tokenized" in the protocol means structured and referenceable, never a
     financial token.
     """
-    listening_items = [dict(item) for item in listenings]
-    if not listening_items:
-        raise ValueError("auditum: at least one listening is required")
+    listening_items = [dict(item) for item in listenings or []]
 
     required_listening = (
         "listening_id",
@@ -395,13 +504,57 @@ def auditum(
                 f"{', '.join(AUDITUM_ACTION_STATUSES)}"
             )
 
+    decision_items = [dict(item) for item in route_decisions or []]
+    if not decision_items:
+        raise ValueError("auditum: auditum/v2 requires at least one route decision")
+    decision_ids: set[str] = set()
+    required_decision = ("decision_id", "gate", "outcome", "subject", "reason", "decided_at", "authority")
+    for index, item in enumerate(decision_items):
+        for key in required_decision:
+            if key not in item:
+                raise ValueError(f"auditum: route_decisions[{index}].{key} is required")
+        decision_id = item.get("decision_id")
+        if not isinstance(decision_id, str) or not decision_id:
+            raise ValueError(f"auditum: route_decisions[{index}].decision_id must be a non-empty string")
+        if decision_id in decision_ids:
+            raise ValueError(f"auditum: duplicate decision_id {decision_id!r}")
+        decision_ids.add(decision_id)
+        if item.get("gate") not in AUDITUM_DECISION_GATES:
+            raise ValueError(f"auditum: route_decisions[{index}].gate must be one of {', '.join(AUDITUM_DECISION_GATES)}")
+        if item.get("outcome") not in AUDITUM_DECISION_OUTCOMES:
+            raise ValueError(f"auditum: route_decisions[{index}].outcome must be one of {', '.join(AUDITUM_DECISION_OUTCOMES)}")
+        if item.get("listening_id") is not None and item["listening_id"] not in listening_ids:
+            raise ValueError(f"auditum: route_decisions[{index}] references an unknown listening_id")
+        authority = item.get("authority")
+        if not isinstance(authority, dict) or not isinstance(authority.get("actor"), str) or not authority["actor"]:
+            raise ValueError(f"auditum: route_decisions[{index}].authority.actor must be a non-empty string")
+
+    if not listening_items and not any(
+        item.get("gate") in {"input", "capture"}
+        and item.get("outcome") in {"pause", "defer", "abstain", "refuse", "withhold"}
+        for item in decision_items
+    ):
+        raise ValueError("auditum: an empty listening list requires an input or capture stop decision")
+
     block: dict[str, Any] = {
         "contract": AUDITUM_CONTRACT,
         "listenings": listening_items,
         "disagreements": disagreement_items,
         "honest_absences": absence_items,
         "actions": action_items,
+        "route_decisions": decision_items,
     }
+    if ensemble:
+        listening_refs = ensemble.get("listening_ids") if isinstance(ensemble, dict) else None
+        if not isinstance(listening_refs, list) or len(set(listening_refs)) < 2 or not set(listening_refs).issubset(listening_ids):
+            raise ValueError("auditum: ensemble requires at least two known listening_ids")
+        if ensemble.get("kind") == "ear_swarm":
+            if not ensemble.get("influence_edges") or ensemble.get("permissions_preserved") is not True or ensemble.get("disagreements_preserved") is not True:
+                raise ValueError("auditum: ear_swarm requires influence plus preserved permissions and disagreements")
+            for edge in ensemble["influence_edges"]:
+                if not isinstance(edge, dict) or edge.get("from_listening_id") not in listening_ids or edge.get("to_listening_id") not in listening_ids:
+                    raise ValueError("auditum: ear_swarm influence edges must reference known listenings")
+        block["ensemble"] = dict(ensemble)
     if revision:
         block["revision"] = dict(revision)
     return block
@@ -469,6 +622,15 @@ class AkousmataStore:
             CREATE INDEX IF NOT EXISTS idx_relation_to ON relation_edges(to_id);
             CREATE INDEX IF NOT EXISTS idx_akousmata_hash ON akousmata(content_hash);
             CREATE INDEX IF NOT EXISTS idx_akousmata_created ON akousmata(created_at);
+            CREATE TABLE IF NOT EXISTS forgetting_receipts (
+              receipt_id             TEXT PRIMARY KEY,
+              akousma_id             TEXT NOT NULL,
+              created_at             TEXT NOT NULL,
+              actor                  TEXT NOT NULL,
+              reason                 TEXT NOT NULL,
+              receipt                TEXT NOT NULL
+            );
+            CREATE INDEX IF NOT EXISTS idx_forgetting_akousma ON forgetting_receipts(akousma_id, created_at);
             """
         )
         # v0.3: location columns, hoisted from record["location"] so the
@@ -493,8 +655,13 @@ class AkousmataStore:
             self.conn.execute("ALTER TABLE akousmata ADD COLUMN disagreement_count INTEGER NOT NULL DEFAULT 0")
         if "honest_absence_count" not in columns:
             self.conn.execute("ALTER TABLE akousmata ADD COLUMN honest_absence_count INTEGER NOT NULL DEFAULT 0")
+        if "route_decision_count" not in columns:
+            self.conn.execute("ALTER TABLE akousmata ADD COLUMN route_decision_count INTEGER NOT NULL DEFAULT 0")
+        if "stop_decision_count" not in columns:
+            self.conn.execute("ALTER TABLE akousmata ADD COLUMN stop_decision_count INTEGER NOT NULL DEFAULT 0")
         self.conn.execute("CREATE INDEX IF NOT EXISTS idx_akousmata_auditum ON akousmata(auditum_contract)")
         self.conn.execute("CREATE INDEX IF NOT EXISTS idx_akousmata_disagreement ON akousmata(disagreement_count)")
+        self.conn.execute("CREATE INDEX IF NOT EXISTS idx_akousmata_decision ON akousmata(route_decision_count, stop_decision_count)")
         self.conn.commit()
 
     @staticmethod
@@ -512,19 +679,23 @@ class AkousmataStore:
         return str(value) if isinstance(value, str) and value else None
 
     @staticmethod
-    def _auditum_index(record: dict[str, Any]) -> tuple[str | None, int, int, int]:
+    def _auditum_index(record: dict[str, Any]) -> tuple[str | None, int, int, int, int, int]:
         block = record.get("auditum")
         if not isinstance(block, dict):
-            return None, 0, 0, 0
+            return None, 0, 0, 0, 0, 0
         contract = block.get("contract")
         listenings = block.get("listenings")
         disagreements = block.get("disagreements")
         absences = block.get("honest_absences")
+        decisions = block.get("route_decisions")
+        stop_outcomes = {"pause", "defer", "abstain", "refuse", "withhold", "forget", "do_not_act"}
         return (
             str(contract) if isinstance(contract, str) and contract else None,
             len(listenings) if isinstance(listenings, list) else 0,
             len(disagreements) if isinstance(disagreements, list) else 0,
             len(absences) if isinstance(absences, list) else 0,
+            len(decisions) if isinstance(decisions, list) else 0,
+            sum(1 for item in decisions if isinstance(item, dict) and item.get("outcome") in stop_outcomes) if isinstance(decisions, list) else 0,
         )
 
     # --- content-addressed audio -----------------------------------------
@@ -551,14 +722,17 @@ class AkousmataStore:
         if errors:
             raise ValueError("invalid akousma:\n" + "\n".join(errors))
         rid = record["akousma_id"]
+        if self.forgotten(rid) is not None:
+            raise ValueError(f"akousma {rid!r} has a forgetting receipt and cannot be silently resurrected")
         lat, lon = self._latlon(record)
-        auditum_contract, listening_count, disagreement_count, honest_absence_count = self._auditum_index(record)
+        auditum_contract, listening_count, disagreement_count, honest_absence_count, route_decision_count, stop_decision_count = self._auditum_index(record)
         self.conn.execute(
             """INSERT OR REPLACE INTO akousmata
                (akousma_id, created_at, originating_app, source_type, origin,
                 content_hash, session_id, lat, lon, covenant_id, auditum_contract,
-                listening_count, disagreement_count, honest_absence_count, record)
-               VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+                listening_count, disagreement_count, honest_absence_count,
+                route_decision_count, stop_decision_count, record)
+               VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
             (
                 rid,
                 record["created_at"],
@@ -574,6 +748,8 @@ class AkousmataStore:
                 listening_count,
                 disagreement_count,
                 honest_absence_count,
+                route_decision_count,
+                stop_decision_count,
                 json.dumps(record),
             ),
         )
@@ -614,6 +790,8 @@ class AkousmataStore:
         covenant_id: str | None = None,
         has_auditum: bool | None = None,
         has_disagreement: bool | None = None,
+        has_route_decision: bool | None = None,
+        has_stop_decision: bool | None = None,
         limit: int = 100,
     ) -> list[dict[str, Any]]:
         clauses, args = [], []
@@ -654,6 +832,14 @@ class AkousmataStore:
             clauses.append("disagreement_count>0")
         elif has_disagreement is False:
             clauses.append("disagreement_count=0")
+        if has_route_decision is True:
+            clauses.append("route_decision_count>0")
+        elif has_route_decision is False:
+            clauses.append("route_decision_count=0")
+        if has_stop_decision is True:
+            clauses.append("stop_decision_count>0")
+        elif has_stop_decision is False:
+            clauses.append("stop_decision_count=0")
         where = f"WHERE {' AND '.join(clauses)}" if clauses else ""
         args.append(limit)
         # Column names and clauses above come only from fixed literals; all caller values are bound parameters.
@@ -841,17 +1027,27 @@ class AkousmataStore:
             ).fetchall()
         return [json.loads(r["record"]) for r in rows]
 
-    def forget(self, akousma_id: str, *, delete_audio: bool = False) -> bool:
-        """The memory operation 'forget': remove one record and its edges.
+    def forget_with_receipt(
+        self,
+        akousma_id: str,
+        *,
+        delete_audio: bool = False,
+        actor: str = "operator",
+        reason: str = "forget requested",
+    ) -> dict[str, Any] | None:
+        """Forget one record and return a content-free durable receipt.
 
         With ``delete_audio`` the content-addressed object is also removed —
         but only when no other record references the same content hash.
-        Returns False when the record does not exist. Edges pointing AT the
+        Returns ``None`` when the record does not exist. Edges pointing AT the
         forgotten record are kept: absence is information, and ``verify()``
-        will report them as dangling rather than erasing the trace."""
+        reports them as dangling rather than erasing the trace. The receipt
+        retains no summary, tags, location, audio URI, or forgotten content."""
         record = self.get(akousma_id)
         if record is None:
-            return False
+            return None
+        audio_deleted = False
+        shared_audio_preserved = False
         if delete_audio:
             content_hash = str(record.get("audio", {}).get("content_hash") or "")
             uri = str(record.get("audio", {}).get("uri") or "")
@@ -865,11 +1061,74 @@ class AkousmataStore:
                 path = self.resolve_uri(uri)
                 if path is not None and path.exists():
                     path.unlink()
+                    audio_deleted = True
+            elif uri.startswith("akousmata://objects/") and bool(others):
+                shared_audio_preserved = True
+        receipt = {
+            "receipt_id": new_id("fgt"),
+            "contract": FORGETTING_RECEIPT_CONTRACT,
+            "akousma_id": akousma_id,
+            "created_at": _utc_now(),
+            "actor": actor,
+            "reason": reason,
+            "record_deleted": True,
+            "audio_deletion_requested": bool(delete_audio),
+            "audio_deleted": audio_deleted,
+            "shared_audio_preserved": shared_audio_preserved,
+            "recovery": (
+                "The record and its unshared local audio are not recoverable from this store."
+                if audio_deleted
+                else "The record is not recoverable from this store; a shared audio object remains but is not reattached automatically."
+                if shared_audio_preserved
+                else "The record is not recoverable from this store."
+            ),
+        }
+        self.conn.execute(
+            "INSERT INTO forgetting_receipts (receipt_id, akousma_id, created_at, actor, reason, receipt) VALUES (?,?,?,?,?,?)",
+            (receipt["receipt_id"], akousma_id, receipt["created_at"], actor, reason, json.dumps(receipt)),
+        )
         self.conn.execute("DELETE FROM akousmata WHERE akousma_id=?", (akousma_id,))
         self.conn.execute("DELETE FROM lineage_edges WHERE child_id=?", (akousma_id,))
         self.conn.execute("DELETE FROM relation_edges WHERE from_id=?", (akousma_id,))
         self.conn.commit()
-        return True
+        return receipt
+
+    def forget(
+        self,
+        akousma_id: str,
+        *,
+        delete_audio: bool = False,
+        actor: str = "operator",
+        reason: str = "forget requested",
+    ) -> bool:
+        """Backward-compatible boolean wrapper around :meth:`forget_with_receipt`."""
+        return self.forget_with_receipt(
+            akousma_id,
+            delete_audio=delete_audio,
+            actor=actor,
+            reason=reason,
+        ) is not None
+
+    def forgetting_receipts(self, akousma_id: str | None = None) -> list[dict[str, Any]]:
+        """Return content-free forgetting receipts, newest first."""
+        if akousma_id is None:
+            rows = self.conn.execute(
+                "SELECT receipt FROM forgetting_receipts ORDER BY created_at DESC, receipt_id DESC"
+            ).fetchall()
+        else:
+            rows = self.conn.execute(
+                "SELECT receipt FROM forgetting_receipts WHERE akousma_id=? ORDER BY created_at DESC, receipt_id DESC",
+                (akousma_id,),
+            ).fetchall()
+        return [json.loads(row["receipt"]) for row in rows]
+
+    def forgotten(self, akousma_id: str) -> dict[str, Any] | None:
+        """Return the latest forgetting receipt for an identifier, if any."""
+        row = self.conn.execute(
+            "SELECT receipt FROM forgetting_receipts WHERE akousma_id=? ORDER BY created_at DESC, receipt_id DESC LIMIT 1",
+            (akousma_id,),
+        ).fetchone()
+        return json.loads(row["receipt"]) if row else None
 
     # --- maintenance --------------------------------------------------------
     def reindex(self) -> int:
@@ -892,11 +1151,12 @@ class AkousmataStore:
                     (rid, rel.get("type", "other"), rel.get("target_akousma_id", "")),
                 )
             lat, lon = self._latlon(record)
-            auditum_contract, listening_count, disagreement_count, honest_absence_count = self._auditum_index(record)
+            auditum_contract, listening_count, disagreement_count, honest_absence_count, route_decision_count, stop_decision_count = self._auditum_index(record)
             self.conn.execute(
                 """UPDATE akousmata
                    SET lat=?, lon=?, covenant_id=?, auditum_contract=?,
-                       listening_count=?, disagreement_count=?, honest_absence_count=?
+                       listening_count=?, disagreement_count=?, honest_absence_count=?,
+                       route_decision_count=?, stop_decision_count=?
                    WHERE akousma_id=?""",
                 (
                     lat,
@@ -906,6 +1166,8 @@ class AkousmataStore:
                     listening_count,
                     disagreement_count,
                     honest_absence_count,
+                    route_decision_count,
+                    stop_decision_count,
                     rid,
                 ),
             )
@@ -921,6 +1183,7 @@ class AkousmataStore:
             "dangling_relations": [],
             "missing_audio": [],
             "invalid_records": [],
+            "invalid_forgetting_receipts": [],
         }
         ids = {r["akousma_id"] for r in self.conn.execute("SELECT akousma_id FROM akousmata").fetchall()}
         for row in self.conn.execute("SELECT record FROM akousmata").fetchall():
@@ -941,6 +1204,11 @@ class AkousmataStore:
                 path = self.resolve_uri(uri)
                 if path is not None and not path.exists():
                     report["missing_audio"].append(f"{rid}: {uri}")
+        forbidden_receipt_fields = {"record", "audio", "summary", "tags", "location", "subject", "content_hash", "uri"}
+        for row in self.conn.execute("SELECT receipt_id, receipt FROM forgetting_receipts").fetchall():
+            receipt = json.loads(row["receipt"])
+            if receipt.get("contract") != FORGETTING_RECEIPT_CONTRACT or forbidden_receipt_fields.intersection(receipt):
+                report["invalid_forgetting_receipts"].append(str(row["receipt_id"]))
         return report
 
     def close(self) -> None:
@@ -956,6 +1224,8 @@ class AkousmataStore:
 __all__ = [
     "SCHEMA_VERSION",
     "AUDITUM_CONTRACT",
+    "LEGACY_AUDITUM_CONTRACT",
+    "FORGETTING_RECEIPT_CONTRACT",
     "RELATION_TYPES",
     "PIPELINE_EFFECTS",
     "LOCATION_SOURCES",
@@ -964,6 +1234,8 @@ __all__ = [
     "AUDITUM_ABSENCE_KINDS",
     "AUDITUM_DISAGREEMENT_STATUSES",
     "AUDITUM_ACTION_STATUSES",
+    "AUDITUM_DECISION_GATES",
+    "AUDITUM_DECISION_OUTCOMES",
     "new_id",
     "load_schema",
     "validation_errors",
@@ -974,6 +1246,7 @@ __all__ = [
     "location",
     "capture",
     "covenant",
+    "route_decision",
     "auditum",
     "default_store_path",
     "AkousmataStore",

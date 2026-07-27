@@ -1,0 +1,80 @@
+{
+  "akousma_id": "akm_CAPTURE_REFUSAL_001",
+  "schema_version": "1.5.0",
+  "created_at": "2026-07-27T12:00:00Z",
+  "subject": "quiet-hours capture request",
+  "provenance": {
+    "source_type": "unknown",
+    "origin": "live-input",
+    "originating_app": "oida",
+    "created_at": "2026-07-27T12:00:00Z",
+    "consent_status": "restricted",
+    "capture_conditions": "Capture was refused before an audio asset was created."
+  },
+  "listening": {},
+  "lineage": {
+    "parent_akousma_ids": []
+  },
+  "tags": ["decision-only", "capture-refusal"],
+  "annotations": {},
+  "extensions": {},
+  "covenant": {
+    "id": "quiet-hours/1",
+    "contract": "akouo/v0.9",
+    "rules_applied": ["quiet_hours"],
+    "withheld": [
+      {
+        "rule": "quiet_hours",
+        "subject": "audio capture",
+        "count": 1
+      }
+    ],
+    "commitments": 0
+  },
+  "auditum": {
+    "contract": "earworm/auditum/v2",
+    "listenings": [],
+    "disagreements": [],
+    "honest_absences": [
+      {
+        "id": "absence-capture-1",
+        "kind": "refused",
+        "subject": "audio capture",
+        "attributed_to": "quiet-hours/1",
+        "listening_id": null,
+        "rule": "quiet_hours",
+        "count": 1,
+        "note": "No audio was captured or reconstructed."
+      }
+    ],
+    "actions": [],
+    "route_decisions": [
+      {
+        "decision_id": "decision-capture-1",
+        "gate": "capture",
+        "outcome": "refuse",
+        "subject": "audio capture",
+        "reason": "The adopted covenant closes the ear during quiet hours.",
+        "decided_at": "2026-07-27T12:00:00Z",
+        "listening_id": null,
+        "producer_contract": "akouo/v0.9",
+        "producer_decision_ref": "route-capture-1",
+        "authority": {
+          "mode": "observe_only",
+          "actor": "oida-covenant-gate",
+          "covenant_ref": "quiet-hours/1",
+          "granted_by": "adopted covenant",
+          "requires_confirmation": false,
+          "reversible": true
+        },
+        "receipt": {
+          "created_at": "2026-07-27T12:00:00Z",
+          "actor": "oida-covenant-gate",
+          "result": "capture not opened",
+          "recovery": "Change or deactivate the covenant, then make a new request."
+        },
+        "note": "Refusal is the complete outcome."
+      }
+    ]
+  }
+}

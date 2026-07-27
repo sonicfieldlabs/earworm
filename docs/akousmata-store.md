@@ -43,7 +43,22 @@ CREATE TABLE akousmata (
   session_id      TEXT,
   lat             REAL,           -- v0.3: hoisted from record["location"] (nullable)
   lon             REAL,           -- v0.3: hoisted from record["location"] (nullable)
+  covenant_id     TEXT,           -- v0.4
+  auditum_contract TEXT,          -- v0.5
+  listening_count INTEGER NOT NULL DEFAULT 0,
+  disagreement_count INTEGER NOT NULL DEFAULT 0,
+  honest_absence_count INTEGER NOT NULL DEFAULT 0,
+  route_decision_count INTEGER NOT NULL DEFAULT 0, -- v0.6
+  stop_decision_count INTEGER NOT NULL DEFAULT 0,  -- v0.6
   record          TEXT NOT NULL   -- the full akousma JSON
+);
+CREATE TABLE forgetting_receipts (
+  receipt_id TEXT PRIMARY KEY,
+  akousma_id TEXT NOT NULL,
+  created_at TEXT NOT NULL,
+  actor TEXT NOT NULL,
+  reason TEXT NOT NULL,
+  receipt TEXT NOT NULL            -- content-free earworm/forgetting-receipt/v1 JSON
 );
 CREATE TABLE lineage_edges (
   child_id  TEXT NOT NULL,        -- akousma_id
@@ -78,9 +93,8 @@ recurrences, series — is walkable in both directions without confusing it with
   `find_by_hash()` for dedupe/recurrence lookups.
 - v0.2.1 library operations for navigators: `tags()` (distinct tags with
   counts), `changed_since(iso)` (watchers/realtime feeds), and
-  `forget(id, delete_audio=False)` — the memory operation: removes the record
-  and its outgoing edges, keeps inbound edges as reportable absence, and only
-  deletes the audio object when no other record shares its content hash.
+  `forget(id, delete_audio=False)` — the backward-compatible boolean memory
+  operation; it delegates to `forget_with_receipt(...)`.
 
 ### The covenant surface (v0.4, spec v1.3)
 
@@ -103,6 +117,25 @@ recurrences, series — is walkable in both directions without confusing it with
 - Indexing never collapses the underlying listenings. Each listener, route,
   position, authority decision, receipt, absence, and revision remains in the
   record that supplied it.
+
+### Decision-first memory and forgetting receipts (v0.6, spec v1.5)
+
+- `earworm/auditum/v2` requires at least one addressable route decision. An
+  input or capture stop may persist with a category-level `subject` and no
+  audio asset or listening pass.
+- Route-decision and stop-decision counts are indexed. Use
+  `query(has_route_decision=…)` and `query(has_stop_decision=…)` without
+  scanning record JSON.
+- `forget_with_receipt(id, delete_audio=False, actor=…, reason=…)` removes the
+  record and returns a durable `earworm/forgetting-receipt/v1` object.
+  `forgotten(id)` and `forgetting_receipts(id)` expose receipts without
+  restoring the forgotten record.
+- Receipts deliberately exclude content-bearing fields: no summary, tags,
+  location, subject, audio URI, hash, or original record. `put()` refuses to
+  silently reuse an identifier that has a forgetting receipt.
+- Unshared local audio is deleted only when requested; shared content-addressed
+  audio remains for other records and the receipt says so. Inbound lineage
+  remains dangling and therefore auditable.
 
 ### The location surface (v0.3, spec v1.2)
 

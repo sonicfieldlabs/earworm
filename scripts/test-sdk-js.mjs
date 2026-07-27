@@ -9,6 +9,7 @@ import {
   createSession,
   createAkousma,
   createAuditum,
+  createRouteDecision,
   akousmaRelation,
   addListening,
   akousmaShapeErrors,
@@ -188,7 +189,7 @@ const accountable = createAkousma({
         listener_type: "agent",
         created_at: "2026-07-22T12:00:00Z",
         report_namespace: "oida.signal",
-        contract: "akouo/v0.8",
+        contract: "akouo/v0.9",
         route: ["signal-inspection-listening"]
       },
       {
@@ -197,7 +198,7 @@ const accountable = createAkousma({
         listener_type: "agent",
         created_at: "2026-07-22T12:00:01Z",
         report_namespace: "akouo.acoulogical-object-listening",
-        contract: "akouo/v0.8",
+        contract: "akouo/v0.9",
         route: ["acoulogical-object-listening"]
       }
     ],
@@ -228,15 +229,55 @@ const accountable = createAkousma({
           reversible: true
         }
       }
+    ],
+    routeDecisions: [
+      createRouteDecision({
+        decisionId: "decision-listen-1",
+        gate: "inference",
+        outcome: "proceed",
+        subject: "accountable listening pass",
+        reason: "The user requested an observe-only pass.",
+        actor: "oida-router",
+        listeningId: "lst_signal",
+        producerContract: "akouo/v0.9"
+      })
     ]
   })
 });
-assert.equal(accountable.schema_version, "1.4.0");
-assert.equal(accountable.auditum.contract, "earworm/auditum/v1");
+assert.equal(accountable.schema_version, "1.5.0");
+assert.equal(accountable.auditum.contract, "earworm/auditum/v2");
 assert.equal(accountable.auditum.listenings.length, 2);
+assert.equal(accountable.auditum.route_decisions.length, 1);
 assert.equal(accountable.auditum.disagreements[0].status, "preserved");
 assert.equal(akousmaShapeErrors(accountable).length, 0);
 assert.throws(() => createAuditum({ listenings: [] }));
+
+const captureRefusal = createAkousma({
+  originatingApp: "oida",
+  sourceType: "unknown",
+  origin: "live-input",
+  subject: "quiet-hours capture request",
+  auditum: createAuditum({
+    listenings: [],
+    routeDecisions: [
+      createRouteDecision({
+        decisionId: "decision-capture-1",
+        gate: "capture",
+        outcome: "refuse",
+        subject: "audio capture",
+        reason: "Quiet hours close the ear before capture.",
+        actor: "covenant-gate",
+        covenantRef: "quiet-hours/1",
+        requiresConfirmation: false
+      })
+    ],
+    honestAbsences: [
+      { id: "absence-capture-1", kind: "refused", subject: "audio capture", attributed_to: "quiet-hours/1", count: 1 }
+    ]
+  })
+});
+assert.equal(captureRefusal.audio, undefined);
+assert.equal(akousmaShapeErrors(captureRefusal).length, 0);
 
 const ids = new Set(Array.from({ length: 50 }, () => newAkousmaId()));
 assert.equal(ids.size, 50);

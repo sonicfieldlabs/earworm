@@ -16,4 +16,8 @@ ingestPrompt(store, {
 });
 ```
 
-The JSON Schemas in `schemas/` are the public interchange contract. Fixtures in `fixtures/` are executable protocol examples.
+The JSON Schemas in `schemas/` are the public interchange contract. Alongside
+the event/session schemas, they include akousma spec v1.5 with
+`earworm/auditum/v2` decision records and the content-free
+`earworm/forgetting-receipt/v1` contract. Fixtures in `fixtures/` and the root
+`tests/fixtures/` directory are executable protocol examples.

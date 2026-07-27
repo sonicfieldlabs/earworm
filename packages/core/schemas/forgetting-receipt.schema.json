@@ -1,0 +1,34 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://earworm.dev/schemas/forgetting-receipt.schema.json",
+  "title": "Earworm Forgetting Receipt",
+  "description": "A content-free durable receipt that an akousma record was forgotten. It proves the memory operation without preserving the forgotten record or reconstructing its content.",
+  "type": "object",
+  "required": [
+    "receipt_id",
+    "contract",
+    "akousma_id",
+    "created_at",
+    "actor",
+    "reason",
+    "record_deleted",
+    "audio_deletion_requested",
+    "audio_deleted",
+    "shared_audio_preserved",
+    "recovery"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "receipt_id": { "type": "string", "minLength": 1 },
+    "contract": { "type": "string", "const": "earworm/forgetting-receipt/v1" },
+    "akousma_id": { "type": "string", "minLength": 1 },
+    "created_at": { "type": "string", "minLength": 1 },
+    "actor": { "type": "string", "minLength": 1 },
+    "reason": { "type": "string", "minLength": 1 },
+    "record_deleted": { "type": "boolean", "const": true },
+    "audio_deletion_requested": { "type": "boolean" },
+    "audio_deleted": { "type": "boolean" },
+    "shared_audio_preserved": { "type": "boolean" },
+    "recovery": { "type": ["string", "null"] }
+  }
+}

@@ -32,6 +32,7 @@ function assertSupportedSchema(schema, label, path = "$") {
     "$id",
     "$ref",
     "$defs",
+    "anyOf",
     "title",
     "description",
     "type",
@@ -40,6 +41,7 @@ function assertSupportedSchema(schema, label, path = "$") {
     "additionalProperties",
     "properties",
     "items",
+    "contains",
     "enum",
     "minLength",
     "minItems",
@@ -64,6 +66,12 @@ function assertSupportedSchema(schema, label, path = "$") {
   if (schema.items) {
     assertSupportedSchema(schema.items, label, `${path}.items`);
   }
+  if (schema.contains) {
+    assertSupportedSchema(schema.contains, label, `${path}.contains`);
+  }
+  for (const [index, childSchema] of (schema.anyOf ?? []).entries()) {
+    assertSupportedSchema(childSchema, label, `${path}.anyOf[${index}]`);
+  }
 }
 
 function resolvePointer(document, pointer) {
@@ -75,6 +83,14 @@ function resolvePointer(document, pointer) {
 
 function validate(schema, value, schemas, path = "$", rootSchema = schema) {
   const errors = [];
+
+  if (schema.anyOf) {
+    const branchErrors = schema.anyOf.map((branch) => validate(branch, value, schemas, path, rootSchema));
+    if (!branchErrors.some((branch) => branch.length === 0)) {
+      errors.push(`${path}: expected one valid anyOf branch`);
+      errors.push(...(branchErrors[0] ?? []));
+    }
+  }
 
   if (schema.$ref) {
     const [documentRef, fragment] = schema.$ref.split("#", 2);
@@ -174,6 +190,9 @@ function validate(schema, value, schemas, path = "$", rootSchema = schema) {
         errors.push(...validate(schema.items, item, schemas, `${path}[${index}]`, rootSchema));
       });
     }
+    if (schema.contains && !value.some((item, index) => validate(schema.contains, item, schemas, `${path}[${index}]`, rootSchema).length === 0)) {
+      errors.push(`${path}: expected at least one item matching contains`);
+    }
   }
 
   return errors;
@@ -229,7 +248,8 @@ const schemaBySuffix = {
   ".signal-packet.json": "signal-packet.schema.json",
   ".feature-stream-ref.json": "feature-stream-ref.schema.json",
   ".export-manifest.json": "export-manifest.schema.json",
-  ".akousma.json": "akousma.schema.json"
+  ".akousma.json": "akousma.schema.json",
+  ".forgetting-receipt.json": "forgetting-receipt.schema.json"
 };
 
 const fixtureRoots = [

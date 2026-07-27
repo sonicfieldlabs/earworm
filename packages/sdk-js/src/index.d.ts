@@ -54,11 +54,14 @@ export const AKOUSMA_RELATION_TYPES: readonly string[];
 export const AKOUSMA_PIPELINE_EFFECTS: readonly string[];
 export const AKOUSMA_LOCATION_SOURCES: readonly string[];
 export const AKOUSMA_CAPTURE_DIRECTIONS: readonly string[];
-export const AUDITUM_CONTRACT: "earworm/auditum/v1";
+export const AUDITUM_CONTRACT: "earworm/auditum/v2";
+export const LEGACY_AUDITUM_CONTRACT: "earworm/auditum/v1";
 export const AUDITUM_LISTENER_TYPES: readonly string[];
 export const AUDITUM_ABSENCE_KINDS: readonly string[];
 export const AUDITUM_DISAGREEMENT_STATUSES: readonly string[];
 export const AUDITUM_ACTION_STATUSES: readonly string[];
+export const AUDITUM_DECISION_GATES: readonly string[];
+export const AUDITUM_DECISION_OUTCOMES: readonly string[];
 export const GERM_IMPORT_MODES: readonly ["sound", "prompt", "lineage"];
 
 export interface AkousmaAudio {
@@ -175,7 +178,7 @@ export type AuditumClaimCategory =
 export interface AuditumListening {
   listening_id: string;
   listener_id: string;
-  listener_type: "human" | "agent" | "hybrid";
+  listener_type: "human" | "agent" | "hybrid" | "community" | "institution" | "sensor" | "habitat" | "other_animal" | "ensemble" | "other";
   created_at: string;
   report_namespace: string;
   contract: string;
@@ -184,6 +187,10 @@ export interface AuditumListening {
   claim_set_ref?: string | null;
   covenant_ref?: string | null;
   route?: string[];
+  listening_pass_ref?: string | null;
+  listening_provenance_ref?: string | null;
+  route_decision_refs?: string[];
+  influenced_by?: Array<{ listening_id: string; effect: string }>;
   note?: string | null;
 }
 
@@ -202,7 +209,7 @@ export interface AuditumDisagreement {
 
 export interface AuditumHonestAbsence {
   id: string;
-  kind: "unavailable" | "withheld" | "refused" | "not_retained" | "forgotten" | "undetermined";
+  kind: "unavailable" | "withheld" | "refused" | "not_retained" | "forgotten";
   subject: string;
   attributed_to: string;
   listening_id?: string | null;
@@ -241,12 +248,46 @@ export interface AuditumRevision {
   created_at: string;
 }
 
+export interface AuditumRouteDecision {
+  decision_id: string;
+  gate: "input" | "capture" | "inference" | "memory" | "output" | "disclosure" | "retention" | "action";
+  outcome: "proceed" | "pause" | "defer" | "abstain" | "refuse" | "withhold" | "forget" | "do_not_act";
+  subject: string;
+  reason: string;
+  decided_at: string;
+  listening_id?: string | null;
+  producer_contract?: string | null;
+  producer_decision_ref?: string | null;
+  authority: {
+    mode: "observe_only" | "recommend" | "request" | "execute_scoped";
+    actor: string;
+    covenant_ref?: string | null;
+    granted_by?: string | null;
+    requires_confirmation: boolean;
+    reversible: boolean;
+  };
+  receipt?: { created_at: string; actor: string; result?: string | null; recovery?: string | null };
+  note?: string | null;
+}
+
+export interface AuditumEnsemble {
+  id: string;
+  kind: "plural_listening" | "ear_swarm";
+  listening_ids: string[];
+  influence_edges: Array<{ from_listening_id: string; to_listening_id: string; effect: string }>;
+  permissions_preserved: boolean;
+  disagreements_preserved: boolean;
+  dissolution_rule: string;
+}
+
 export interface Auditum {
-  contract: "earworm/auditum/v1";
+  contract: "earworm/auditum/v1" | "earworm/auditum/v2";
   listenings: AuditumListening[];
   disagreements: AuditumDisagreement[];
   honest_absences: AuditumHonestAbsence[];
   actions: AuditumAction[];
+  route_decisions?: AuditumRouteDecision[];
+  ensemble?: AuditumEnsemble;
   revision?: AuditumRevision;
 }
 
@@ -255,7 +296,8 @@ export interface Akousma {
   schema_version: string;
   created_at: string;
   session_id?: string;
-  audio: AkousmaAudio;
+  audio?: AkousmaAudio;
+  subject?: string;
   provenance: AkousmaProvenance;
   listening?: Record<string, unknown>;
   lineage: AkousmaLineage;
@@ -267,14 +309,14 @@ export interface Akousma {
   capture?: AkousmaCapture;
   covenant?: AkousmaCovenant;
   auditum?: Auditum;
-  /** Spec v1.4: the record is open — unknown top-level fields are preserved. */
+  /** Spec v1.5: the record is open — unknown top-level fields are preserved. */
   [key: string]: unknown;
 }
 
 export function newAkousmaId(prefix?: string): string;
 
 export function createAkousma(input: {
-  audio: AkousmaAudio;
+  audio?: AkousmaAudio;
   originatingApp: string;
   sourceType?: AkousmaProvenance["source_type"];
   origin?: AkousmaProvenance["origin"];
@@ -293,15 +335,37 @@ export function createAkousma(input: {
   capture?: AkousmaCapture | null;
   covenant?: AkousmaCovenant | null;
   auditum?: Auditum | null;
+  subject?: string | null;
 }): Akousma;
 
 export function createAuditum(input: {
-  listenings: AuditumListening[];
+  listenings?: AuditumListening[];
   disagreements?: AuditumDisagreement[];
   honestAbsences?: AuditumHonestAbsence[];
   actions?: AuditumAction[];
+  routeDecisions: AuditumRouteDecision[];
+  ensemble?: AuditumEnsemble | null;
   revision?: AuditumRevision | null;
 }): Auditum;
+
+export function createRouteDecision(input: {
+  decisionId: string;
+  gate: AuditumRouteDecision["gate"];
+  outcome: AuditumRouteDecision["outcome"];
+  subject: string;
+  reason: string;
+  actor: string;
+  decidedAt?: string | null;
+  authorityMode?: AuditumRouteDecision["authority"]["mode"];
+  listeningId?: string | null;
+  producerContract?: string | null;
+  producerDecisionRef?: string | null;
+  covenantRef?: string | null;
+  grantedBy?: string | null;
+  requiresConfirmation?: boolean;
+  reversible?: boolean;
+  note?: string | null;
+}): AuditumRouteDecision;
 
 export function akousmaRelation(
   type: AkousmaRelationType,

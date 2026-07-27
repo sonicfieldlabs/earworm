@@ -17,7 +17,8 @@ Current schema drafts:
 - `ContextSelector`
 - `ContextBundle`
 - `ExportManifest`
-- `Akousma` spec v1.4, including the `earworm/auditum/v1` accountable-listening block
+- `Akousma` spec v1.5, including current `earworm/auditum/v2` route decisions and legacy `earworm/auditum/v1` compatibility
+- `Earworm Forgetting Receipt` v1, the content-free durable receipt for a completed forget operation
 
 Fixtures are executable examples of the protocol. Run `pnpm validate` to validate the current fixture set against the schemas.
 
