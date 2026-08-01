@@ -31,16 +31,22 @@ function assertSupportedSchema(schema, label, path = "$") {
     "$schema",
     "$id",
     "$ref",
+    "$defs",
+    "anyOf",
     "title",
     "description",
     "type",
+    "const",
     "required",
     "additionalProperties",
     "properties",
     "items",
+    "contains",
     "enum",
+    "minLength",
     "minItems",
     "maxItems",
+    "uniqueItems",
     "minimum",
     "maximum"
   ]);
@@ -54,25 +60,58 @@ function assertSupportedSchema(schema, label, path = "$") {
   for (const [key, childSchema] of Object.entries(schema.properties ?? {})) {
     assertSupportedSchema(childSchema, label, `${path}.properties.${key}`);
   }
+  for (const [key, childSchema] of Object.entries(schema.$defs ?? {})) {
+    assertSupportedSchema(childSchema, label, `${path}.$defs.${key}`);
+  }
   if (schema.items) {
     assertSupportedSchema(schema.items, label, `${path}.items`);
   }
+  if (schema.contains) {
+    assertSupportedSchema(schema.contains, label, `${path}.contains`);
+  }
+  for (const [index, childSchema] of (schema.anyOf ?? []).entries()) {
+    assertSupportedSchema(childSchema, label, `${path}.anyOf[${index}]`);
+  }
 }
 
-function validate(schema, value, schemas, path = "$") {
+function resolvePointer(document, pointer) {
+  return pointer.split("/").slice(1).reduce((value, segment) => {
+    const key = segment.replaceAll("~1", "/").replaceAll("~0", "~");
+    return value?.[key];
+  }, document);
+}
+
+function validate(schema, value, schemas, path = "$", rootSchema = schema) {
   const errors = [];
 
+  if (schema.anyOf) {
+    const branchErrors = schema.anyOf.map((branch) => validate(branch, value, schemas, path, rootSchema));
+    if (!branchErrors.some((branch) => branch.length === 0)) {
+      errors.push(`${path}: expected one valid anyOf branch`);
+      errors.push(...(branchErrors[0] ?? []));
+    }
+  }
+
   if (schema.$ref) {
-    const ref = schemas.get(schema.$ref) ?? schemas.get(basename(schema.$ref));
+    const [documentRef, fragment] = schema.$ref.split("#", 2);
+    const document = documentRef
+      ? schemas.get(documentRef) ?? schemas.get(basename(documentRef))
+      : rootSchema;
+    const ref = fragment ? resolvePointer(document, `/${fragment.replace(/^\//, "")}`) : document;
     if (!ref) {
       return [`${path}: unresolved schema ref ${schema.$ref}`];
     }
-    errors.push(...validate(ref, value, schemas, path));
+    errors.push(...validate(ref, value, schemas, path, document));
   }
 
   if (schema.type) {
     const actual = Array.isArray(value) ? "array" : value === null ? "null" : typeof value;
-    if (schema.type === "integer") {
+    const allowedTypes = Array.isArray(schema.type) ? schema.type : [schema.type];
+    if (allowedTypes.includes("integer") && Number.isInteger(value)) {
+      // Valid integer; it is also a JSON number.
+    } else if (allowedTypes.includes(actual)) {
+      // Exact JSON type match.
+    } else if (schema.type === "integer") {
       if (!Number.isInteger(value)) {
         errors.push(`${path}: expected integer, got ${actual}`);
         return errors;
@@ -82,10 +121,14 @@ function validate(schema, value, schemas, path = "$") {
         errors.push(`${path}: expected number, got ${actual}`);
         return errors;
       }
-    } else if (schema.type !== actual) {
-      errors.push(`${path}: expected ${schema.type}, got ${actual}`);
+    } else {
+      errors.push(`${path}: expected ${allowedTypes.join(" or ")}, got ${actual}`);
       return errors;
     }
+  }
+
+  if ("const" in schema && value !== schema.const) {
+    errors.push(`${path}: expected ${JSON.stringify(schema.const)}, got ${JSON.stringify(value)}`);
   }
 
   if (schema.enum && !schema.enum.includes(value)) {
@@ -99,6 +142,10 @@ function validate(schema, value, schemas, path = "$") {
     if (typeof schema.maximum === "number" && value > schema.maximum) {
       errors.push(`${path}: expected <= ${schema.maximum}, got ${value}`);
     }
+  }
+
+  if (typeof value === "string" && typeof schema.minLength === "number" && value.length < schema.minLength) {
+    errors.push(`${path}: expected at least ${schema.minLength} characters`);
   }
 
   if (schema.type === "object") {
@@ -120,7 +167,7 @@ function validate(schema, value, schemas, path = "$") {
 
     for (const [key, childSchema] of Object.entries(schema.properties ?? {})) {
       if (key in value) {
-        errors.push(...validate(childSchema, value[key], schemas, `${path}.${key}`));
+        errors.push(...validate(childSchema, value[key], schemas, `${path}.${key}`, rootSchema));
       }
     }
   }
@@ -132,10 +179,19 @@ function validate(schema, value, schemas, path = "$") {
     if (schema.maxItems !== undefined && value.length > schema.maxItems) {
       errors.push(`${path}: expected at most ${schema.maxItems} items`);
     }
+    if (schema.uniqueItems === true) {
+      const serialized = value.map((item) => JSON.stringify(item));
+      if (new Set(serialized).size !== serialized.length) {
+        errors.push(`${path}: expected unique items`);
+      }
+    }
     if (schema.items) {
       value.forEach((item, index) => {
-        errors.push(...validate(schema.items, item, schemas, `${path}[${index}]`));
+        errors.push(...validate(schema.items, item, schemas, `${path}[${index}]`, rootSchema));
       });
+    }
+    if (schema.contains && !value.some((item, index) => validate(schema.contains, item, schemas, `${path}[${index}]`, rootSchema).length === 0)) {
+      errors.push(`${path}: expected at least one item matching contains`);
     }
   }
 
@@ -192,7 +248,8 @@ const schemaBySuffix = {
   ".signal-packet.json": "signal-packet.schema.json",
   ".feature-stream-ref.json": "feature-stream-ref.schema.json",
   ".export-manifest.json": "export-manifest.schema.json",
-  ".akousma.json": "akousma.schema.json"
+  ".akousma.json": "akousma.schema.json",
+  ".forgetting-receipt.json": "forgetting-receipt.schema.json"
 };
 
 const fixtureRoots = [

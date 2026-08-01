@@ -4,6 +4,19 @@ import unittest
 import akousma
 
 
+def proceed_decision(listening_id: str = "lst_1") -> dict:
+    return akousma.route_decision(
+        f"decision-{listening_id}",
+        gate="inference",
+        outcome="proceed",
+        subject="accountable listening pass",
+        reason="The user requested an observe-only pass.",
+        actor="test-listener",
+        listening_id=listening_id,
+        producer_contract="akouo/v0.9",
+    )
+
+
 class TestAkousmaRecord(unittest.TestCase):
     def test_schema_loads(self):
         schema = akousma.load_schema()
@@ -99,6 +112,208 @@ class TestAkousmaRecord(unittest.TestCase):
         rec = akousma.new_akousma(audio={"asset_id": "a1"}, originating_app="oida")
         rec["covenant"] = {"name": "anonymous rules"}
         self.assertTrue(akousma.validation_errors(rec))
+
+    def test_accountable_auditum_is_valid_and_plural(self):
+        listenings = [
+            {
+                "listening_id": "lst_signal",
+                "listener_id": "oida-signal",
+                "listener_type": "agent",
+                "created_at": "2026-07-22T12:00:00Z",
+                "report_namespace": "oida.signal",
+                "contract": "akouo/v0.9",
+                "claim_set_ref": "#/listening/oida.signal/payload/listening_claims",
+                "route": ["signal-inspection-listening"],
+            },
+            {
+                "listening_id": "lst_context",
+                "listener_id": "oida-context",
+                "listener_type": "agent",
+                "created_at": "2026-07-22T12:00:01Z",
+                "report_namespace": "akouo.ecological-posthuman-listening",
+                "contract": "akouo/v0.9",
+                "route": ["ecological-posthuman-listening"],
+            },
+        ]
+        block = akousma.auditum(
+            listenings=listenings,
+            disagreements=[{
+                "id": "dis_1",
+                "subject": "source identity",
+                "listening_ids": ["lst_signal", "lst_context"],
+                "positions": [
+                    {"listening_id": "lst_signal", "statement": "Source remains undetermined", "claim_category": "undetermined"},
+                    {"listening_id": "lst_context", "statement": "Water is a contextual possibility", "claim_category": "interpreted"},
+                ],
+                "status": "preserved",
+            }],
+            honest_absences=[{
+                "id": "abs_1",
+                "kind": "not_retained",
+                "subject": "raw audio",
+                "attributed_to": "local retention boundary",
+                "count": 1,
+            }],
+            actions=[{
+                "action_id": "act_1",
+                "proposal": "Recommend a calibrated re-listening",
+                "status": "proposed",
+                "authority": {
+                    "mode": "recommend",
+                    "scopes": ["recommend_next_listening"],
+                    "requires_confirmation": True,
+                    "reversible": True,
+                },
+            }],
+            route_decisions=[proceed_decision("lst_signal")],
+        )
+        rec = akousma.new_akousma(
+            audio={"asset_id": "a1"}, originating_app="oida", auditum=block
+        )
+        self.assertEqual(akousma.validation_errors(rec), [])
+        self.assertEqual(rec["schema_version"], "1.5.0")
+        self.assertEqual(rec["auditum"]["contract"], "earworm/auditum/v2")
+        self.assertEqual(len(rec["auditum"]["listenings"]), 2)
+        self.assertEqual(rec["auditum"]["disagreements"][0]["status"], "preserved")
+
+    def test_ear_swarm_requires_attributable_influence(self):
+        listenings = [
+            {
+                "listening_id": f"lst_{index}",
+                "listener_id": f"listener_{index}",
+                "listener_type": "agent",
+                "created_at": f"2026-07-22T12:00:0{index}Z",
+                "report_namespace": f"akouo.pass-{index}",
+                "contract": "akouo/v0.9",
+            }
+            for index in (1, 2)
+        ]
+        with self.assertRaises(ValueError):
+            akousma.auditum(
+                listenings=listenings,
+                route_decisions=[proceed_decision("lst_1")],
+                ensemble={
+                    "id": "ensemble-1",
+                    "kind": "ear_swarm",
+                    "listening_ids": ["lst_1", "lst_2"],
+                    "influence_edges": [],
+                    "permissions_preserved": True,
+                    "disagreements_preserved": True,
+                    "dissolution_rule": "End after two passes.",
+                },
+            )
+        block = akousma.auditum(
+            listenings=listenings,
+            route_decisions=[proceed_decision("lst_1")],
+            ensemble={
+                "id": "ensemble-1",
+                "kind": "ear_swarm",
+                "listening_ids": ["lst_1", "lst_2"],
+                "influence_edges": [{
+                    "from_listening_id": "lst_1",
+                    "to_listening_id": "lst_2",
+                    "effect": "The first pass redirected the second toward an unresolved source claim.",
+                }],
+                "permissions_preserved": True,
+                "disagreements_preserved": True,
+                "dissolution_rule": "End after the second attributable pass.",
+            },
+        )
+        self.assertEqual(block["ensemble"]["kind"], "ear_swarm")
+
+    def test_auditum_builder_rejects_false_plurality(self):
+        listening = {
+            "listening_id": "lst_1",
+            "listener_id": "listener_1",
+            "listener_type": "agent",
+            "created_at": "2026-07-22T12:00:00Z",
+            "report_namespace": "oida.signal",
+            "contract": "akouo/v0.9",
+        }
+        with self.assertRaises(ValueError):
+            akousma.auditum(listenings=[listening, listening], route_decisions=[proceed_decision()])
+        with self.assertRaises(ValueError):
+            akousma.auditum(
+                listenings=[listening],
+                disagreements=[{
+                    "id": "dis_1",
+                    "subject": "identity",
+                    "listening_ids": ["lst_1", "lst_missing"],
+                    "positions": [
+                        {"listening_id": "lst_1", "statement": "unknown"},
+                        {"listening_id": "lst_missing", "statement": "known"},
+                    ],
+                    "status": "preserved",
+                }],
+                route_decisions=[proceed_decision()],
+            )
+
+    def test_decision_only_capture_refusal_is_valid(self):
+        decision = akousma.route_decision(
+            "decision-capture-1",
+            gate="capture",
+            outcome="refuse",
+            subject="audio capture",
+            reason="Quiet hours close the ear before capture.",
+            actor="covenant-gate",
+            covenant_ref="quiet-hours/1",
+            requires_confirmation=False,
+        )
+        rec = akousma.new_akousma(
+            originating_app="oida",
+            source_type="unknown",
+            origin="live-input",
+            subject="quiet-hours capture request",
+            auditum=akousma.auditum(
+                listenings=[],
+                route_decisions=[decision],
+                honest_absences=[{
+                    "id": "absence-capture-1",
+                    "kind": "refused",
+                    "subject": "audio capture",
+                    "attributed_to": "quiet-hours/1",
+                    "count": 1,
+                }],
+            ),
+        )
+        self.assertNotIn("audio", rec)
+        self.assertEqual(akousma.validation_errors(rec), [])
+        self.assertEqual(akousma._fallback_validation_errors(rec), [])
+
+    def test_fallback_rejects_non_stopping_decision_without_audio(self):
+        rec = akousma.new_akousma(audio={"asset_id": "a1"}, originating_app="oida")
+        rec.pop("audio")
+        rec["subject"] = "uncaptured request"
+        rec["auditum"] = {
+            "contract": akousma.AUDITUM_CONTRACT,
+            "route_decisions": [akousma.route_decision(
+                "decision-output-fallback-1",
+                gate="output",
+                outcome="proceed",
+                subject="output",
+                reason="This is not a pre-capture stop.",
+                actor="test",
+            )],
+        }
+        self.assertIn(
+            "<root>: audio or a decision-only subject/auditum is required",
+            akousma._fallback_validation_errors(rec),
+        )
+
+    def test_decision_only_record_requires_precapture_stop(self):
+        with self.assertRaises(ValueError):
+            akousma.new_akousma(
+                originating_app="oida",
+                subject="no audio",
+                auditum=akousma.auditum(route_decisions=[akousma.route_decision(
+                    "decision-output-1",
+                    gate="output",
+                    outcome="proceed",
+                    subject="output",
+                    reason="Not a pre-capture stop.",
+                    actor="test",
+                )]),
+            )
 
     def test_v1_1_records_still_valid(self):
         rec = akousma.new_akousma(
@@ -308,7 +523,15 @@ class TestAkousmataStore(unittest.TestCase):
         self.assertTrue(self.store.forget(rec["akousma_id"], delete_audio=True))
         self.assertIsNone(self.store.get(rec["akousma_id"]))
         self.assertFalse(path.exists())
+        receipt = self.store.forgotten(rec["akousma_id"])
+        self.assertEqual(receipt["contract"], "earworm/forgetting-receipt/v1")
+        self.assertTrue(receipt["audio_deleted"])
+        self.assertNotIn("audio", receipt)
+        self.assertNotIn("summary", receipt)
         self.assertFalse(self.store.forget("akm_missing"))
+        self.assertEqual(len(self.store.forgetting_receipts(rec["akousma_id"])), 1)
+        with self.assertRaises(ValueError):
+            self.store.put(rec)
 
     def test_forget_keeps_shared_audio(self):
         data = b"RIFF-shared"
@@ -320,6 +543,9 @@ class TestAkousmataStore(unittest.TestCase):
         self.store.put(second)
         self.assertTrue(self.store.forget(first["akousma_id"], delete_audio=True))
         self.assertTrue(self.store.resolve_uri(uri).exists())
+        receipt = self.store.forgotten(first["akousma_id"])
+        self.assertTrue(receipt["shared_audio_preserved"])
+        self.assertFalse(receipt["audio_deleted"])
 
     def test_v1_records_still_valid(self):
         rec = akousma.new_akousma(audio={"asset_id": "a1"}, originating_app="oida")
@@ -384,6 +610,92 @@ class TestAkousmataStore(unittest.TestCase):
         self.assertEqual(
             [r["akousma_id"] for r in self.store.query(covenant_id="river-covenant/2")],
             [under["akousma_id"]],
+        )
+
+    def test_auditum_query_and_reindex(self):
+        listenings = [
+            {
+                "listening_id": "lst_1",
+                "listener_id": "oida",
+                "listener_type": "agent",
+                "created_at": "2026-07-22T12:00:00Z",
+                "report_namespace": "oida.signal",
+                "contract": "akouo/v0.9",
+            },
+            {
+                "listening_id": "lst_2",
+                "listener_id": "akouo",
+                "listener_type": "agent",
+                "created_at": "2026-07-22T12:00:01Z",
+                "report_namespace": "akouo.acoulogical-object-listening",
+                "contract": "akouo/v0.9",
+            },
+        ]
+        accountable = akousma.new_akousma(
+            audio={"asset_id": "a1"},
+            originating_app="oida",
+            auditum=akousma.auditum(
+                listenings=listenings,
+                disagreements=[{
+                    "id": "dis_1",
+                    "subject": "source",
+                    "listening_ids": ["lst_1", "lst_2"],
+                    "positions": [
+                        {"listening_id": "lst_1", "statement": "undetermined"},
+                        {"listening_id": "lst_2", "statement": "ambiguous object"},
+                    ],
+                    "status": "preserved",
+                }],
+                route_decisions=[proceed_decision("lst_1")],
+            ),
+        )
+        legacy = akousma.new_akousma(audio={"asset_id": "a2"}, originating_app="oida")
+        self.store.put(accountable)
+        self.store.put(legacy)
+        self.assertEqual(
+            [record["akousma_id"] for record in self.store.query(has_auditum=True)],
+            [accountable["akousma_id"]],
+        )
+        self.assertEqual(
+            [record["akousma_id"] for record in self.store.query(has_disagreement=True)],
+            [accountable["akousma_id"]],
+        )
+        self.assertEqual(
+            [record["akousma_id"] for record in self.store.query(has_route_decision=True)],
+            [accountable["akousma_id"]],
+        )
+        self.assertEqual(self.store.query(has_stop_decision=True), [])
+        self.store.conn.execute(
+            "UPDATE akousmata SET auditum_contract=NULL, listening_count=0, disagreement_count=0, honest_absence_count=0, route_decision_count=0, stop_decision_count=0"
+        )
+        self.store.conn.commit()
+        self.assertEqual(self.store.query(has_auditum=True), [])
+        self.store.reindex()
+        self.assertEqual(
+            [record["akousma_id"] for record in self.store.query(has_disagreement=True)],
+            [accountable["akousma_id"]],
+        )
+
+    def test_decision_only_record_is_stored_and_queryable(self):
+        record = akousma.new_akousma(
+            originating_app="oida",
+            source_type="unknown",
+            origin="live-input",
+            subject="quiet-hours capture request",
+            auditum=akousma.auditum(route_decisions=[akousma.route_decision(
+                "decision-capture-store-1",
+                gate="capture",
+                outcome="refuse",
+                subject="audio capture",
+                reason="Quiet hours close the ear.",
+                actor="covenant-gate",
+            )]),
+        )
+        self.store.put(record)
+        self.assertEqual(self.store.get(record["akousma_id"])["subject"], "quiet-hours capture request")
+        self.assertEqual(
+            [item["akousma_id"] for item in self.store.query(has_stop_decision=True)],
+            [record["akousma_id"]],
         )
 
     def test_reindex_rehoists_location(self):

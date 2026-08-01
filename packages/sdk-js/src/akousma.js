@@ -11,7 +11,29 @@
  * build, check, and link records on the JS side.
  */
 
-export const AKOUSMA_SCHEMA_VERSION = "1.3.0";
+export const AKOUSMA_SCHEMA_VERSION = "1.5.0";
+
+export const AUDITUM_CONTRACT = "earworm/auditum/v2";
+
+export const LEGACY_AUDITUM_CONTRACT = "earworm/auditum/v1";
+
+export const AUDITUM_LISTENER_TYPES = ["human", "agent", "hybrid", "community", "institution", "sensor", "habitat", "other_animal", "ensemble", "other"];
+
+export const AUDITUM_ABSENCE_KINDS = [
+  "unavailable",
+  "withheld",
+  "refused",
+  "not_retained",
+  "forgotten"
+];
+
+export const AUDITUM_DISAGREEMENT_STATUSES = ["preserved", "resolved", "undetermined"];
+
+export const AUDITUM_ACTION_STATUSES = ["proposed", "authorized", "refused", "executed", "failed", "reverted"];
+
+export const AUDITUM_DECISION_GATES = ["input", "capture", "inference", "memory", "output", "disclosure", "retention", "action"];
+
+export const AUDITUM_DECISION_OUTCOMES = ["proceed", "pause", "defer", "abstain", "refuse", "withhold", "forget", "do_not_act"];
 
 export const AKOUSMA_SOURCE_TYPES = [
   "generated",
@@ -97,10 +119,20 @@ export function createAkousma({
   summary = null,
   location = null,
   capture = null,
-  covenant = null
+  covenant = null,
+  auditum = null,
+  subject = null
 }) {
-  if (!audio || typeof audio.asset_id !== "string" || audio.asset_id.length === 0) {
-    throw new Error("createAkousma: audio.asset_id is required");
+  if (audio && (typeof audio.asset_id !== "string" || audio.asset_id.length === 0)) {
+    throw new Error("createAkousma: audio.asset_id is required when audio is supplied");
+  }
+  if (!audio) {
+    const hasPreCaptureStop = auditum?.contract === AUDITUM_CONTRACT
+      && Array.isArray(auditum.route_decisions)
+      && auditum.route_decisions.some((decision) => ["input", "capture"].includes(decision.gate) && ["pause", "defer", "abstain", "refuse", "withhold"].includes(decision.outcome));
+    if (typeof subject !== "string" || subject.length === 0 || !hasPreCaptureStop) {
+      throw new Error("createAkousma: audio may be omitted only with a subject and an auditum/v2 input or capture stop decision");
+    }
   }
   if (typeof originatingApp !== "string" || originatingApp.length === 0) {
     throw new Error("createAkousma: originatingApp is required");
@@ -117,6 +149,10 @@ export function createAkousma({
     const problems = covenantErrors(covenant, "covenant");
     if (problems.length > 0) throw new Error(`createAkousma: ${problems.join("; ")}`);
   }
+  if (auditum) {
+    const problems = auditumErrors(auditum, "auditum");
+    if (problems.length > 0) throw new Error(`createAkousma: ${problems.join("; ")}`);
+  }
 
   const lineage = { parent_akousma_ids: [...parentAkousmaIds] };
   if (operation) lineage.operation = operation;
@@ -131,7 +167,6 @@ export function createAkousma({
     akousma_id: newAkousmaId(),
     schema_version: AKOUSMA_SCHEMA_VERSION,
     created_at: new Date().toISOString().replace(/\.\d{3}Z$/, "Z"),
-    audio,
     provenance: {
       source_type: sourceType,
       origin,
@@ -144,11 +179,14 @@ export function createAkousma({
     annotations: {},
     extensions
   };
+  if (audio) record.audio = audio;
+  if (subject) record.subject = subject;
   if (sessionId) record.session_id = sessionId;
   if (summary) record.summary = summary;
   if (location) record.location = { ...location };
   if (capture) record.capture = { ...capture };
   if (covenant) record.covenant = { ...covenant };
+  if (auditum) record.auditum = structuredClone(auditum);
   return record;
 }
 
@@ -204,6 +242,175 @@ function covenantErrors(covenant, path) {
   return errors;
 }
 
+function auditumErrors(auditum, path) {
+  if (!auditum || typeof auditum !== "object" || Array.isArray(auditum)) {
+    return [`${path}: expected object`];
+  }
+  const errors = [];
+  const ids = new Set();
+  if (![AUDITUM_CONTRACT, LEGACY_AUDITUM_CONTRACT].includes(auditum.contract)) {
+    errors.push(`${path}.contract: expected ${LEGACY_AUDITUM_CONTRACT} or ${AUDITUM_CONTRACT}`);
+  }
+  if (!Array.isArray(auditum.listenings) || (auditum.contract === LEGACY_AUDITUM_CONTRACT && auditum.listenings.length === 0)) {
+    errors.push(`${path}.listenings: expected ${auditum.contract === LEGACY_AUDITUM_CONTRACT ? "non-empty " : ""}array`);
+  } else {
+    auditum.listenings.forEach((listening, index) => {
+      for (const key of ["listening_id", "listener_id", "created_at", "report_namespace", "contract"]) {
+        if (typeof listening?.[key] !== "string" || listening[key].length === 0) {
+          errors.push(`${path}.listenings[${index}].${key}: required non-empty string`);
+        }
+      }
+      if (!AUDITUM_LISTENER_TYPES.includes(listening?.listener_type)) {
+        errors.push(`${path}.listenings[${index}].listener_type: expected one of ${AUDITUM_LISTENER_TYPES.join(", ")}`);
+      }
+      if (ids.has(listening?.listening_id)) {
+        errors.push(`${path}.listenings[${index}].listening_id: duplicate`);
+      }
+      ids.add(listening?.listening_id);
+    });
+    for (const [index, disagreement] of (auditum.disagreements ?? []).entries()) {
+      const listeningIds = disagreement?.listening_ids;
+      if (!Array.isArray(listeningIds) || new Set(listeningIds).size < 2) {
+        errors.push(`${path}.disagreements[${index}].listening_ids: expected at least two distinct ids`);
+      } else if (listeningIds.some((id) => !ids.has(id))) {
+        errors.push(`${path}.disagreements[${index}].listening_ids: references unknown listening`);
+      }
+      if (!AUDITUM_DISAGREEMENT_STATUSES.includes(disagreement?.status)) {
+        errors.push(`${path}.disagreements[${index}].status: expected one of ${AUDITUM_DISAGREEMENT_STATUSES.join(", ")}`);
+      }
+      if (!Array.isArray(disagreement?.positions) || disagreement.positions.length < 2) {
+        errors.push(`${path}.disagreements[${index}].positions: expected at least two positions`);
+      }
+    }
+  }
+  if (!Array.isArray(auditum.disagreements)) errors.push(`${path}.disagreements: expected array`);
+  if (!Array.isArray(auditum.honest_absences)) {
+    errors.push(`${path}.honest_absences: expected array`);
+  } else {
+    auditum.honest_absences.forEach((absence, index) => {
+      if (!AUDITUM_ABSENCE_KINDS.includes(absence?.kind) && !(auditum.contract === LEGACY_AUDITUM_CONTRACT && absence?.kind === "undetermined")) {
+        errors.push(`${path}.honest_absences[${index}].kind: expected one of ${AUDITUM_ABSENCE_KINDS.join(", ")}`);
+      }
+    });
+  }
+  if (!Array.isArray(auditum.actions)) {
+    errors.push(`${path}.actions: expected array`);
+  } else {
+    auditum.actions.forEach((action, index) => {
+      if (!AUDITUM_ACTION_STATUSES.includes(action?.status)) {
+        errors.push(`${path}.actions[${index}].status: expected one of ${AUDITUM_ACTION_STATUSES.join(", ")}`);
+      }
+    });
+  }
+  if (auditum.contract === AUDITUM_CONTRACT) {
+    if (!Array.isArray(auditum.route_decisions) || auditum.route_decisions.length === 0) {
+      errors.push(`${path}.route_decisions: auditum/v2 requires a non-empty array`);
+    } else {
+      const decisionIds = new Set();
+      auditum.route_decisions.forEach((decision, index) => {
+        for (const key of ["decision_id", "subject", "reason", "decided_at"]) {
+          if (typeof decision?.[key] !== "string" || decision[key].length === 0) {
+            errors.push(`${path}.route_decisions[${index}].${key}: required non-empty string`);
+          }
+        }
+        if (!AUDITUM_DECISION_GATES.includes(decision?.gate)) errors.push(`${path}.route_decisions[${index}].gate: invalid`);
+        if (!AUDITUM_DECISION_OUTCOMES.includes(decision?.outcome)) errors.push(`${path}.route_decisions[${index}].outcome: invalid`);
+        if (decisionIds.has(decision?.decision_id)) errors.push(`${path}.route_decisions[${index}].decision_id: duplicate`);
+        decisionIds.add(decision?.decision_id);
+        if (decision?.listening_id != null && !ids.has(decision.listening_id)) errors.push(`${path}.route_decisions[${index}].listening_id: references unknown listening`);
+        if (typeof decision?.authority?.actor !== "string" || decision.authority.actor.length === 0) errors.push(`${path}.route_decisions[${index}].authority.actor: required`);
+      });
+      if (auditum.listenings.length === 0 && !auditum.route_decisions.some((decision) => ["input", "capture"].includes(decision.gate) && ["pause", "defer", "abstain", "refuse", "withhold"].includes(decision.outcome))) {
+        errors.push(`${path}: empty listenings require an input or capture stop decision`);
+      }
+    }
+    if (auditum.ensemble) {
+      if (!Array.isArray(auditum.ensemble.listening_ids) || new Set(auditum.ensemble.listening_ids).size < 2 || auditum.ensemble.listening_ids.some((id) => !ids.has(id))) {
+        errors.push(`${path}.ensemble.listening_ids: expected at least two known listenings`);
+      }
+      if (auditum.ensemble.kind === "ear_swarm" && (!auditum.ensemble.influence_edges?.length || auditum.ensemble.permissions_preserved !== true || auditum.ensemble.disagreements_preserved !== true)) {
+        errors.push(`${path}.ensemble: ear_swarm requires influence and preserved permissions/disagreements`);
+      }
+      for (const edge of auditum.ensemble.influence_edges ?? []) {
+        if (!ids.has(edge.from_listening_id) || !ids.has(edge.to_listening_id)) errors.push(`${path}.ensemble.influence_edges: references unknown listening`);
+      }
+    }
+  }
+  return errors;
+}
+
+/**
+ * Build an akousma v1.5 auditum/v2 block. "Tokenized" means structured,
+ * attributable, versioned, and addressable — never a financial token.
+ */
+export function createAuditum({
+  listenings = [],
+  disagreements = [],
+  honestAbsences = [],
+  actions = [],
+  routeDecisions = [],
+  ensemble = null,
+  revision = null
+}) {
+  const block = {
+    contract: AUDITUM_CONTRACT,
+    listenings: (listenings ?? []).map((item) => ({ ...item })),
+    disagreements: disagreements.map((item) => structuredClone(item)),
+    honest_absences: honestAbsences.map((item) => ({ ...item })),
+    actions: actions.map((item) => structuredClone(item)),
+    route_decisions: routeDecisions.map((item) => structuredClone(item))
+  };
+  if (ensemble) block.ensemble = structuredClone(ensemble);
+  if (revision) block.revision = structuredClone(revision);
+  const errors = auditumErrors(block, "auditum");
+  if (errors.length > 0) throw new Error(`createAuditum: ${errors.join("; ")}`);
+  return block;
+}
+
+/** Build one addressable auditum/v2 gate decision. */
+export function createRouteDecision({
+  decisionId,
+  gate,
+  outcome,
+  subject,
+  reason,
+  actor,
+  decidedAt = null,
+  authorityMode = "observe_only",
+  listeningId = null,
+  producerContract = null,
+  producerDecisionRef = null,
+  covenantRef = null,
+  grantedBy = null,
+  requiresConfirmation = true,
+  reversible = true,
+  note = null
+}) {
+  if (!AUDITUM_DECISION_GATES.includes(gate)) throw new Error(`createRouteDecision: invalid gate ${gate}`);
+  if (!AUDITUM_DECISION_OUTCOMES.includes(outcome)) throw new Error(`createRouteDecision: invalid outcome ${outcome}`);
+  const decision = {
+    decision_id: decisionId,
+    gate,
+    outcome,
+    subject,
+    reason,
+    decided_at: decidedAt ?? new Date().toISOString().replace(/\.\d{3}Z$/, "Z"),
+    authority: {
+      mode: authorityMode,
+      actor,
+      requires_confirmation: Boolean(requiresConfirmation),
+      reversible: Boolean(reversible)
+    }
+  };
+  if (listeningId != null) decision.listening_id = listeningId;
+  if (producerContract != null) decision.producer_contract = producerContract;
+  if (producerDecisionRef != null) decision.producer_decision_ref = producerDecisionRef;
+  if (covenantRef != null) decision.authority.covenant_ref = covenantRef;
+  if (grantedBy != null) decision.authority.granted_by = grantedBy;
+  if (note != null) decision.note = note;
+  return decision;
+}
+
 /** Build a typed lineage relation (kinship link, not causal parenthood). */
 export function akousmaRelation(type, targetAkousmaId, note = null) {
   if (!AKOUSMA_RELATION_TYPES.includes(type)) {
@@ -234,12 +441,18 @@ export function addListening(record, namespace, payload, { contract = null, summ
 export function akousmaShapeErrors(record) {
   const errors = [];
   if (!record || typeof record !== "object") return ["record must be an object"];
-  for (const key of ["akousma_id", "schema_version", "created_at", "audio", "provenance", "lineage"]) {
+  for (const key of ["akousma_id", "schema_version", "created_at", "provenance", "lineage"]) {
     if (!(key in record)) errors.push(`${key}: required property missing`);
   }
   const audio = record.audio;
   if (audio && (typeof audio.asset_id !== "string" || audio.asset_id.length === 0)) {
     errors.push("audio.asset_id: required");
+  }
+  if (!audio) {
+    const decisions = record.auditum?.route_decisions;
+    if (typeof record.subject !== "string" || record.subject.length === 0 || record.auditum?.contract !== AUDITUM_CONTRACT || !Array.isArray(decisions) || decisions.length === 0) {
+      errors.push("audio or a decision-only subject/auditum is required");
+    }
   }
   const provenance = record.provenance ?? {};
   if (provenance.source_type && !AKOUSMA_SOURCE_TYPES.includes(provenance.source_type)) {
@@ -278,6 +491,9 @@ export function akousmaShapeErrors(record) {
   }
   if (record.covenant !== undefined) {
     errors.push(...covenantErrors(record.covenant, "covenant"));
+  }
+  if (record.auditum !== undefined) {
+    errors.push(...auditumErrors(record.auditum, "auditum"));
   }
   return errors;
 }

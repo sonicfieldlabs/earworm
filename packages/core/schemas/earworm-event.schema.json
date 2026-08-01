@@ -32,6 +32,14 @@
         "automation.committed",
         "automation.reverted",
         "render.created",
+        "listening.report.created",
+        "listening.disagreement.recorded",
+        "listening.action.proposed",
+        "listening.action.authorized",
+        "listening.action.refused",
+        "listening.action.executed",
+        "listening.revision.created",
+        "memory.forgotten",
         "snapshot.created"
       ]
     },

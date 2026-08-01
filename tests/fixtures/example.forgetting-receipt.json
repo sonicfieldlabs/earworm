@@ -1,0 +1,13 @@
+{
+  "receipt_id": "forget-akm_001-20260727T120000Z",
+  "contract": "earworm/forgetting-receipt/v1",
+  "akousma_id": "akm_001",
+  "created_at": "2026-07-27T12:00:00Z",
+  "actor": "listener-owner",
+  "reason": "Retention consent was withdrawn.",
+  "record_deleted": true,
+  "audio_deletion_requested": true,
+  "audio_deleted": false,
+  "shared_audio_preserved": true,
+  "recovery": "The shared asset remains because another retained record references it; this record cannot be restored under the same id."
+}
