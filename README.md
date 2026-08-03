@@ -5,16 +5,16 @@ agentic signal chains. It keeps audio events, intent, generation metadata,
 analysis, user edits, agent actions, modulation, provenance, retention, and
 render history in one queryable context chain.
 
-Current release: `0.6.0`.
+Current release: `0.6.1`.
 
 ## Packages
 
 | Package | Version | Purpose |
 | --- | --- | --- |
-| `@earworm/core` | 0.6.0 | Canonical TypeScript event/session types, schemas, event stores, state reconstruction, context queries, listening events, modulation, snapshots, and consent-gated manifest export. |
-| `@earworm/sdk-js` | 0.6.0 | JavaScript client plus akousma v1.5, decision-only record, and auditum/v2 helpers. |
-| `akousma` | 0.6.0 | Python reference store for sonic-memory and decision-only records, route decisions, forgetting receipts, lineage, disagreement, absence, authority, revision, change cursors, reindexing, and verification. |
-| `earworm-sdk-python` | 0.6.0 | Read-only Python helpers for Earworm fixtures and sessions. |
+| `@earworm/core` | 0.6.1 | Canonical TypeScript event/session types, schemas, event stores, state reconstruction, context queries, listening events, modulation, snapshots, and consent-gated manifest export. |
+| `@earworm/sdk-js` | 0.6.1 | JavaScript client plus akousma v1.5, decision-only record, and auditum/v2 helpers. |
+| `akousma` | 0.6.1 | Python reference store for sonic-memory and decision-only records, route decisions, forgetting receipts, lineage, disagreement, absence, authority, revision, change cursors, reindexing, and verification. |
+| `earworm-sdk-python` | 0.6.1 | Read-only Python helpers for Earworm fixtures and sessions. |
 
 ## Protocol capabilities
 
@@ -42,8 +42,10 @@ An **akousma** is an open sonic-memory record. Spec v1.5 supports:
   pass/provenance references, influences, and contract references;
 - addressable input, capture, inference, memory, output, disclosure, retention,
   and action decisions, including refusal before an audio asset exists;
-- preserved disagreement, honest absence, scoped action authority and
-  receipts, and additive re-listening revisions;
+- preserved disagreement, with an attributable note required before a
+  disagreement is marked resolved;
+- honest absence, scoped action authority and receipts, plus mechanically
+  additive re-listening revisions that cannot overwrite an earlier account;
 - explicit plural-listening versus ear-swarm declarations—parallelism alone
   never establishes a swarm;
 - unknown top-level fields preserved for future producers.

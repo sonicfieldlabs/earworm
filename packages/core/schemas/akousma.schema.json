@@ -554,6 +554,20 @@
             "type": "object",
             "required": ["id", "subject", "listening_ids", "positions", "status"],
             "additionalProperties": false,
+            "allOf": [
+              {
+                "if": {
+                  "type": "object",
+                  "required": ["status"],
+                  "properties": { "status": { "const": "resolved" } }
+                },
+                "then": {
+                  "type": "object",
+                  "required": ["resolution_note"],
+                  "properties": { "resolution_note": { "type": "string", "minLength": 1 } }
+                }
+              }
+            ],
             "properties": {
               "id": { "type": "string", "minLength": 1 },
               "subject": { "type": "string", "minLength": 1 },
@@ -587,7 +601,7 @@
               "resolution_note": { "type": ["string", "null"] }
             }
           },
-          "description": "Differences between attributable listenings. Consumers preserve positions and must not manufacture consensus."
+          "description": "Differences between attributable listenings. Consumers preserve positions and must not manufacture consensus; a resolved disagreement requires a non-empty attributable resolution note."
         },
         "honest_absences": {
           "type": "array",

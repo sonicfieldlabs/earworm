@@ -482,6 +482,13 @@ def auditum(
                 f"auditum: disagreements[{index}].status must be one of "
                 f"{', '.join(AUDITUM_DISAGREEMENT_STATUSES)}"
             )
+        if item.get("status") == "resolved" and (
+            not isinstance(item.get("resolution_note"), str)
+            or not item["resolution_note"].strip()
+        ):
+            raise ValueError(
+                f"auditum: disagreements[{index}].resolution_note must be a non-empty string when resolved"
+            )
         positions = item.get("positions")
         if not isinstance(positions, list) or len(positions) < 2:
             raise ValueError(f"auditum: disagreements[{index}] needs at least two positions")
@@ -698,6 +705,52 @@ class AkousmataStore:
             sum(1 for item in decisions if isinstance(item, dict) and item.get("outcome") in stop_outcomes) if isinstance(decisions, list) else 0,
         )
 
+    @staticmethod
+    def _protected_account(record: dict[str, Any]) -> dict[str, Any]:
+        """Return the listening/account fields that an in-place edit may not rewrite.
+
+        Curators may still update tags, annotations, summary, location, consent,
+        rights, extensions, and typed kinship relations. A changed listening or
+        causal account must use a fresh id and an ``auditum.revision`` link.
+        """
+        provenance = record.get("provenance") if isinstance(record.get("provenance"), dict) else {}
+        lineage = record.get("lineage") if isinstance(record.get("lineage"), dict) else {}
+        return {
+            "schema_version": record.get("schema_version"),
+            "created_at": record.get("created_at"),
+            "audio": record.get("audio"),
+            "subject": record.get("subject"),
+            "listening": record.get("listening"),
+            "auditum": record.get("auditum"),
+            "provenance_account": {
+                key: provenance.get(key)
+                for key in (
+                    "provenance_id",
+                    "source_type",
+                    "origin",
+                    "originating_app",
+                    "device",
+                    "provider",
+                    "model_id",
+                    "seed",
+                    "created_at",
+                    "capture_conditions",
+                    "pipeline_effects",
+                )
+            },
+            "causal_lineage": {
+                key: lineage.get(key)
+                for key in (
+                    "parent_akousma_ids",
+                    "operation",
+                    "prompt",
+                    "model",
+                    "params",
+                    "event_ids",
+                )
+            },
+        }
+
     # --- content-addressed audio -----------------------------------------
     def put_audio(self, data: bytes, ext: str = "wav") -> str:
         digest = sha256(data).hexdigest()
@@ -724,6 +777,18 @@ class AkousmataStore:
         rid = record["akousma_id"]
         if self.forgotten(rid) is not None:
             raise ValueError(f"akousma {rid!r} has a forgetting receipt and cannot be silently resurrected")
+        revision = record.get("auditum", {}).get("revision") if isinstance(record.get("auditum"), dict) else None
+        if isinstance(revision, dict):
+            target = revision.get("revises_akousma_id")
+            if target == rid:
+                raise ValueError("an auditum revision must use a fresh akousma_id, not revise itself")
+            if not isinstance(target, str) or self.get(target) is None:
+                raise ValueError(f"auditum revision target {target!r} is not present in this store")
+        existing = self.get(rid)
+        if existing is not None and self._protected_account(existing) != self._protected_account(record):
+            raise ValueError(
+                f"akousma {rid!r} has an existing listening account; create a new record with auditum.revision instead of overwriting it"
+            )
         lat, lon = self._latlon(record)
         auditum_contract, listening_count, disagreement_count, honest_absence_count, route_decision_count, stop_decision_count = self._auditum_index(record)
         self.conn.execute(

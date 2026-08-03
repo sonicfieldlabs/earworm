@@ -278,6 +278,9 @@ function auditumErrors(auditum, path) {
       if (!AUDITUM_DISAGREEMENT_STATUSES.includes(disagreement?.status)) {
         errors.push(`${path}.disagreements[${index}].status: expected one of ${AUDITUM_DISAGREEMENT_STATUSES.join(", ")}`);
       }
+      if (disagreement?.status === "resolved" && (typeof disagreement.resolution_note !== "string" || disagreement.resolution_note.trim().length === 0)) {
+        errors.push(`${path}.disagreements[${index}].resolution_note: required non-empty string when resolved`);
+      }
       if (!Array.isArray(disagreement?.positions) || disagreement.positions.length < 2) {
         errors.push(`${path}.disagreements[${index}].positions: expected at least two positions`);
       }

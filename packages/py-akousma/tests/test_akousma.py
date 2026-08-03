@@ -248,6 +248,42 @@ class TestAkousmaRecord(unittest.TestCase):
                 route_decisions=[proceed_decision()],
             )
 
+    def test_resolved_disagreement_requires_resolution_note(self):
+        listenings = [
+            {
+                "listening_id": f"lst_{index}",
+                "listener_id": f"listener_{index}",
+                "listener_type": "human",
+                "created_at": f"2026-07-22T12:00:0{index}Z",
+                "report_namespace": f"human.pass-{index}",
+                "contract": "akouo/v0.9",
+            }
+            for index in (1, 2)
+        ]
+        disagreement = {
+            "id": "dis_1",
+            "subject": "source identity",
+            "listening_ids": ["lst_1", "lst_2"],
+            "positions": [
+                {"listening_id": "lst_1", "statement": "source remains unknown"},
+                {"listening_id": "lst_2", "statement": "source was later documented"},
+            ],
+            "status": "resolved",
+        }
+        with self.assertRaisesRegex(ValueError, "resolution_note"):
+            akousma.auditum(
+                listenings=listenings,
+                disagreements=[disagreement],
+                route_decisions=[proceed_decision("lst_1")],
+            )
+        disagreement["resolution_note"] = "Resolved by an attributable source log supplied after both passes."
+        block = akousma.auditum(
+            listenings=listenings,
+            disagreements=[disagreement],
+            route_decisions=[proceed_decision("lst_1")],
+        )
+        self.assertEqual(block["disagreements"][0]["status"], "resolved")
+
     def test_decision_only_capture_refusal_is_valid(self):
         decision = akousma.route_decision(
             "decision-capture-1",
@@ -366,6 +402,79 @@ class TestAkousmataStore(unittest.TestCase):
     def test_put_rejects_invalid(self):
         with self.assertRaises(ValueError):
             self.store.put({"akousma_id": "x"})
+
+    def test_put_preserves_listening_account_and_allows_curatorial_metadata(self):
+        record = akousma.new_akousma(
+            audio={"asset_id": "a1"},
+            originating_app="oida",
+            listening={"oida.signal": {"summary": "first account"}},
+        )
+        self.store.put(record)
+        edited = self.store.get(record["akousma_id"])
+        edited["summary"] = "Curator summary"
+        edited["tags"] = ["reviewed"]
+        edited["provenance"]["consent_status"] = "owned"
+        self.store.put(edited)
+        self.assertEqual(self.store.get(record["akousma_id"])["summary"], "Curator summary")
+
+        overwritten = self.store.get(record["akousma_id"])
+        overwritten["listening"]["oida.signal"]["summary"] = "rewritten account"
+        with self.assertRaisesRegex(ValueError, "auditum.revision"):
+            self.store.put(overwritten)
+
+        overwritten = self.store.get(record["akousma_id"])
+        overwritten["provenance"]["provider"] = "different-provider"
+        with self.assertRaisesRegex(ValueError, "auditum.revision"):
+            self.store.put(overwritten)
+
+    def test_revision_requires_fresh_id_and_existing_target(self):
+        parent = akousma.new_akousma(
+            audio={"asset_id": "a1"}, originating_app="oida"
+        )
+        self.store.put(parent)
+
+        def revision_block(target: str) -> dict:
+            return akousma.auditum(
+                route_decisions=[akousma.route_decision(
+                    "decision-revision",
+                    gate="capture",
+                    outcome="refuse",
+                    subject="re-listening capture",
+                    reason="The test records an accountable stop.",
+                    actor="test-listener",
+                )],
+                revision={
+                    "revision_id": akousma.new_id("rev"),
+                    "revises_akousma_id": target,
+                    "reason": "fresh accountable pass",
+                    "changes": ["new route decision"],
+                    "created_at": "2026-07-22T12:00:00Z",
+                },
+            )
+
+        missing = akousma.new_akousma(
+            audio={"asset_id": "a2"},
+            originating_app="oida",
+            auditum=revision_block("akm_missing"),
+        )
+        with self.assertRaisesRegex(ValueError, "not present"):
+            self.store.put(missing)
+
+        self_revision = dict(parent)
+        self_revision["auditum"] = revision_block(parent["akousma_id"])
+        with self.assertRaisesRegex(ValueError, "fresh akousma_id"):
+            self.store.put(self_revision)
+
+        child = akousma.new_akousma(
+            audio={"asset_id": "a1"},
+            originating_app="oida",
+            auditum=revision_block(parent["akousma_id"]),
+        )
+        self.store.put(child)
+        self.assertEqual(
+            self.store.get(child["akousma_id"])["auditum"]["revision"]["revises_akousma_id"],
+            parent["akousma_id"],
+        )
 
     def test_relations_roundtrip(self):
         first = akousma.new_akousma(
