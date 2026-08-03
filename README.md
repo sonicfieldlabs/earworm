@@ -66,10 +66,10 @@ queries, forget with content-free durable receipts, reindex, and verify.
 | Component | Version / contract | Relationship |
 | --- | --- | --- |
 | [AKOÚŌ](https://github.com/sonicfieldlabs/akouo) | `akouo/v0.9` | Owns listening modes, claim attribution, context v2, provenance, passes, route decisions, ensembles, and covenant references. |
-| [OÍDA](https://github.com/sonicfieldlabs/oida) | 0.9.1 / `oida/gateway/v0.5` | Reference producer. OÍDA returns route decisions before content and can persist a pre-capture refusal without fabricating audio. |
-| [Akousmata](https://github.com/sonicfieldlabs/akousmata) | 0.6.0 | Reference navigator and accountability auditor over the Python store, including forgetting receipts and true swarm semantics. |
-| [GERM](https://github.com/sonicfieldlabs/germ) | 0.3.2 | Writes lineage-bearing generations and Earworm context exports. |
-| [Algophony](https://github.com/sonicfieldlabs/algophony) | 0.5.1 | Uses Earworm context and akousma relations for traceable batch evaluation. |
+| [OÍDA](https://github.com/sonicfieldlabs/oida) | 0.9.2 / `oida/gateway/v0.5` | Reference producer. OÍDA returns route decisions before content and can persist a pre-capture refusal without fabricating audio. |
+| [Akousmata](https://github.com/sonicfieldlabs/akousmata) | 0.6.1 | Reference navigator and accountability auditor over the Python store, including forgetting receipts and true swarm semantics. |
+| [GERM](https://github.com/sonicfieldlabs/germ) | 0.3.3 | Writes lineage-bearing generations and Earworm context exports. |
+| [Algophony](https://github.com/sonicfieldlabs/algophony) | 0.5.2 | Uses Earworm context and akousma relations for traceable batch evaluation. |
 | [ORAM](https://github.com/sonicfieldlabs/oram) | 0.4.1 | Does not write the protocol directly; ORAM audio can be captured into akousma records by OÍDA or GERM. |
 
 ## Quick start
