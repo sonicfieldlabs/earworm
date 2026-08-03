@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.6.1 — Revision integrity
+
+- Required a non-empty resolution note whenever an attributable disagreement
+  is marked resolved, across the canonical schema and both SDK validators.
+- Protected stored listening, auditum, provenance-account, and causal-lineage
+  fields from silent in-place replacement while retaining app-owned curatorial
+  edits.
+- Required a revision record to use a fresh id and point to an existing record
+  in the same store.
+- Expanded environment-file ignore coverage and added cross-language
+  regression tests.
+
 ## 0.6.0 — Decision-first auditums
 
 - Advanced the open akousma record to spec v1.5 and the current accountable

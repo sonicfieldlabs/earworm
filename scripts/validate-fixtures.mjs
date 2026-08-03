@@ -32,7 +32,10 @@ function assertSupportedSchema(schema, label, path = "$") {
     "$id",
     "$ref",
     "$defs",
+    "allOf",
     "anyOf",
+    "if",
+    "then",
     "title",
     "description",
     "type",
@@ -72,6 +75,11 @@ function assertSupportedSchema(schema, label, path = "$") {
   for (const [index, childSchema] of (schema.anyOf ?? []).entries()) {
     assertSupportedSchema(childSchema, label, `${path}.anyOf[${index}]`);
   }
+  for (const [index, childSchema] of (schema.allOf ?? []).entries()) {
+    assertSupportedSchema(childSchema, label, `${path}.allOf[${index}]`);
+  }
+  if (schema.if) assertSupportedSchema(schema.if, label, `${path}.if`);
+  if (schema.then) assertSupportedSchema(schema.then, label, `${path}.then`);
 }
 
 function resolvePointer(document, pointer) {
@@ -83,6 +91,14 @@ function resolvePointer(document, pointer) {
 
 function validate(schema, value, schemas, path = "$", rootSchema = schema) {
   const errors = [];
+
+  for (const branch of schema.allOf ?? []) {
+    errors.push(...validate(branch, value, schemas, path, rootSchema));
+  }
+
+  if (schema.if && schema.then && validate(schema.if, value, schemas, path, rootSchema).length === 0) {
+    errors.push(...validate(schema.then, value, schemas, path, rootSchema));
+  }
 
   if (schema.anyOf) {
     const branchErrors = schema.anyOf.map((branch) => validate(branch, value, schemas, path, rootSchema));

@@ -251,6 +251,23 @@ assert.equal(accountable.auditum.route_decisions.length, 1);
 assert.equal(accountable.auditum.disagreements[0].status, "preserved");
 assert.equal(akousmaShapeErrors(accountable).length, 0);
 assert.throws(() => createAuditum({ listenings: [] }));
+assert.throws(() => createAuditum({
+  listenings: accountable.auditum.listenings,
+  disagreements: [{
+    ...accountable.auditum.disagreements[0],
+    status: "resolved"
+  }],
+  routeDecisions: accountable.auditum.route_decisions
+}), /resolution_note/);
+assert.doesNotThrow(() => createAuditum({
+  listenings: accountable.auditum.listenings,
+  disagreements: [{
+    ...accountable.auditum.disagreements[0],
+    status: "resolved",
+    resolution_note: "Resolved by a named source log supplied after both passes."
+  }],
+  routeDecisions: accountable.auditum.route_decisions
+}));
 
 const captureRefusal = createAkousma({
   originatingApp: "oida",
