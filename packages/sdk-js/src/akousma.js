@@ -11,7 +11,7 @@
  * build, check, and link records on the JS side.
  */
 
-export const AKOUSMA_SCHEMA_VERSION = "1.5.0";
+export const AKOUSMA_SCHEMA_VERSION = "1.6.0";
 
 export const AUDITUM_CONTRACT = "earworm/auditum/v2";
 
@@ -34,6 +34,8 @@ export const AUDITUM_ACTION_STATUSES = ["proposed", "authorized", "refused", "ex
 export const AUDITUM_DECISION_GATES = ["input", "capture", "inference", "memory", "output", "disclosure", "retention", "action"];
 
 export const AUDITUM_DECISION_OUTCOMES = ["proceed", "pause", "defer", "abstain", "refuse", "withhold", "forget", "do_not_act"];
+
+export const AKOUSMA_RECORD_CLASSES = ["human", "agent", "hybrid", "plural_other", "decision_only", "legacy"];
 
 export const AKOUSMA_SOURCE_TYPES = [
   "generated",
@@ -81,6 +83,58 @@ export const GERM_IMPORT_MODES = ["sound", "prompt", "lineage"];
 
 const CROCKFORD = "0123456789ABCDEFGHJKMNPQRSTVWXYZ";
 
+function hasPreCaptureStop(auditum) {
+  return auditum?.contract === AUDITUM_CONTRACT
+    && Array.isArray(auditum.route_decisions)
+    && auditum.route_decisions.some((decision) =>
+      ["input", "capture"].includes(decision?.gate)
+      && ["pause", "defer", "abstain", "refuse", "withhold"].includes(decision?.outcome));
+}
+
+function hasRawAudioAbsence(auditum) {
+  return Array.isArray(auditum?.honest_absences)
+    && auditum.honest_absences.some((absence) =>
+      ["unavailable", "not_retained"].includes(absence?.kind)
+      && absence?.subject === "raw audio");
+}
+
+/** Canonical attributable listener types in stable vocabulary order. */
+export function listenerTypes(record) {
+  const listenings = record?.auditum?.listenings;
+  if (!Array.isArray(listenings)) return [];
+  const present = new Set(
+    listenings
+      .map((listening) => listening?.listener_type)
+      .filter((listenerType) => AUDITUM_LISTENER_TYPES.includes(listenerType))
+  );
+  return AUDITUM_LISTENER_TYPES.filter((listenerType) => present.has(listenerType));
+}
+
+/**
+ * Coarse navigation class. The lossless listenerTypes() facet remains the
+ * authority for community, institution, sensor, habitat, other-animal,
+ * ensemble, and other listening.
+ */
+export function recordClass(record) {
+  const auditum = record?.auditum;
+  if (!auditum || typeof auditum !== "object" || !Array.isArray(auditum.listenings)) return "legacy";
+  if (auditum.listenings.length === 0) return hasPreCaptureStop(auditum) ? "decision_only" : "legacy";
+  if (auditum.listenings.some((listening) => !AUDITUM_LISTENER_TYPES.includes(listening?.listener_type))) {
+    return "legacy";
+  }
+  const types = new Set(listenerTypes(record));
+  if (types.size === 1 && types.has("human")) return "human";
+  if (types.size === 1 && types.has("agent")) return "agent";
+  if ([...types].every((listenerType) => ["human", "agent", "hybrid"].includes(listenerType))) return "hybrid";
+  return "plural_other";
+}
+
+/** Direct revision target, or null for a root/non-revision record. */
+export function revisionOf(record) {
+  const target = record?.auditum?.revision?.revises_akousma_id;
+  return typeof target === "string" && target.length > 0 ? target : null;
+}
+
 function base32(value, length) {
   let n = BigInt(value);
   const out = [];
@@ -127,11 +181,15 @@ export function createAkousma({
     throw new Error("createAkousma: audio.asset_id is required when audio is supplied");
   }
   if (!audio) {
-    const hasPreCaptureStop = auditum?.contract === AUDITUM_CONTRACT
-      && Array.isArray(auditum.route_decisions)
-      && auditum.route_decisions.some((decision) => ["input", "capture"].includes(decision.gate) && ["pause", "defer", "abstain", "refuse", "withhold"].includes(decision.outcome));
-    if (typeof subject !== "string" || subject.length === 0 || !hasPreCaptureStop) {
-      throw new Error("createAkousma: audio may be omitted only with a subject and an auditum/v2 input or capture stop decision");
+    const listenings = auditum?.listenings;
+    const commonValid = typeof subject === "string"
+      && subject.trim().length > 0
+      && auditum?.contract === AUDITUM_CONTRACT
+      && Array.isArray(listenings);
+    const decisionOnly = commonValid && listenings.length === 0 && hasPreCaptureStop(auditum);
+    const listeningOnly = commonValid && listenings.length > 0 && hasRawAudioAbsence(auditum);
+    if (!decisionOnly && !listeningOnly) {
+      throw new Error("createAkousma: audio may be omitted only for a decision-only auditum/v2 input/capture stop, or for a listening-only auditum/v2 record with an unavailable/not_retained raw-audio absence");
     }
   }
   if (typeof originatingApp !== "string" || originatingApp.length === 0) {
@@ -343,7 +401,7 @@ function auditumErrors(auditum, path) {
 }
 
 /**
- * Build an akousma v1.5 auditum/v2 block. "Tokenized" means structured,
+ * Build an akousma v1.6 auditum/v2 block. "Tokenized" means structured,
  * attributable, versioned, and addressable — never a financial token.
  */
 export function createAuditum({
@@ -452,9 +510,15 @@ export function akousmaShapeErrors(record) {
     errors.push("audio.asset_id: required");
   }
   if (!audio) {
-    const decisions = record.auditum?.route_decisions;
-    if (typeof record.subject !== "string" || record.subject.length === 0 || record.auditum?.contract !== AUDITUM_CONTRACT || !Array.isArray(decisions) || decisions.length === 0) {
-      errors.push("audio or a decision-only subject/auditum is required");
+    const listenings = record.auditum?.listenings;
+    const commonValid = typeof record.subject === "string"
+      && record.subject.trim().length > 0
+      && record.auditum?.contract === AUDITUM_CONTRACT
+      && Array.isArray(listenings);
+    const decisionOnly = commonValid && listenings.length === 0 && hasPreCaptureStop(record.auditum);
+    const listeningOnly = commonValid && listenings.length > 0 && hasRawAudioAbsence(record.auditum);
+    if (!decisionOnly && !listeningOnly) {
+      errors.push("audio, a decision-only subject/auditum, or a listening-only subject/auditum with an unavailable/not_retained raw-audio absence is required");
     }
   }
   const provenance = record.provenance ?? {};

@@ -1,5 +1,8 @@
+import json
+import sqlite3
 import tempfile
 import unittest
+from pathlib import Path
 
 import akousma
 
@@ -14,6 +17,40 @@ def proceed_decision(listening_id: str = "lst_1") -> dict:
         actor="test-listener",
         listening_id=listening_id,
         producer_contract="akouo/v0.9",
+    )
+
+
+def attributable_listening(
+    listener_type: str = "human",
+    listening_id: str = "lst_human_1",
+) -> dict:
+    return {
+        "listening_id": listening_id,
+        "listener_id": f"{listener_type}-listener-1",
+        "listener_type": listener_type,
+        "created_at": "2026-08-11T15:00:00Z",
+        "report_namespace": f"{listener_type}.note",
+        "contract": "akouo/v0.9",
+    }
+
+
+def listening_only_auditum(
+    *,
+    listener_type: str = "human",
+    listening_id: str = "lst_human_1",
+    revision: dict | None = None,
+) -> dict:
+    return akousma.auditum(
+        listenings=[attributable_listening(listener_type, listening_id)],
+        honest_absences=[{
+            "id": f"absence-{listening_id}",
+            "kind": "not_retained",
+            "subject": "raw audio",
+            "attributed_to": "local retention boundary",
+            "listening_id": listening_id,
+        }],
+        route_decisions=[proceed_decision(listening_id)],
+        revision=revision,
     )
 
 
@@ -33,6 +70,86 @@ class TestAkousmaRecord(unittest.TestCase):
         self.assertEqual(akousma.validation_errors(rec), [])
         self.assertTrue(rec["akousma_id"].startswith("akm_"))
         self.assertEqual(rec["schema_version"], akousma.SCHEMA_VERSION)
+
+    def test_listening_only_record_is_valid_without_fabricated_audio(self):
+        rec = akousma.new_akousma(
+            originating_app="akousmata",
+            source_type="unknown",
+            origin="live-input",
+            subject="night insects heard from an open window",
+            listening={"human.note": {"payload": {"notes": "a sparse foreground pulse"}}},
+            auditum=listening_only_auditum(),
+        )
+        self.assertEqual(rec["schema_version"], "1.6.0")
+        self.assertNotIn("audio", rec)
+        self.assertEqual(akousma.validation_errors(rec), [])
+        self.assertEqual(akousma.listener_types(rec), ("human",))
+        self.assertEqual(akousma.record_class(rec), "human")
+
+    def test_listening_only_record_requires_raw_audio_absence(self):
+        block = listening_only_auditum()
+        block["honest_absences"] = []
+        with self.assertRaisesRegex(ValueError, "raw-audio absence"):
+            akousma.new_akousma(
+                originating_app="akousmata",
+                subject="unrecorded listening",
+                auditum=block,
+            )
+
+        block["route_decisions"] = [akousma.route_decision(
+            "decision-capture-with-listening",
+            gate="capture",
+            outcome="refuse",
+            subject="later capture request",
+            reason="A stop decision does not turn an attributable listening into decision-only memory.",
+            actor="human-listener-1",
+            listening_id="lst_human_1",
+        )]
+        with self.assertRaisesRegex(ValueError, "raw-audio absence"):
+            akousma.new_akousma(
+                originating_app="akousmata",
+                subject="ambiguous stopped listening",
+                auditum=block,
+            )
+
+        with_audio = akousma.new_akousma(
+            audio={"asset_id": "a1"},
+            originating_app="akousmata",
+            auditum=block,
+        )
+        with_audio.pop("audio")
+        with_audio["subject"] = "unrecorded listening"
+        self.assertTrue(akousma.validation_errors(with_audio))
+
+    def test_shared_listening_only_fixture_has_python_parity(self):
+        fixture = json.loads(
+            (Path(__file__).parents[3] / "tests/fixtures/human-listening-only.akousma.json").read_text()
+        )
+        self.assertEqual(akousma.validation_errors(fixture), [])
+        self.assertEqual(akousma.listener_types(fixture), ("human",))
+        self.assertEqual(akousma.record_class(fixture), "human")
+
+    def test_record_class_preserves_non_equivalent_listener_types(self):
+        def record_for(*types: str) -> dict:
+            listenings = [
+                attributable_listening(listener_type, f"lst_{index}")
+                for index, listener_type in enumerate(types)
+            ]
+            return {
+                "auditum": {
+                    "listenings": listenings,
+                    "route_decisions": [proceed_decision(listenings[0]["listening_id"])] if listenings else [],
+                }
+            }
+
+        self.assertEqual(akousma.record_class(record_for("human")), "human")
+        self.assertEqual(akousma.record_class(record_for("agent")), "agent")
+        self.assertEqual(akousma.record_class(record_for("human", "agent")), "hybrid")
+        self.assertEqual(akousma.record_class(record_for("hybrid")), "hybrid")
+        ecological = record_for("sensor", "habitat")
+        self.assertEqual(akousma.listener_types(ecological), ("sensor", "habitat"))
+        self.assertEqual(akousma.record_class(ecological), "plural_other")
+        self.assertEqual(akousma.record_class({}), "legacy")
 
     def test_invalid_is_detected(self):
         bad = {"akousma_id": "x", "schema_version": "1.0.0", "created_at": "now"}  # missing audio/provenance/lineage
@@ -171,7 +288,7 @@ class TestAkousmaRecord(unittest.TestCase):
             audio={"asset_id": "a1"}, originating_app="oida", auditum=block
         )
         self.assertEqual(akousma.validation_errors(rec), [])
-        self.assertEqual(rec["schema_version"], "1.5.0")
+        self.assertEqual(rec["schema_version"], "1.6.0")
         self.assertEqual(rec["auditum"]["contract"], "earworm/auditum/v2")
         self.assertEqual(len(rec["auditum"]["listenings"]), 2)
         self.assertEqual(rec["auditum"]["disagreements"][0]["status"], "preserved")
@@ -331,10 +448,7 @@ class TestAkousmaRecord(unittest.TestCase):
                 actor="test",
             )],
         }
-        self.assertIn(
-            "<root>: audio or a decision-only subject/auditum is required",
-            akousma._fallback_validation_errors(rec),
-        )
+        self.assertTrue(akousma._fallback_validation_errors(rec))
 
     def test_decision_only_record_requires_precapture_stop(self):
         with self.assertRaises(ValueError):
@@ -476,6 +590,107 @@ class TestAkousmataStore(unittest.TestCase):
             parent["akousma_id"],
         )
 
+    def test_listener_indexes_and_revision_heads(self):
+        root = akousma.new_akousma(
+            originating_app="akousmata",
+            subject="unrecorded dawn listening",
+            auditum=listening_only_auditum(listening_id="lst_root"),
+        )
+        root["created_at"] = "2026-08-11T15:00:00Z"
+        self.store.put(root)
+
+        revision = {
+            "revision_id": "rev_human_1",
+            "revises_akousma_id": root["akousma_id"],
+            "reason": "listener correction",
+            "changes": ["corrected foreground pulse count"],
+            "created_at": "2026-08-11T15:10:00Z",
+        }
+        child = akousma.new_akousma(
+            originating_app="akousmata",
+            subject="unrecorded dawn listening",
+            auditum=listening_only_auditum(
+                listening_id="lst_corrected",
+                revision=revision,
+            ),
+        )
+        child["created_at"] = "2026-08-11T15:10:00Z"
+        self.store.put(child)
+
+        self.assertEqual(
+            [record["akousma_id"] for record in self.store.query(listener_type="human")],
+            [child["akousma_id"], root["akousma_id"]],
+        )
+        self.assertEqual(
+            [record["akousma_id"] for record in self.store.query(record_class="human")],
+            [child["akousma_id"], root["akousma_id"]],
+        )
+        self.assertEqual(
+            [record["akousma_id"] for record in self.store.query(revision_of=root["akousma_id"])],
+            [child["akousma_id"]],
+        )
+        self.assertEqual(
+            [record["akousma_id"] for record in self.store.revision_chain(root["akousma_id"])],
+            [root["akousma_id"], child["akousma_id"]],
+        )
+        self.assertEqual(
+            [record["akousma_id"] for record in self.store.revision_heads(root["akousma_id"])],
+            [child["akousma_id"]],
+        )
+        self.assertEqual(self.store.current_head(root["akousma_id"])["akousma_id"], child["akousma_id"])
+        with self.assertRaises(ValueError):
+            self.store.query(listener_type="machine")
+        with self.assertRaises(ValueError):
+            self.store.query(record_class="machine")
+
+    def test_divergent_revision_heads_are_not_collapsed(self):
+        root = akousma.new_akousma(
+            audio={"asset_id": "revision-root"},
+            originating_app="oida",
+        )
+        self.store.put(root)
+        for index in (1, 2):
+            block = akousma.auditum(
+                route_decisions=[akousma.route_decision(
+                    f"decision-branch-{index}",
+                    gate="capture",
+                    outcome="refuse",
+                    subject="re-listening capture",
+                    reason="The branch records an accountable stop.",
+                    actor="test-listener",
+                )],
+                revision={
+                    "revision_id": f"rev_branch_{index}",
+                    "revises_akousma_id": root["akousma_id"],
+                    "reason": f"branch {index}",
+                    "changes": ["route decision"],
+                    "created_at": f"2026-08-11T15:0{index}:00Z",
+                },
+            )
+            branch = akousma.new_akousma(
+                audio={"asset_id": f"revision-branch-{index}"},
+                originating_app="oida",
+                auditum=block,
+            )
+            branch["created_at"] = f"2026-08-11T15:0{index}:00Z"
+            self.store.put(branch)
+        self.assertEqual(len(self.store.revision_heads(root["akousma_id"])), 2)
+        with self.assertRaisesRegex(ValueError, "current heads"):
+            self.store.current_head(root["akousma_id"])
+
+    def test_human_listening_account_is_not_mutable_in_place(self):
+        record = akousma.new_akousma(
+            originating_app="akousmata",
+            subject="unrecorded human listening",
+            listening={"human.note": {"payload": {"notes": "first account"}}},
+            auditum=listening_only_auditum(),
+        )
+        self.store.put(record)
+        overwritten = self.store.get(record["akousma_id"])
+        overwritten["listening"]["human.note"]["payload"]["notes"] = "silently rewritten"
+        with self.assertRaisesRegex(ValueError, "auditum.revision"):
+            self.store.put(overwritten)
+
     def test_relations_roundtrip(self):
         first = akousma.new_akousma(
             audio={"asset_id": "a1"}, originating_app="oida", summary="harbor, first take"
@@ -593,6 +808,52 @@ class TestAkousmataStore(unittest.TestCase):
         self.assertEqual(count, 2)
         self.assertEqual(self.store.parents(b["akousma_id"]), [a["akousma_id"]])
         self.assertEqual(self.store.relations(b["akousma_id"]), [{"type": "variant_of", "target_akousma_id": a["akousma_id"]}])
+
+    def test_existing_store_migrates_listener_indexes_without_rewriting_json(self):
+        with tempfile.TemporaryDirectory() as legacy_root:
+            record = akousma.new_akousma(
+                audio={"asset_id": "legacy-human-audio"},
+                originating_app="akousmata",
+                auditum=listening_only_auditum(),
+            )
+            record["schema_version"] = "1.5.0"
+            raw_record = json.dumps(record, separators=(",", ":"), ensure_ascii=False)
+            db_path = Path(legacy_root) / "index.sqlite"
+            connection = sqlite3.connect(db_path)
+            connection.execute(
+                """CREATE TABLE akousmata (
+                   akousma_id TEXT PRIMARY KEY, created_at TEXT NOT NULL,
+                   originating_app TEXT, source_type TEXT, origin TEXT,
+                   content_hash TEXT, session_id TEXT, lat REAL, lon REAL,
+                   covenant_id TEXT, auditum_contract TEXT,
+                   listening_count INTEGER NOT NULL DEFAULT 0,
+                   disagreement_count INTEGER NOT NULL DEFAULT 0,
+                   honest_absence_count INTEGER NOT NULL DEFAULT 0,
+                   route_decision_count INTEGER NOT NULL DEFAULT 0,
+                   stop_decision_count INTEGER NOT NULL DEFAULT 0,
+                   record TEXT NOT NULL
+                )"""
+            )
+            connection.execute(
+                "INSERT INTO akousmata (akousma_id, created_at, record) VALUES (?,?,?)",
+                (record["akousma_id"], record["created_at"], raw_record),
+            )
+            connection.commit()
+            connection.close()
+
+            with akousma.AkousmataStore(legacy_root) as migrated:
+                stored_raw = migrated.conn.execute(
+                    "SELECT record FROM akousmata WHERE akousma_id=?", (record["akousma_id"],)
+                ).fetchone()["record"]
+                self.assertEqual(stored_raw, raw_record)
+                self.assertEqual(
+                    [item["akousma_id"] for item in migrated.query(listener_type="human")],
+                    [record["akousma_id"]],
+                )
+                self.assertEqual(
+                    [item["akousma_id"] for item in migrated.query(record_class="human")],
+                    [record["akousma_id"]],
+                )
 
     def test_tags_counts(self):
         for tags in (["harbor", "field"], ["harbor"], []):

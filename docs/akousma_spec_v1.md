@@ -1,4 +1,4 @@
-# Akousma — the sonic memory record (spec v1.5)
+# Akousma — the sonic memory record (spec v1.6)
 
 > **akousma** (ἄκουσμα, "a thing heard"; plural **akousmata**) — one sound's memory:
 > its audio, where it came from, what was heard in it, and how it relates to other sounds.
@@ -50,17 +50,27 @@ listeners or routes remain plural listening unless they demonstrably redirect
 one another. Forgetting removes the record while leaving a separate,
 content-free `earworm/forgetting-receipt/v1` receipt in the store.
 
+Spec v1.6 (Earworm v0.7) adds listening-only records without weakening the
+audio boundary. A record may omit `audio` after listening only when it carries
+a non-empty `subject`, an `earworm/auditum/v2` block with at least one
+attributable listening, and an honest absence whose subject is `raw audio` and
+whose kind is `unavailable` or `not_retained`. Decision-only records remain a
+separate no-audio case: they have no listening pass and require a pre-capture
+stop. The auditum contract remains v2. Stores index the complete listener-type
+set, a coarse navigation class, and direct revision targets without changing
+the canonical JSON record.
+
 ## Blocks
 
 | Block | Meaning |
 |---|---|
 | `akousma_id` | Stable id for this record (`akm_` + 26-char base32, ULID-style). |
-| `schema_version` | Semver of this record's shape (`1.5.0`; all v1.x records remain valid). |
+| `schema_version` | Semver of this record's shape (`1.6.0`; all v1.x records remain valid). |
 | `created_at` | ISO-8601 UTC. |
 | `session_id` | Optional link to the Earworm session this record was reconstructed from. |
 | `summary` | *(v1.1)* One-line human-readable account of the sound for skimming and search. Audio has no skim affordance of its own — the summary is the record's answer to the demand of duration. |
-| `subject` | *(v1.5)* Category-level object of an attempted listening when input or capture was refused before audio existed. It never contains withheld content. |
-| `audio` | The sound: `asset_id`, `uri`, `content_hash`, `duration_seconds`, `sample_rate`, `channels`, `provenance_id`, and *(v1.1)* `media` (`container`, `codec`, `bit_depth`, `codec_history[]`). Required for ordinary records; omitted only by an auditum/v2 decision-only record with `subject` and a pre-capture stop decision. |
+| `subject` | *(v1.5; expanded v1.6)* Category-level object of an attempted or completed listening when no audio asset exists. It never contains withheld content. |
+| `audio` | The sound: `asset_id`, `uri`, `content_hash`, `duration_seconds`, `sample_rate`, `channels`, `provenance_id`, and *(v1.1)* `media` (`container`, `codec`, `bit_depth`, `codec_history[]`). Required except for a decision-only record with a pre-capture stop, or a v1.6 listening-only record with attributable listening and an explicit unavailable/not-retained `raw audio` absence. |
 | `provenance` | Where it came from: `source_type` (Earworm vocabulary: generated/recorded/imported/cloned/designed/unknown), `origin` (app-level: live-input/system-output/file/generated/unknown), `originating_app` (`oida`/`germ`/`algophony`), `device`, `provider`, `model_id`, `seed`, `consent_status`, and *(v1.1)* `capture_conditions`, `rights_note`, `pipeline_effects[]` (which of the seven technological effects — capture, telephony, acousmatization, amplification, phonofixation, phonogeneration, reshaping — the sound has passed through). Mirrors Earworm `provenance-record`. |
 | `listening` | What was heard, **namespaced per producer**: `oida.signal`, `akouo.<skill>`, `oida.moss`, … Open object. *(v1.1 recommended envelope per entry:)* `{contract?, created_at, summary?, payload}` — `contract` pins the producer's contract (e.g. `akouo/v0.6`) so consumers know which claim discipline shaped the payload. |
 | `lineage` | How it relates: `parent_akousma_ids[]` (the causal genealogy every app must understand), `operation`, `prompt`, `model`, `params`, `event_ids[]` linking to the Earworm event log, and *(v1.1)* `relations[]` — typed curatorial links (`variant_of`, `response_to`, `same_source_as`, `recurrence_of`, `series_with`, `compares_with`, `replaces`, `other`) with `target_akousma_id` and optional `note`. |
@@ -69,7 +79,7 @@ content-free `earworm/forgetting-receipt/v1` receipt in the store.
 | `location` | *(v1.2)* Where the sound was heard: `lat` / `lon` (required inside the block), `accuracy_m`, `altitude_m`, `label` (human place name), `source` (gps / network / manual / config / inferred), `captured_at`. Optional and consent-scoped — producers attach it only when the listener granted it; navigators may add or correct it afterwards. The listening map reads this block. |
 | `capture` | *(v1.2)* How the listening was triggered: `direction` (`past` = the seconds already in the ring buffer when the trigger fired; `future` = the seconds recorded after it; `live` = an open-ended or manual session), `seconds` (window length), `trigger` (hotkey / remote-ear / mcp / dashboard / watcher / …), `armed_at`, `triggered_at`. Device and format detail stay in `provenance` / `audio`. |
 | `covenant` | *(v1.3)* Under which ethics this was listened: the listening covenant's `id` (required inside the block), `name`, `version`, `contract` (e.g. `akouo/v0.7`), `sha256` of its source text, `extends` (declared lineage — manifestos, community protocols, parent covenants), `rules_applied`, `withheld[]` (`{rule, subject, count}` — honest absence: named by category, never described), `commitments` (count). Identity and consequences travel; the covenant's text stays with its author. |
-| `auditum` | *(v1.5)* Durable accountable-listening index. Legacy contract `earworm/auditum/v1` remains valid. Current `earworm/auditum/v2` adds required `route_decisions[]`, permits zero `listenings[]` only for a pre-capture stop, references AKOÚŌ listening passes/provenance/decisions, and optionally declares plural listening or an ear swarm. It references producer reports in `listening`; it does not redefine AKOÚŌ claims. |
+| `auditum` | *(v1.5; expanded v1.6)* Durable accountable-listening index. Legacy contract `earworm/auditum/v1` remains valid. Current `earworm/auditum/v2` requires `route_decisions[]`, permits zero `listenings[]` only for a pre-capture stop, and permits a listening-only no-audio record only with attributable listening plus the canonical raw-audio absence. It references AKOÚŌ listening passes/provenance/decisions and producer reports in `listening`; it does not redefine AKOÚŌ claims. |
 
 ## Rules
 
@@ -129,10 +139,18 @@ content-free `earworm/forgetting-receipt/v1` receipt in the store.
     content-free receipt containing identifiers and deletion outcomes—not the
     forgotten summary, tags, location, URI, hash, or content. A forgotten id
     cannot be silently resurrected.
+15. **No retained audio is not no listening.** *(v1.6)* A completed,
+    attributable listening may survive without an audio asset. Its subject and
+    auditum remain, while an honest absence says specifically that `raw audio`
+    was `unavailable` or `not_retained`. This case must not fabricate an asset,
+    and it must not be confused with a decision-only record whose ear never
+    opened. Listener types remain canonical facets; the derived record class is
+    only a navigation aid and never relabels community, institutional, sensor,
+    habitat, other-animal, ensemble, or other listening.
 
 ## How each app uses it
 
-- **oída** (generative ears): writes an akousma on every accepted listen and a decision-only akousma when input or capture is refused — `provenance.origin` = live-input /
+- **oída** (generative ears): writes an akousma on every accepted listen, a linked listening-only akousma when a human account has no retained audio, and a decision-only akousma when input or capture is refused — `provenance.origin` = live-input /
   system-output / file; `listening` from the signal listener + MOSS + AKOÚŌ skills. The three UI
   buttons ("open as sound", "open as prompt", "explore lineage") hand an `akousma_id` to germ.
   *(v1.2)* oída fills `capture` on every triggered listen (direction past/future + seconds) and

@@ -125,6 +125,7 @@ export {
   AUDITUM_ACTION_STATUSES,
   AUDITUM_DECISION_GATES,
   AUDITUM_DECISION_OUTCOMES,
+  AKOUSMA_RECORD_CLASSES,
   GERM_IMPORT_MODES,
   newAkousmaId,
   createAkousma,
@@ -132,6 +133,9 @@ export {
   createRouteDecision,
   akousmaRelation,
   addListening,
+  listenerTypes,
+  recordClass,
+  revisionOf,
   akousmaShapeErrors,
   germImportUrl
 } from "./akousma.js";

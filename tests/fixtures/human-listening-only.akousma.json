@@ -1,0 +1,77 @@
+{
+  "akousma_id": "akm_01K2D3HUMANLISTENING00001",
+  "schema_version": "1.6.0",
+  "created_at": "2026-08-11T15:00:00Z",
+  "subject": "night insects heard from an open window",
+  "provenance": {
+    "source_type": "unknown",
+    "origin": "live-input",
+    "originating_app": "akousmata",
+    "created_at": "2026-08-11T15:00:00Z"
+  },
+  "listening": {
+    "human.note": {
+      "contract": "akouo/v0.9",
+      "created_at": "2026-08-11T15:00:00Z",
+      "summary": "A sparse pulse above a continuous insect bed.",
+      "payload": {
+        "notes": "The foreground pulse appeared three times; its source remained undetermined."
+      }
+    }
+  },
+  "lineage": {
+    "parent_akousma_ids": []
+  },
+  "tags": [
+    "human-listening"
+  ],
+  "annotations": {},
+  "extensions": {},
+  "summary": "A human listening account without retained raw audio.",
+  "auditum": {
+    "contract": "earworm/auditum/v2",
+    "listenings": [
+      {
+        "listening_id": "lst_human_001",
+        "listener_id": "local-listener-001",
+        "listener_type": "human",
+        "created_at": "2026-08-11T15:00:00Z",
+        "report_namespace": "human.note",
+        "contract": "akouo/v0.9",
+        "note": "Embodied listening; no recording was retained."
+      }
+    ],
+    "disagreements": [],
+    "honest_absences": [
+      {
+        "id": "absence_raw_audio_001",
+        "kind": "not_retained",
+        "subject": "raw audio",
+        "attributed_to": "local retention boundary",
+        "listening_id": "lst_human_001",
+        "count": 1,
+        "note": "The account preserves the hearing, not a fabricated asset."
+      }
+    ],
+    "actions": [],
+    "route_decisions": [
+      {
+        "decision_id": "decision_memory_001",
+        "gate": "memory",
+        "outcome": "proceed",
+        "subject": "human listening account",
+        "reason": "The listener explicitly chose to retain their account.",
+        "decided_at": "2026-08-11T15:01:00Z",
+        "listening_id": "lst_human_001",
+        "producer_contract": "akouo/v0.9",
+        "authority": {
+          "mode": "request",
+          "actor": "local-listener-001",
+          "granted_by": "local-listener-001",
+          "requires_confirmation": true,
+          "reversible": true
+        }
+      }
+    ]
+  }
+}

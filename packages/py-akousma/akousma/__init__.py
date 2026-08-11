@@ -19,7 +19,7 @@ from hashlib import sha256
 from pathlib import Path
 from typing import Any, Iterable
 
-SCHEMA_VERSION = "1.5.0"
+SCHEMA_VERSION = "1.6.0"
 AUDITUM_CONTRACT = "earworm/auditum/v2"
 LEGACY_AUDITUM_CONTRACT = "earworm/auditum/v1"
 FORGETTING_RECEIPT_CONTRACT = "earworm/forgetting-receipt/v1"
@@ -66,6 +66,15 @@ AUDITUM_ACTION_STATUSES = ("proposed", "authorized", "refused", "executed", "fai
 AUDITUM_DECISION_GATES = ("input", "capture", "inference", "memory", "output", "disclosure", "retention", "action")
 AUDITUM_DECISION_OUTCOMES = ("proceed", "pause", "defer", "abstain", "refuse", "withhold", "forget", "do_not_act")
 
+RECORD_CLASSES = (
+    "human",
+    "agent",
+    "hybrid",
+    "plural_other",
+    "decision_only",
+    "legacy",
+)
+
 _CROCKFORD = "0123456789ABCDEFGHJKMNPQRSTVWXYZ"
 
 
@@ -92,6 +101,84 @@ def load_schema() -> dict[str, Any]:
     return json.loads(_SCHEMA_PATH.read_text())
 
 
+def _has_precapture_stop(auditum_block: dict[str, Any]) -> bool:
+    decisions = auditum_block.get("route_decisions")
+    return isinstance(decisions, list) and any(
+        isinstance(item, dict)
+        and item.get("gate") in {"input", "capture"}
+        and item.get("outcome") in {"pause", "defer", "abstain", "refuse", "withhold"}
+        for item in decisions
+    )
+
+
+def _has_raw_audio_absence(auditum_block: dict[str, Any]) -> bool:
+    absences = auditum_block.get("honest_absences")
+    return isinstance(absences, list) and any(
+        isinstance(item, dict)
+        and item.get("kind") in {"unavailable", "not_retained"}
+        and item.get("subject") == "raw audio"
+        for item in absences
+    )
+
+
+def listener_types(record: dict[str, Any]) -> tuple[str, ...]:
+    """Return the canonical attributable listener types in stable vocabulary order.
+
+    This is a lossless facet: community, institution, sensor, habitat,
+    other-animal, ensemble, and other listening are never relabelled as human
+    or machine.
+    """
+    auditum_block = record.get("auditum")
+    listenings = auditum_block.get("listenings") if isinstance(auditum_block, dict) else None
+    if not isinstance(listenings, list):
+        return ()
+    present = {
+        item.get("listener_type")
+        for item in listenings
+        if isinstance(item, dict) and item.get("listener_type") in AUDITUM_LISTENER_TYPES
+    }
+    return tuple(listener_type for listener_type in AUDITUM_LISTENER_TYPES if listener_type in present)
+
+
+def record_class(record: dict[str, Any]) -> str:
+    """Derive a coarse navigation class without replacing listener types.
+
+    ``plural_other`` means that at least one attributable listener is outside
+    the human/agent/hybrid triad; callers must inspect :func:`listener_types`
+    for the preserved canonical types. Records without a usable attributable
+    auditum remain ``legacy``.
+    """
+    auditum_block = record.get("auditum")
+    if not isinstance(auditum_block, dict):
+        return "legacy"
+    listenings = auditum_block.get("listenings")
+    if not isinstance(listenings, list):
+        return "legacy"
+    if not listenings:
+        return "decision_only" if _has_precapture_stop(auditum_block) else "legacy"
+    if any(
+        not isinstance(item, dict) or item.get("listener_type") not in AUDITUM_LISTENER_TYPES
+        for item in listenings
+    ):
+        return "legacy"
+    types = set(listener_types(record))
+    if types == {"human"}:
+        return "human"
+    if types == {"agent"}:
+        return "agent"
+    if types and types.issubset({"human", "agent", "hybrid"}):
+        return "hybrid"
+    return "plural_other"
+
+
+def revision_of(record: dict[str, Any]) -> str | None:
+    """Return the directly revised akousma id, if this is a revision record."""
+    auditum_block = record.get("auditum")
+    revision = auditum_block.get("revision") if isinstance(auditum_block, dict) else None
+    target = revision.get("revises_akousma_id") if isinstance(revision, dict) else None
+    return target if isinstance(target, str) and target else None
+
+
 def _fallback_validation_errors(record: dict[str, Any]) -> list[str]:
     """Validate the record's required structural boundary without jsonschema."""
     errors: list[str] = []
@@ -107,21 +194,21 @@ def _fallback_validation_errors(record: dict[str, Any]) -> list[str]:
             errors.append("audio: 'asset_id' is required")
     else:
         auditum_block = record.get("auditum")
-        decisions = auditum_block.get("route_decisions", []) if isinstance(auditum_block, dict) else []
-        has_precapture_stop = any(
-            isinstance(item, dict)
-            and item.get("gate") in {"input", "capture"}
-            and item.get("outcome") in {"pause", "defer", "abstain", "refuse", "withhold"}
-            for item in decisions
+        listenings = auditum_block.get("listenings") if isinstance(auditum_block, dict) else None
+        common_valid = (
+            isinstance(record.get("subject"), str)
+            and bool(record["subject"].strip())
+            and isinstance(auditum_block, dict)
+            and auditum_block.get("contract") == AUDITUM_CONTRACT
+            and isinstance(listenings, list)
         )
-        if (
-            not isinstance(record.get("subject"), str)
-            or not record["subject"]
-            or not isinstance(auditum_block, dict)
-            or auditum_block.get("contract") != AUDITUM_CONTRACT
-            or not has_precapture_stop
-        ):
-            errors.append("<root>: audio or a decision-only subject/auditum is required")
+        decision_only = common_valid and not listenings and _has_precapture_stop(auditum_block)
+        listening_only = common_valid and bool(listenings) and _has_raw_audio_absence(auditum_block)
+        if not decision_only and not listening_only:
+            errors.append(
+                "<root>: audio, a decision-only subject/auditum, or a listening-only "
+                "subject/auditum with an unavailable/not_retained raw-audio absence is required"
+            )
 
     if isinstance(record.get("lineage"), dict) and "parent_akousma_ids" not in record["lineage"]:
         errors.append("lineage: 'parent_akousma_ids' is required")
@@ -174,25 +261,32 @@ def new_akousma(
     auditum: dict[str, Any] | None = None,
     subject: str | None = None,
 ) -> dict[str, Any]:
-    """Build an akousma v1.5 record.
+    """Build an akousma v1.6 record.
 
     Normal records require ``audio.asset_id``. A decision-only record may omit
     audio only when ``subject`` is category-level text and an auditum/v2
-    capture/input decision records why the ear never opened.
+    capture/input decision records why the ear never opened. A listening-only
+    record may omit audio when it has an attributable auditum/v2 listening and
+    an honest absence saying raw audio was unavailable or not retained.
     """
     if audio is not None and (not isinstance(audio.get("asset_id"), str) or not audio["asset_id"]):
         raise ValueError("new_akousma: audio.asset_id is required when audio is supplied")
     if audio is None:
-        decisions = auditum.get("route_decisions") if isinstance(auditum, dict) else None
-        has_precapture_stop = any(
-            isinstance(item, dict)
-            and item.get("gate") in {"input", "capture"}
-            and item.get("outcome") in {"pause", "defer", "abstain", "refuse", "withhold"}
-            for item in (decisions or [])
+        listenings = auditum.get("listenings") if isinstance(auditum, dict) else None
+        common_valid = (
+            isinstance(subject, str)
+            and bool(subject.strip())
+            and isinstance(auditum, dict)
+            and auditum.get("contract") == AUDITUM_CONTRACT
+            and isinstance(listenings, list)
         )
-        if not subject or not isinstance(auditum, dict) or auditum.get("contract") != AUDITUM_CONTRACT or not has_precapture_stop:
+        decision_only = common_valid and not listenings and _has_precapture_stop(auditum)
+        listening_only = common_valid and bool(listenings) and _has_raw_audio_absence(auditum)
+        if not decision_only and not listening_only:
             raise ValueError(
-                "new_akousma: audio may be omitted only with a subject and an auditum/v2 input or capture stop decision"
+                "new_akousma: audio may be omitted only for a decision-only auditum/v2 "
+                "input/capture stop, or for a listening-only auditum/v2 record with an "
+                "unavailable/not_retained raw-audio absence"
             )
     lineage: dict[str, Any] = {"parent_akousma_ids": list(parent_akousma_ids or [])}
     for k, v in (("operation", operation), ("prompt", prompt), ("model", model)):
@@ -438,7 +532,7 @@ def auditum(
     ensemble: dict[str, Any] | None = None,
     revision: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
-    """Build the v1.5 addressable auditum/v2 block.
+    """Build the v1.6 addressable auditum/v2 block.
 
     Each listening remains attributable to one listener and report namespace;
     disagreement is preserved between listening ids rather than collapsed into
@@ -602,6 +696,9 @@ class AkousmataStore:
         self._init_db()
 
     def _init_db(self) -> None:
+        listener_index_existed = self.conn.execute(
+            "SELECT 1 FROM sqlite_master WHERE type='table' AND name='listener_type_index'"
+        ).fetchone() is not None
         self.conn.executescript(
             """
             CREATE TABLE IF NOT EXISTS akousmata (
@@ -612,6 +709,8 @@ class AkousmataStore:
               origin          TEXT,
               content_hash    TEXT,
               session_id      TEXT,
+              record_class    TEXT NOT NULL DEFAULT 'legacy',
+              revision_of     TEXT,
               record          TEXT NOT NULL
             );
             CREATE TABLE IF NOT EXISTS lineage_edges (
@@ -627,6 +726,12 @@ class AkousmataStore:
               PRIMARY KEY (from_id, rel_type, to_id)
             );
             CREATE INDEX IF NOT EXISTS idx_relation_to ON relation_edges(to_id);
+            CREATE TABLE IF NOT EXISTS listener_type_index (
+              akousma_id   TEXT NOT NULL,
+              listener_type TEXT NOT NULL,
+              PRIMARY KEY (akousma_id, listener_type)
+            );
+            CREATE INDEX IF NOT EXISTS idx_listener_type ON listener_type_index(listener_type, akousma_id);
             CREATE INDEX IF NOT EXISTS idx_akousmata_hash ON akousmata(content_hash);
             CREATE INDEX IF NOT EXISTS idx_akousmata_created ON akousmata(created_at);
             CREATE TABLE IF NOT EXISTS forgetting_receipts (
@@ -666,9 +771,24 @@ class AkousmataStore:
             self.conn.execute("ALTER TABLE akousmata ADD COLUMN route_decision_count INTEGER NOT NULL DEFAULT 0")
         if "stop_decision_count" not in columns:
             self.conn.execute("ALTER TABLE akousmata ADD COLUMN stop_decision_count INTEGER NOT NULL DEFAULT 0")
+        # v0.7 / akousma v1.6: listener types stay lossless in a normalized
+        # index; record_class is only a coarse navigator facet. Revision
+        # targets are hoisted for chain/head lookups. Existing JSON is never
+        # rewritten during migration.
+        derived_index_changed = not listener_index_existed
+        if "record_class" not in columns:
+            self.conn.execute("ALTER TABLE akousmata ADD COLUMN record_class TEXT NOT NULL DEFAULT 'legacy'")
+            derived_index_changed = True
+        if "revision_of" not in columns:
+            self.conn.execute("ALTER TABLE akousmata ADD COLUMN revision_of TEXT")
+            derived_index_changed = True
         self.conn.execute("CREATE INDEX IF NOT EXISTS idx_akousmata_auditum ON akousmata(auditum_contract)")
         self.conn.execute("CREATE INDEX IF NOT EXISTS idx_akousmata_disagreement ON akousmata(disagreement_count)")
         self.conn.execute("CREATE INDEX IF NOT EXISTS idx_akousmata_decision ON akousmata(route_decision_count, stop_decision_count)")
+        self.conn.execute("CREATE INDEX IF NOT EXISTS idx_akousmata_record_class ON akousmata(record_class, created_at)")
+        self.conn.execute("CREATE INDEX IF NOT EXISTS idx_akousmata_revision_of ON akousmata(revision_of)")
+        if derived_index_changed:
+            self._reindex_derived_metadata()
         self.conn.commit()
 
     @staticmethod
@@ -704,6 +824,38 @@ class AkousmataStore:
             len(decisions) if isinstance(decisions, list) else 0,
             sum(1 for item in decisions if isinstance(item, dict) and item.get("outcome") in stop_outcomes) if isinstance(decisions, list) else 0,
         )
+
+    def _replace_listener_type_index(self, akousma_id: str, types: Iterable[str]) -> None:
+        self.conn.execute("DELETE FROM listener_type_index WHERE akousma_id=?", (akousma_id,))
+        self.conn.executemany(
+            "INSERT OR IGNORE INTO listener_type_index (akousma_id, listener_type) VALUES (?,?)",
+            ((akousma_id, listener_type) for listener_type in types),
+        )
+
+    def _reindex_derived_metadata(self) -> None:
+        """Rebuild v0.7 facets without changing canonical record JSON."""
+        rows = self.conn.execute("SELECT akousma_id, record FROM akousmata").fetchall()
+        self.conn.execute("DELETE FROM listener_type_index")
+        for row in rows:
+            try:
+                record = json.loads(row["record"])
+            except (TypeError, json.JSONDecodeError):
+                self.conn.execute(
+                    "UPDATE akousmata SET record_class='legacy', revision_of=NULL WHERE akousma_id=?",
+                    (row["akousma_id"],),
+                )
+                continue
+            if not isinstance(record, dict):
+                self.conn.execute(
+                    "UPDATE akousmata SET record_class='legacy', revision_of=NULL WHERE akousma_id=?",
+                    (row["akousma_id"],),
+                )
+                continue
+            self.conn.execute(
+                "UPDATE akousmata SET record_class=?, revision_of=? WHERE akousma_id=?",
+                (record_class(record), revision_of(record), row["akousma_id"]),
+            )
+            self._replace_listener_type_index(row["akousma_id"], listener_types(record))
 
     @staticmethod
     def _protected_account(record: dict[str, Any]) -> dict[str, Any]:
@@ -778,8 +930,9 @@ class AkousmataStore:
         if self.forgotten(rid) is not None:
             raise ValueError(f"akousma {rid!r} has a forgetting receipt and cannot be silently resurrected")
         revision = record.get("auditum", {}).get("revision") if isinstance(record.get("auditum"), dict) else None
+        revision_target = revision_of(record)
         if isinstance(revision, dict):
-            target = revision.get("revises_akousma_id")
+            target = revision_target
             if target == rid:
                 raise ValueError("an auditum revision must use a fresh akousma_id, not revise itself")
             if not isinstance(target, str) or self.get(target) is None:
@@ -791,13 +944,16 @@ class AkousmataStore:
             )
         lat, lon = self._latlon(record)
         auditum_contract, listening_count, disagreement_count, honest_absence_count, route_decision_count, stop_decision_count = self._auditum_index(record)
+        types = listener_types(record)
+        derived_class = record_class(record)
         self.conn.execute(
             """INSERT OR REPLACE INTO akousmata
                (akousma_id, created_at, originating_app, source_type, origin,
                 content_hash, session_id, lat, lon, covenant_id, auditum_contract,
                 listening_count, disagreement_count, honest_absence_count,
-                route_decision_count, stop_decision_count, record)
-               VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+                route_decision_count, stop_decision_count, record_class,
+                revision_of, record)
+               VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
             (
                 rid,
                 record["created_at"],
@@ -815,9 +971,12 @@ class AkousmataStore:
                 honest_absence_count,
                 route_decision_count,
                 stop_decision_count,
+                derived_class,
+                revision_target,
                 json.dumps(record),
             ),
         )
+        self._replace_listener_type_index(rid, types)
         self.conn.execute("DELETE FROM lineage_edges WHERE child_id=?", (rid,))
         for parent in record.get("lineage", {}).get("parent_akousma_ids", []):
             self.conn.execute(
@@ -857,6 +1016,9 @@ class AkousmataStore:
         has_disagreement: bool | None = None,
         has_route_decision: bool | None = None,
         has_stop_decision: bool | None = None,
+        listener_type: str | None = None,
+        record_class: str | None = None,
+        revision_of: str | None = None,
         limit: int = 100,
     ) -> list[dict[str, Any]]:
         clauses, args = [], []
@@ -867,6 +1029,8 @@ class AkousmataStore:
             ("session_id", session_id),
             ("content_hash", content_hash),
             ("covenant_id", covenant_id),
+            ("record_class", record_class),
+            ("revision_of", revision_of),
         ):
             if val is not None:
                 clauses.append(f"{col}=?")
@@ -905,6 +1069,18 @@ class AkousmataStore:
             clauses.append("stop_decision_count>0")
         elif has_stop_decision is False:
             clauses.append("stop_decision_count=0")
+        if listener_type is not None:
+            if listener_type not in AUDITUM_LISTENER_TYPES:
+                raise ValueError(
+                    f"query: listener_type must be one of {', '.join(AUDITUM_LISTENER_TYPES)}"
+                )
+            clauses.append(
+                "EXISTS (SELECT 1 FROM listener_type_index AS lti "
+                "WHERE lti.akousma_id=akousmata.akousma_id AND lti.listener_type=?)"
+            )
+            args.append(listener_type)
+        if record_class is not None and record_class not in RECORD_CLASSES:
+            raise ValueError(f"query: record_class must be one of {', '.join(RECORD_CLASSES)}")
         where = f"WHERE {' AND '.join(clauses)}" if clauses else ""
         args.append(limit)
         # Column names and clauses above come only from fixed literals; all caller values are bound parameters.
@@ -919,6 +1095,76 @@ class AkousmataStore:
     def find_by_hash(self, content_hash: str) -> list[dict[str, Any]]:
         """All records carrying this audio content hash (dedupe / recurrence lookup)."""
         return self.query(content_hash=content_hash, limit=1000)
+
+    def revision_chain(self, akousma_id: str) -> list[dict[str, Any]]:
+        """Return the complete revision component, oldest first.
+
+        A component may branch; no branch is hidden or treated as consensus.
+        Use :meth:`revision_heads` to inspect every leaf and
+        :meth:`current_head` only when a unique head is required.
+        """
+        if self.get(akousma_id) is None:
+            return []
+        root = akousma_id
+        seen: set[str] = set()
+        while root not in seen:
+            seen.add(root)
+            row = self.conn.execute(
+                "SELECT revision_of FROM akousmata WHERE akousma_id=?", (root,)
+            ).fetchone()
+            parent = row["revision_of"] if row else None
+            if not isinstance(parent, str) or self.get(parent) is None:
+                break
+            root = parent
+
+        component_ids: set[str] = set()
+        stack = [root]
+        while stack:
+            current = stack.pop()
+            if current in component_ids:
+                continue
+            component_ids.add(current)
+            stack.extend(
+                row["akousma_id"]
+                for row in self.conn.execute(
+                    "SELECT akousma_id FROM akousmata WHERE revision_of=?", (current,)
+                ).fetchall()
+            )
+        placeholders = ",".join("?" for _ in component_ids)
+        rows = self.conn.execute(
+            f"SELECT record FROM akousmata WHERE akousma_id IN ({placeholders}) "  # nosemgrep: python.sqlalchemy.security.sqlalchemy-execute-raw-query.sqlalchemy-execute-raw-query
+            "ORDER BY created_at ASC, akousma_id ASC",
+            tuple(component_ids),
+        ).fetchall()
+        return [json.loads(row["record"]) for row in rows]
+
+    def revision_heads(self, akousma_id: str) -> list[dict[str, Any]]:
+        """Return every current leaf in a revision component, newest first."""
+        chain = self.revision_chain(akousma_id)
+        if not chain:
+            return []
+        component_ids = {record["akousma_id"] for record in chain}
+        revised_ids = {
+            target
+            for record in chain
+            if (target := revision_of(record)) in component_ids
+        }
+        return sorted(
+            (record for record in chain if record["akousma_id"] not in revised_ids),
+            key=lambda record: (record.get("created_at", ""), record["akousma_id"]),
+            reverse=True,
+        )
+
+    def current_head(self, akousma_id: str) -> dict[str, Any] | None:
+        """Return the unique revision head; reject divergent revision branches."""
+        heads = self.revision_heads(akousma_id)
+        if not heads:
+            return None
+        if len(heads) != 1:
+            raise ValueError(
+                f"akousma revision component for {akousma_id!r} has {len(heads)} current heads"
+            )
+        return heads[0]
 
     def parents(self, akousma_id: str) -> list[str]:
         return [
@@ -1155,6 +1401,7 @@ class AkousmataStore:
         self.conn.execute("DELETE FROM akousmata WHERE akousma_id=?", (akousma_id,))
         self.conn.execute("DELETE FROM lineage_edges WHERE child_id=?", (akousma_id,))
         self.conn.execute("DELETE FROM relation_edges WHERE from_id=?", (akousma_id,))
+        self.conn.execute("DELETE FROM listener_type_index WHERE akousma_id=?", (akousma_id,))
         self.conn.commit()
         return receipt
 
@@ -1197,11 +1444,11 @@ class AkousmataStore:
 
     # --- maintenance --------------------------------------------------------
     def reindex(self) -> int:
-        """Rebuild lineage and relation edges from the stored records (e.g. after
-        upgrading a store created before relations existed). Returns record count."""
+        """Rebuild edges and derived indexes without rewriting record JSON."""
         rows = self.conn.execute("SELECT record FROM akousmata").fetchall()
         self.conn.execute("DELETE FROM lineage_edges")
         self.conn.execute("DELETE FROM relation_edges")
+        self.conn.execute("DELETE FROM listener_type_index")
         for row in rows:
             record = json.loads(row["record"])
             rid = record["akousma_id"]
@@ -1221,7 +1468,8 @@ class AkousmataStore:
                 """UPDATE akousmata
                    SET lat=?, lon=?, covenant_id=?, auditum_contract=?,
                        listening_count=?, disagreement_count=?, honest_absence_count=?,
-                       route_decision_count=?, stop_decision_count=?
+                       route_decision_count=?, stop_decision_count=?, record_class=?,
+                       revision_of=?
                    WHERE akousma_id=?""",
                 (
                     lat,
@@ -1233,9 +1481,12 @@ class AkousmataStore:
                     honest_absence_count,
                     route_decision_count,
                     stop_decision_count,
+                    record_class(record),
+                    revision_of(record),
                     rid,
                 ),
             )
+            self._replace_listener_type_index(rid, listener_types(record))
         self.conn.commit()
         return len(rows)
 
@@ -1246,6 +1497,7 @@ class AkousmataStore:
         report: dict[str, list[str]] = {
             "dangling_parents": [],
             "dangling_relations": [],
+            "dangling_revisions": [],
             "missing_audio": [],
             "invalid_records": [],
             "invalid_forgetting_receipts": [],
@@ -1264,6 +1516,9 @@ class AkousmataStore:
                 target = rel.get("target_akousma_id", "")
                 if target not in ids:
                     report["dangling_relations"].append(f"{rid} -[{rel.get('type', 'other')}]-> {target}")
+            revised = revision_of(record)
+            if revised is not None and revised not in ids:
+                report["dangling_revisions"].append(f"{rid} -> {revised}")
             uri = record.get("audio", {}).get("uri", "")
             if uri.startswith("akousmata://objects/"):
                 path = self.resolve_uri(uri)
@@ -1301,10 +1556,14 @@ __all__ = [
     "AUDITUM_ACTION_STATUSES",
     "AUDITUM_DECISION_GATES",
     "AUDITUM_DECISION_OUTCOMES",
+    "RECORD_CLASSES",
     "new_id",
     "load_schema",
     "validation_errors",
     "is_valid",
+    "listener_types",
+    "record_class",
+    "revision_of",
     "new_akousma",
     "relation",
     "add_listening",
