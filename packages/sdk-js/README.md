@@ -19,7 +19,7 @@ client.ingestPrompt({
 });
 ```
 
-Akousma v1.5 helpers make accountable hearings and pre-capture decisions addressable while keeping
+Akousma v1.6 helpers make accountable hearings, listening-only accounts, and pre-capture decisions addressable while keeping
 producer reports namespaced:
 
 ```js
@@ -53,3 +53,8 @@ const record = createAkousma({
 
 Each listening stays attributable. Disagreement, absence, action authority,
 receipts, and revision are recorded rather than flattened into a consensus.
+Use `listenerTypes(record)` for the lossless canonical listener facets,
+`recordClass(record)` for the coarse navigation class, and
+`revisionOf(record)` for the direct revision target. The class never relabels
+community, institutional, sensor, habitat, other-animal, ensemble, or other
+listening as human or agent.

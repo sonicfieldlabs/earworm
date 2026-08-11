@@ -1,6 +1,6 @@
 # Earworm in the Oída gateway
 
-Oída's `oida/gateway/v0.5` interface is a host adapter over the existing
+Oída's `oida/gateway/v0.6` interface is a host adapter over the existing
 Earworm protocol, not a new memory protocol. It produces the same signal,
 analysis, action, provenance, retention, and context-bundle structures whether
 perception came from Oída's configured local engine or from an audio-capable
@@ -18,11 +18,13 @@ Host-supplied sessions should record:
 - explicit remember/forget actions and the effective raw-audio policy.
 
 Each request returns a route decision before any content. A refusal at input or
-capture is complete: OÍDA may persist an akousma v1.5 decision-only record with
+capture is complete: OÍDA may persist an akousma v1.6 decision-only record with
 no audio asset and no fabricated listening. Each accepted report emits an attributable `listening.report.created` event.
 Plural routes may add `listening.disagreement.recorded`; action proposals and
 decisions use the listening action event family. When remembered, OÍDA writes
-the corresponding references into akousma v1.5's `earworm/auditum/v2` block. The block
+the corresponding references into akousma v1.6's `earworm/auditum/v2` block. A
+separately attributable human account may be stored as a linked listening-only
+record when raw audio is unavailable or not retained. The block
 indexes the hearing; AKOÚŌ's namespaced producer report remains the semantic
 source of its six claim categories.
 

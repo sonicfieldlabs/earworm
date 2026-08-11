@@ -47,6 +47,7 @@ function assertSupportedSchema(schema, label, path = "$") {
     "contains",
     "enum",
     "minLength",
+    "pattern",
     "minItems",
     "maxItems",
     "uniqueItems",
@@ -163,15 +164,19 @@ function validate(schema, value, schemas, path = "$", rootSchema = schema) {
   if (typeof value === "string" && typeof schema.minLength === "number" && value.length < schema.minLength) {
     errors.push(`${path}: expected at least ${schema.minLength} characters`);
   }
+  if (typeof value === "string" && typeof schema.pattern === "string" && !new RegExp(schema.pattern).test(value)) {
+    errors.push(`${path}: expected to match ${schema.pattern}`);
+  }
 
-  if (schema.type === "object") {
-    const required = schema.required ?? [];
-    for (const key of required) {
+  if (schema.required && value && typeof value === "object" && !Array.isArray(value)) {
+    for (const key of schema.required) {
       if (!(key in value)) {
         errors.push(`${path}.${key}: required property missing`);
       }
     }
+  }
 
+  if (value && typeof value === "object" && !Array.isArray(value)) {
     if (schema.additionalProperties === false) {
       const allowed = new Set(Object.keys(schema.properties ?? {}));
       for (const key of Object.keys(value)) {

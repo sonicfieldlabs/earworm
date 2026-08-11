@@ -27,7 +27,7 @@ rec = akousma.new_akousma(
 )
 assert akousma.is_valid(rec)
 
-# Optional v1.5 accountable-listening index. The full producer report remains
+# Optional v1.6 accountable-listening index. The full producer report remains
 # namespaced in `listening`; the auditum keeps attribution and references.
 rec["auditum"] = akousma.auditum(listenings=[{
     "listening_id": "lst_1",
@@ -63,6 +63,9 @@ with akousma.AkousmataStore() as store:
     store.query(has_route_decision=True)   # auditum/v2 decisions
     store.query(has_stop_decision=True)    # refusal, withholding, forgetting, non-action...
     store.query(has_disagreement=True)     # plural hearings with preserved differences
+    store.query(listener_type="human")     # exact attributable listener facet
+    store.query(record_class="human")      # coarse navigator class
+    store.current_head(rec["akousma_id"])  # unique latest revision, or raises on a branch
 ```
 
 A refusal before capture is also addressable without inventing audio:
@@ -79,6 +82,42 @@ refusal = akousma.new_akousma(
         reason="The adopted covenant closes the ear.", actor="covenant-gate",
     )]),
 )
+```
+
+A completed human listening may also remain addressable without inventing
+audio. It needs an attributable listening and an explicit raw-audio absence:
+
+```python
+human = akousma.new_akousma(
+    originating_app="akousmata",
+    source_type="unknown",
+    origin="live-input",
+    subject="night insects heard from an open window",
+    auditum=akousma.auditum(
+        listenings=[{
+            "listening_id": "lst_human_1",
+            "listener_id": "local-listener-1",
+            "listener_type": "human",
+            "created_at": "2026-08-11T15:00:00Z",
+            "report_namespace": "human.note",
+            "contract": "akouo/v0.9",
+        }],
+        honest_absences=[{
+            "id": "absence_raw_audio_1",
+            "kind": "not_retained",
+            "subject": "raw audio",
+            "attributed_to": "local retention boundary",
+            "listening_id": "lst_human_1",
+        }],
+        route_decisions=[akousma.route_decision(
+            "decision_memory_1", gate="memory", outcome="proceed",
+            subject="human listening account", reason="The listener chose to retain it.",
+            actor="local-listener-1", listening_id="lst_human_1",
+        )],
+    ),
+)
+assert akousma.listener_types(human) == ("human",)
+assert akousma.record_class(human) == "human"
 ```
 
 `forget_with_receipt(...)` removes a record and returns a content-free durable

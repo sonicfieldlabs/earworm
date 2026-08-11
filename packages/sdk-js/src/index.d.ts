@@ -62,7 +62,16 @@ export const AUDITUM_DISAGREEMENT_STATUSES: readonly string[];
 export const AUDITUM_ACTION_STATUSES: readonly string[];
 export const AUDITUM_DECISION_GATES: readonly string[];
 export const AUDITUM_DECISION_OUTCOMES: readonly string[];
+export const AKOUSMA_RECORD_CLASSES: readonly AkousmaRecordClass[];
 export const GERM_IMPORT_MODES: readonly ["sound", "prompt", "lineage"];
+
+export type AkousmaRecordClass =
+  | "human"
+  | "agent"
+  | "hybrid"
+  | "plural_other"
+  | "decision_only"
+  | "legacy";
 
 export interface AkousmaAudio {
   asset_id: string;
@@ -309,7 +318,7 @@ export interface Akousma {
   capture?: AkousmaCapture;
   covenant?: AkousmaCovenant;
   auditum?: Auditum;
-  /** Spec v1.5: the record is open — unknown top-level fields are preserved. */
+  /** Spec v1.6: the record is open — unknown top-level fields are preserved. */
   [key: string]: unknown;
 }
 
@@ -379,6 +388,12 @@ export function addListening(
   payload: Record<string, unknown>,
   options?: { contract?: string | null; summary?: string | null }
 ): Akousma;
+
+export function listenerTypes(record: Akousma | unknown): AuditumListening["listener_type"][];
+
+export function recordClass(record: Akousma | unknown): AkousmaRecordClass;
+
+export function revisionOf(record: Akousma | unknown): string | null;
 
 export function akousmaShapeErrors(record: unknown): string[];
 

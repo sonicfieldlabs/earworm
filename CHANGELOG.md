@@ -1,5 +1,25 @@
 # Changelog
 
+## 0.7.0 — Attributable human listening
+
+- Advanced the open akousma record to spec v1.6 while retaining
+  `earworm/auditum/v2` and validation compatibility for earlier v1 records.
+- Added listening-only akousmata: audio may be omitted only with a non-empty
+  subject, at least one attributable listening, and an honest absence stating
+  that raw audio was unavailable or not retained. Decision-only records remain
+  distinct and require an empty listening list plus a pre-capture stop.
+- Added lossless `listener_types` / `listenerTypes` facets and coarse
+  `record_class` / `recordClass` navigation helpers. Community, institutional,
+  sensor, habitat, other-animal, ensemble, and other listening are preserved
+  rather than collapsed into human or agent categories.
+- Added indexed listener-type, record-class, and direct-revision queries to
+  the Python store, plus branch-aware revision-chain, head, and unique-current-
+  head helpers.
+- Migrated and reindexed existing SQLite stores in place without rewriting
+  canonical record JSON, and retained protected-account immutability for human
+  and machine-authored records alike.
+- Added a shared listening-only fixture and Python/JavaScript parity tests.
+
 ## 0.6.1 — Revision integrity
 
 - Required a non-empty resolution note whenever an attributable disagreement

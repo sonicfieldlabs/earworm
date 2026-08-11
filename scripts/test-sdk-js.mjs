@@ -3,6 +3,7 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
 
 import { strict as assert } from "node:assert";
+import { readFileSync } from "node:fs";
 import {
   EarwormClient,
   InMemoryEventStore,
@@ -12,6 +13,9 @@ import {
   createRouteDecision,
   akousmaRelation,
   addListening,
+  listenerTypes,
+  recordClass,
+  revisionOf,
   akousmaShapeErrors,
   germImportUrl,
   newAkousmaId
@@ -244,7 +248,7 @@ const accountable = createAkousma({
     ]
   })
 });
-assert.equal(accountable.schema_version, "1.5.0");
+assert.equal(accountable.schema_version, "1.6.0");
 assert.equal(accountable.auditum.contract, "earworm/auditum/v2");
 assert.equal(accountable.auditum.listenings.length, 2);
 assert.equal(accountable.auditum.route_decisions.length, 1);
@@ -295,6 +299,60 @@ const captureRefusal = createAkousma({
 });
 assert.equal(captureRefusal.audio, undefined);
 assert.equal(akousmaShapeErrors(captureRefusal).length, 0);
+assert.equal(recordClass(captureRefusal), "decision_only");
+
+// v1.6: listening-only records and lossless listener classification
+const sharedListeningOnlyFixture = JSON.parse(readFileSync(
+  new URL("../tests/fixtures/human-listening-only.akousma.json", import.meta.url),
+  "utf8"
+));
+assert.equal(akousmaShapeErrors(sharedListeningOnlyFixture).length, 0);
+assert.deepEqual(listenerTypes(sharedListeningOnlyFixture), ["human"]);
+assert.equal(recordClass(sharedListeningOnlyFixture), "human");
+
+const listeningOnly = createAkousma({
+  originatingApp: "akousmata",
+  sourceType: "unknown",
+  origin: "live-input",
+  subject: "night insects heard from an open window",
+  listening: sharedListeningOnlyFixture.listening,
+  auditum: sharedListeningOnlyFixture.auditum
+});
+assert.equal(listeningOnly.audio, undefined);
+assert.equal(akousmaShapeErrors(listeningOnly).length, 0);
+assert.deepEqual(listenerTypes(listeningOnly), ["human"]);
+assert.equal(recordClass(listeningOnly), "human");
+
+const noRawAudioAbsence = structuredClone(sharedListeningOnlyFixture.auditum);
+noRawAudioAbsence.honest_absences = [];
+assert.throws(() => createAkousma({
+  originatingApp: "akousmata",
+  subject: "ambiguous unrecorded listening",
+  auditum: noRawAudioAbsence
+}), /raw-audio absence/);
+assert.ok(akousmaShapeErrors({
+  ...sharedListeningOnlyFixture,
+  auditum: noRawAudioAbsence
+}).length > 0);
+
+const mixed = structuredClone(accountable);
+mixed.auditum.listenings = [
+  { ...mixed.auditum.listenings[0], listener_type: "human" },
+  { ...mixed.auditum.listenings[1], listener_type: "agent" }
+];
+assert.deepEqual(listenerTypes(mixed), ["human", "agent"]);
+assert.equal(recordClass(mixed), "hybrid");
+
+const ecological = structuredClone(accountable);
+ecological.auditum.listenings = [
+  { ...ecological.auditum.listenings[0], listener_type: "sensor" },
+  { ...ecological.auditum.listenings[1], listener_type: "habitat" }
+];
+assert.deepEqual(listenerTypes(ecological), ["sensor", "habitat"]);
+assert.equal(recordClass(ecological), "plural_other");
+assert.equal(recordClass(parent), "legacy");
+assert.equal(revisionOf(parent), null);
+assert.equal(revisionOf({ auditum: { revision: { revises_akousma_id: parent.akousma_id } } }), parent.akousma_id);
 
 const ids = new Set(Array.from({ length: 50 }, () => newAkousmaId()));
 assert.equal(ids.size, 50);

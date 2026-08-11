@@ -50,7 +50,14 @@ CREATE TABLE akousmata (
   honest_absence_count INTEGER NOT NULL DEFAULT 0,
   route_decision_count INTEGER NOT NULL DEFAULT 0, -- v0.6
   stop_decision_count INTEGER NOT NULL DEFAULT 0,  -- v0.6
+  record_class    TEXT NOT NULL DEFAULT 'legacy', -- v0.7: derived navigation facet
+  revision_of     TEXT,            -- v0.7: auditum.revision.revises_akousma_id
   record          TEXT NOT NULL   -- the full akousma JSON
+);
+CREATE TABLE listener_type_index ( -- v0.7: lossless attributable types
+  akousma_id TEXT NOT NULL,
+  listener_type TEXT NOT NULL,
+  PRIMARY KEY (akousma_id, listener_type)
 );
 CREATE TABLE forgetting_receipts (
   receipt_id TEXT PRIMARY KEY,
@@ -87,8 +94,9 @@ recurrences, series — is walkable in both directions without confusing it with
 
 - `reindex()` rebuilds both edge tables from the stored records (run once after upgrading a
   pre-relations store).
-- `verify()` returns an integrity report — dangling parents, dangling relation targets, missing
-  audio objects, invalid records — reported rather than dropped: absence is information.
+- `verify()` returns an integrity report — dangling parents, relation targets,
+  revision targets, missing audio objects, and invalid records — reported
+  rather than dropped: absence is information.
 - Richer queries: `query(tag=…, text=…, since=…, until=…, session_id=…, content_hash=…)` and
   `find_by_hash()` for dedupe/recurrence lookups.
 - v0.2.1 library operations for navigators: `tags()` (distinct tags with
@@ -136,6 +144,29 @@ recurrences, series — is walkable in both directions without confusing it with
 - Unshared local audio is deleted only when requested; shared content-addressed
   audio remains for other records and the receipt says so. Inbound lineage
   remains dangling and therefore auditable.
+
+### Human and agent listening facets (v0.7, spec v1.6)
+
+- A completed listening may omit `audio` only when it has a non-empty
+  `subject`, at least one attributable `auditum.listenings[]` entry, and a
+  `raw audio` honest absence with kind `unavailable` or `not_retained`.
+  Decision-only records remain distinct and contain no listening pass.
+- `listener_type_index` preserves every canonical listener type. Use
+  `query(listener_type=…)`; do not infer identity from a producer namespace.
+- `record_class` is a coarse indexed navigator facet. `human`, `agent`, and
+  `hybrid` describe only the human/agent/hybrid triad. Any attributable type
+  outside that triad is `plural_other`, while its exact type remains available
+  through `listener_types(record)` and `listener_type_index`.
+- `revision_of` supports `query(revision_of=…)`, `revision_chain()`,
+  `revision_heads()`, and `current_head()`. A divergent revision component has
+  multiple heads; `current_head()` rejects that ambiguity rather than choosing
+  one silently.
+- Opening a pre-v0.7 store adds and reindexes these derived structures in
+  place. The stored JSON string is not rewritten. `reindex()` rebuilds them
+  after direct database maintenance.
+- Protected listening, auditum, provenance-account, and causal-lineage fields
+  remain immutable for every record class. A human-facing edit is a fresh
+  record with `auditum.revision`, not an in-place rewrite.
 
 ### The location surface (v0.3, spec v1.2)
 
