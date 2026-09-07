@@ -1,0 +1,324 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contract",
+    "context_id",
+    "vocabulary",
+    "source_record_ref",
+    "subject_ref",
+    "registers",
+    "scales",
+    "source_modality",
+    "representation",
+    "access_declaration_ref",
+    "temporal_scope"
+  ],
+  "properties": {
+    "contract": {
+      "const": "earworm/matter-context/v1"
+    },
+    "context_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "vocabulary": {
+      "const": "masa/0.2.0"
+    },
+    "source_record_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "subject_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "registers": {
+      "type": "array",
+      "items": {
+        "anyOf": [
+          {
+            "type": "string",
+            "enum": [
+              "physical-event",
+              "perceptual-acoulogical",
+              "compositional-transformational",
+              "digital-technical",
+              "ecological-territorial",
+              "historical-political",
+              "cosmological-speculative"
+            ]
+          },
+          {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9-]*:[a-z][a-z0-9_-]*$"
+          }
+        ]
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "scales": {
+      "type": "array",
+      "items": {
+        "anyOf": [
+          {
+            "type": "string",
+            "enum": [
+              "microtemporal",
+              "spectral-stratal",
+              "object-event",
+              "meso-form",
+              "environmental",
+              "corpus-lineage",
+              "infrastructural",
+              "planetary",
+              "cosmic"
+            ]
+          },
+          {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9-]*:[a-z][a-z0-9_-]*$"
+          }
+        ]
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "source_modality": {
+      "anyOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "status",
+            "value",
+            "evidence_refs"
+          ],
+          "properties": {
+            "status": {
+              "const": "known"
+            },
+            "value": {
+              "enum": [
+                "acoustic",
+                "non_acoustic",
+                "mixed"
+              ]
+            },
+            "evidence_refs": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "uniqueItems": true,
+              "minItems": 1
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "status",
+            "reason"
+          ],
+          "properties": {
+            "status": {
+              "enum": [
+                "unknown",
+                "withheld",
+                "unavailable",
+                "not_applicable"
+              ]
+            },
+            "reason": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        }
+      ]
+    },
+    "representation": {
+      "anyOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "status",
+            "kind",
+            "observation_ref"
+          ],
+          "properties": {
+            "status": {
+              "const": "known"
+            },
+            "kind": {
+              "const": "structured_observation"
+            },
+            "observation_ref": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "status",
+            "reason"
+          ],
+          "properties": {
+            "status": {
+              "enum": [
+                "unknown",
+                "withheld",
+                "unavailable",
+                "not_applicable"
+              ]
+            },
+            "reason": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        }
+      ]
+    },
+    "access_declaration_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "temporal_scope": {
+      "anyOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "status",
+            "domain",
+            "window_s",
+            "resolution_s",
+            "sample_rate_hz",
+            "evidence_refs"
+          ],
+          "properties": {
+            "status": {
+              "const": "known"
+            },
+            "domain": {
+              "enum": [
+                "reported_scope",
+                "mathematical_construction",
+                "sampled_representation",
+                "physical_observation"
+              ]
+            },
+            "window_s": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "start",
+                "end"
+              ],
+              "properties": {
+                "start": {
+                  "type": "number",
+                  "minimum": 0
+                },
+                "end": {
+                  "type": "number",
+                  "exclusiveMinimum": 0
+                }
+              }
+            },
+            "resolution_s": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "sample_rate_hz": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "status",
+                    "value"
+                  ],
+                  "properties": {
+                    "status": {
+                      "const": "known"
+                    },
+                    "value": {
+                      "type": "number",
+                      "exclusiveMinimum": 0
+                    }
+                  }
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "status",
+                    "reason"
+                  ],
+                  "properties": {
+                    "status": {
+                      "enum": [
+                        "unknown",
+                        "withheld",
+                        "unavailable",
+                        "not_applicable"
+                      ]
+                    },
+                    "reason": {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  }
+                }
+              ]
+            },
+            "evidence_refs": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "uniqueItems": true,
+              "minItems": 1
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "status",
+            "reason"
+          ],
+          "properties": {
+            "status": {
+              "enum": [
+                "unknown",
+                "withheld",
+                "unavailable",
+                "not_applicable"
+              ]
+            },
+            "reason": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        }
+      ]
+    }
+  },
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://earworm.dev/schemas/matter-context.schema.json",
+  "description": "Application-owned MASA 0.2.0 label mapping. Source modality, structured representation, temporal evidence domain and listening access are independent; no label asserts audibility or sensor capability."
+}

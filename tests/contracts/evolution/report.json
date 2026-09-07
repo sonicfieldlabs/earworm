@@ -1,0 +1,205 @@
+{
+  "akousma_id": "ak_report_of_report",
+  "schema_version": "1.7.0",
+  "created_at": "2026-09-06T12:00:00Z",
+  "subject": "Synthetic report about the retained human account",
+  "provenance": {
+    "source_type": "unknown",
+    "origin": "unknown",
+    "originating_app": "akousmata",
+    "created_at": "2026-09-06T12:00:00Z"
+  },
+  "listening": {
+    "agent.report": {
+      "contract": "akouo/agent-report/v0.1",
+      "payload": {
+        "contract": "akouo/agent-report/v0.1",
+        "report_id": "report:second",
+        "listener_id": "agent:fixture",
+        "listening_pass_id": "pass:second",
+        "subject_ref": "ak_subsequent_listening",
+        "input_refs": [
+          "ak_subsequent_listening"
+        ],
+        "apparatus_ref": "access:report-only",
+        "report_format": "structured",
+        "recipients": [
+          {
+            "id": "agent:reviewer",
+            "type": "agent"
+          }
+        ],
+        "report_of_refs": [
+          "ak_subsequent_listening#/listening/human.note"
+        ],
+        "features": [
+          {
+            "feature_id": "feature:inherited",
+            "namespace": "fixture.report",
+            "name": "inherited-reading",
+            "category": "interpreted",
+            "claim": {
+              "claim_id": "claim:inherited",
+              "statement": "This synthetic interpretation addresses a retained human report.",
+              "confidence": "high",
+              "source": "memory",
+              "evidence_refs": [
+                "ak_subsequent_listening"
+              ],
+              "listening_pass_id": "pass:second",
+              "actionability": "informational"
+            },
+            "value": {
+              "status": "unknown",
+              "reason": "The original audio was not supplied."
+            }
+          }
+        ],
+        "limitations": [
+          "Synthetic conformance data; no physical capture or embodied listening is demonstrated."
+        ]
+      }
+    }
+  },
+  "lineage": {
+    "parent_akousma_ids": [],
+    "relations": [
+      {
+        "contract": "earworm/relations/v1",
+        "relation_id": "rel:report",
+        "type": "report_of",
+        "target_akousma_id": "ak_subsequent_listening",
+        "declared_by": "actor:fixture",
+        "evidence_refs": [
+          "evidence:fixture"
+        ],
+        "epistemic_status": "undetermined",
+        "review": {
+          "status": "unreviewed"
+        }
+      }
+    ]
+  },
+  "tags": [
+    "synthetic",
+    "report_of_report"
+  ],
+  "annotations": {},
+  "extensions": {
+    "earworm_listening_access": {
+      "contract": "earworm/listening-access/v1",
+      "declaration_id": "access:report-only",
+      "subject_ref": "ak_subsequent_listening",
+      "capture": {
+        "status": "unknown",
+        "reason": "Only a retained report was supplied; no signal apparatus is asserted."
+      },
+      "sampled_representation": {
+        "status": "unknown",
+        "reason": "Only a retained report was supplied; no signal apparatus is asserted."
+      },
+      "model_input": {
+        "status": "unknown",
+        "reason": "Only a retained report was supplied; no signal apparatus is asserted."
+      },
+      "human_access": [
+        {
+          "status": "unknown",
+          "reason": "Only a retained report was supplied; no signal apparatus is asserted."
+        }
+      ]
+    },
+    "earworm_listening_context": {
+      "contract": "earworm/listening-context/v1",
+      "contexts": [
+        {
+          "listening_ref": "lst_report_of_report",
+          "subject_ref": "ak_subsequent_listening",
+          "recipients": [
+            {
+              "id": "agent:reviewer",
+              "type": "agent"
+            }
+          ],
+          "access_declaration_ref": "access:report-only",
+          "report": {
+            "ref": "report:second",
+            "contract": "akouo/agent-report/v0.1",
+            "format": "structured",
+            "readability": {
+              "status": "known",
+              "value": "machine_readable"
+            },
+            "human_rendering": {
+              "status": "none",
+              "reason": "No human rendering was created."
+            }
+          },
+          "renderings": []
+        }
+      ],
+      "claims": [
+        {
+          "claim_ref": "claim:inherited",
+          "listening_ref": "lst_report_of_report",
+          "validity": {
+            "status": "unknown",
+            "reason": "Inherited report claims have no established currency."
+          },
+          "retention": {
+            "status": "unknown",
+            "reason": "Host policy must govern retention."
+          }
+        }
+      ]
+    }
+  },
+  "summary": "Synthetic agent interpretation of a retained human account.",
+  "auditum": {
+    "contract": "earworm/auditum/v3",
+    "listenings": [
+      {
+        "listening_id": "lst_report_of_report",
+        "listener_id": "agent:fixture",
+        "listener_type": "agent",
+        "created_at": "2026-09-06T12:00:00Z",
+        "report_namespace": "agent.report",
+        "contract": "akouo/agent-report/v0.1",
+        "note": "Only the retained report was supplied; this is not original hearing.",
+        "listening_pass_ref": "pass:second"
+      }
+    ],
+    "disagreements": [],
+    "honest_absences": [
+      {
+        "id": "absence:report",
+        "kind": "unavailable",
+        "subject": "raw audio",
+        "attributed_to": "local retention boundary",
+        "listening_id": "lst_report_of_report",
+        "count": 1,
+        "note": "Only the retained report was supplied; no original audio was available."
+      }
+    ],
+    "actions": [],
+    "route_decisions": [
+      {
+        "decision_id": "decision:report",
+        "gate": "memory",
+        "outcome": "proceed",
+        "subject": "Synthetic report about the retained human account",
+        "reason": "Synthetic fixture-only report inspection.",
+        "decided_at": "2026-09-06T12:00:00Z",
+        "listening_id": "lst_report_of_report",
+        "producer_contract": "akouo/v0.9",
+        "authority": {
+          "mode": "request",
+          "actor": "agent:fixture",
+          "granted_by": "local-listener-001",
+          "requires_confirmation": true,
+          "reversible": true
+        }
+      }
+    ]
+  }
+}

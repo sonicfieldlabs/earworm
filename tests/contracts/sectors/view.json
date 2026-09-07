@@ -1,0 +1,261 @@
+{
+  "entry": {
+    "sector_id": "sector:descriptors",
+    "listening_ref": "lst_report_of_report",
+    "subject_ref": "asset:descriptor:a",
+    "access_declaration_ref": "access:report-only",
+    "source_kind": "acoustic_signal",
+    "basis": "retained_measurement",
+    "measurement_refs": [
+      "descriptor:spectral_centroid",
+      "descriptor:band_energy",
+      "descriptor:level",
+      "descriptor:duration"
+    ],
+    "claim_refs": [
+      "claim:inherited"
+    ],
+    "renderings": [
+      "rendering:descriptor"
+    ]
+  },
+  "access": {
+    "contract": "earworm/listening-access/v1",
+    "declaration_id": "access:report-only",
+    "subject_ref": "asset:descriptor:a",
+    "capture": {
+      "status": "unknown",
+      "reason": "Only a retained report was supplied; no signal apparatus is asserted."
+    },
+    "sampled_representation": {
+      "status": "known",
+      "representation_ref": "urn:uuid:10000000-0000-4000-8000-000000000201",
+      "sample_rate_hz": 48000,
+      "channels": 1,
+      "retained_band_hz": {
+        "lower": 20,
+        "upper": 20000
+      },
+      "evidence_refs": [
+        "urn:uuid:10000000-0000-4000-8000-000000000002"
+      ]
+    },
+    "model_input": {
+      "status": "known",
+      "model_ref": "model:synthetic",
+      "representation_ref": "urn:uuid:10000000-0000-4000-8000-000000000201",
+      "sample_rate_hz": 48000,
+      "channels": 1,
+      "effective_band_hz": {
+        "lower": 20,
+        "upper": 20000
+      },
+      "window_s": {
+        "start": 0,
+        "end": 1
+      },
+      "preprocessing_refs": [],
+      "evidence_refs": [
+        "urn:uuid:10000000-0000-4000-8000-000000000002"
+      ],
+      "blind_spots": []
+    },
+    "human_access": [
+      {
+        "status": "unknown",
+        "reason": "Only a retained report was supplied; no signal apparatus is asserted."
+      }
+    ]
+  },
+  "renderings": [
+    {
+      "rendering_id": "rendering:descriptor",
+      "source_ref": "report:second",
+      "output_ref": "text:descriptor:a",
+      "transformation_ref": "receipt:interpretation:a",
+      "author_ref": "human:curator",
+      "kind": "interpretation",
+      "media_type": "text/plain",
+      "access": {
+        "status": "known",
+        "value": "private"
+      }
+    }
+  ],
+  "measurements": [
+    {
+      "descriptor": {
+        "descriptor_id": "descriptor:spectral_centroid",
+        "source_record_ref": "urn:uuid:10000000-0000-4000-8000-000000000002",
+        "measurement_ref": "urn:fixture:a:measurement:spectral_centroid",
+        "feature": "spectral_centroid",
+        "reference_basis": "frequency",
+        "band_hz": {
+          "status": "known",
+          "lower": 20,
+          "upper": 20000
+        },
+        "declared_by": "agent:fixture",
+        "mapping_reason": "Explicit synthetic descriptor mapping, not inferred from a metric name."
+      },
+      "measurement": {
+        "id": "urn:fixture:a:measurement:spectral_centroid",
+        "type": "masa:Measurement",
+        "about": "urn:uuid:10000000-0000-4000-8000-000000000201",
+        "metric": "fixture spectral_centroid",
+        "value": 1000,
+        "unit": "Hz",
+        "method": {
+          "name": "synthetic descriptor declaration",
+          "version": {
+            "state": "known",
+            "value": "1.0.0"
+          },
+          "parameters": {}
+        },
+        "window": {
+          "kind": "temporal",
+          "unit": "s",
+          "start": 0,
+          "end": 1
+        },
+        "actor": "urn:uuid:10000000-0000-4000-8000-000000000101",
+        "createdAt": "2026-07-27T12:05:00Z",
+        "uncertainty": [
+          "Synthetic numeric vector; not a measured physical result."
+        ],
+        "extensions": {}
+      }
+    },
+    {
+      "descriptor": {
+        "descriptor_id": "descriptor:band_energy",
+        "source_record_ref": "urn:uuid:10000000-0000-4000-8000-000000000002",
+        "measurement_ref": "urn:fixture:a:measurement:band_energy",
+        "feature": "band_energy",
+        "reference_basis": "digital_energy",
+        "band_hz": {
+          "status": "known",
+          "lower": 20,
+          "upper": 20000
+        },
+        "declared_by": "agent:fixture",
+        "mapping_reason": "Explicit synthetic descriptor mapping, not inferred from a metric name."
+      },
+      "measurement": {
+        "id": "urn:fixture:a:measurement:band_energy",
+        "type": "masa:Measurement",
+        "about": "urn:uuid:10000000-0000-4000-8000-000000000201",
+        "metric": "fixture band_energy",
+        "value": 0.4,
+        "unit": "sample^2",
+        "method": {
+          "name": "synthetic descriptor declaration",
+          "version": {
+            "state": "known",
+            "value": "1.0.0"
+          },
+          "parameters": {}
+        },
+        "window": {
+          "kind": "temporal",
+          "unit": "s",
+          "start": 0,
+          "end": 1
+        },
+        "actor": "urn:uuid:10000000-0000-4000-8000-000000000101",
+        "createdAt": "2026-07-27T12:05:00Z",
+        "uncertainty": [
+          "Synthetic numeric vector; not a measured physical result."
+        ],
+        "extensions": {}
+      }
+    },
+    {
+      "descriptor": {
+        "descriptor_id": "descriptor:level",
+        "source_record_ref": "urn:uuid:10000000-0000-4000-8000-000000000002",
+        "measurement_ref": "urn:fixture:a:measurement:level",
+        "feature": "level",
+        "reference_basis": "digital_full_scale",
+        "band_hz": {
+          "status": "not_applicable",
+          "reason": "No separate spectral band for this scalar fixture."
+        },
+        "declared_by": "agent:fixture",
+        "mapping_reason": "Explicit synthetic descriptor mapping, not inferred from a metric name."
+      },
+      "measurement": {
+        "id": "urn:fixture:a:measurement:level",
+        "type": "masa:Measurement",
+        "about": "urn:uuid:10000000-0000-4000-8000-000000000201",
+        "metric": "fixture level",
+        "value": -18,
+        "unit": "dBFS",
+        "method": {
+          "name": "synthetic descriptor declaration",
+          "version": {
+            "state": "known",
+            "value": "1.0.0"
+          },
+          "parameters": {}
+        },
+        "window": {
+          "kind": "temporal",
+          "unit": "s",
+          "start": 0,
+          "end": 1
+        },
+        "actor": "urn:uuid:10000000-0000-4000-8000-000000000101",
+        "createdAt": "2026-07-27T12:05:00Z",
+        "uncertainty": [
+          "Synthetic numeric vector; not a measured physical result."
+        ],
+        "extensions": {}
+      }
+    },
+    {
+      "descriptor": {
+        "descriptor_id": "descriptor:duration",
+        "source_record_ref": "urn:uuid:10000000-0000-4000-8000-000000000002",
+        "measurement_ref": "urn:fixture:a:measurement:duration",
+        "feature": "duration",
+        "reference_basis": "time",
+        "band_hz": {
+          "status": "not_applicable",
+          "reason": "No separate spectral band for this scalar fixture."
+        },
+        "declared_by": "agent:fixture",
+        "mapping_reason": "Explicit synthetic descriptor mapping, not inferred from a metric name."
+      },
+      "measurement": {
+        "id": "urn:fixture:a:measurement:duration",
+        "type": "masa:Measurement",
+        "about": "urn:uuid:10000000-0000-4000-8000-000000000201",
+        "metric": "fixture duration",
+        "value": 1,
+        "unit": "s",
+        "method": {
+          "name": "synthetic descriptor declaration",
+          "version": {
+            "state": "known",
+            "value": "1.0.0"
+          },
+          "parameters": {}
+        },
+        "window": {
+          "kind": "temporal",
+          "unit": "s",
+          "start": 0,
+          "end": 1
+        },
+        "actor": "urn:uuid:10000000-0000-4000-8000-000000000101",
+        "createdAt": "2026-07-27T12:05:00Z",
+        "uncertainty": [
+          "Synthetic numeric vector; not a measured physical result."
+        ],
+        "extensions": {}
+      }
+    }
+  ]
+}

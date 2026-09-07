@@ -1,0 +1,2863 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://earworm.dev/schemas/akousma-1.7.schema.json",
+  "title": "Akousma",
+  "type": "object",
+  "required": [
+    "akousma_id",
+    "schema_version",
+    "created_at",
+    "provenance",
+    "lineage"
+  ],
+  "additionalProperties": true,
+  "description": "Unreleased opt-in spec 1.7 / auditum v3. Generated from the released schema and record-evolution definitions. Legacy consumers must negotiate support or preserve opaquely; never silently downgrade.",
+  "anyOf": [
+    {
+      "required": [
+        "audio"
+      ]
+    },
+    {
+      "required": [
+        "subject",
+        "auditum"
+      ],
+      "properties": {
+        "auditum": {
+          "type": "object",
+          "required": [
+            "contract",
+            "listenings",
+            "route_decisions"
+          ],
+          "properties": {
+            "contract": {
+              "const": "earworm/auditum/v3"
+            },
+            "listenings": {
+              "type": "array",
+              "maxItems": 0
+            },
+            "route_decisions": {
+              "type": "array",
+              "minItems": 1,
+              "contains": {
+                "type": "object",
+                "required": [
+                  "gate",
+                  "outcome"
+                ],
+                "properties": {
+                  "gate": {
+                    "type": "string",
+                    "enum": [
+                      "input",
+                      "capture"
+                    ]
+                  },
+                  "outcome": {
+                    "type": "string",
+                    "enum": [
+                      "pause",
+                      "defer",
+                      "abstain",
+                      "refuse",
+                      "withhold"
+                    ]
+                  }
+                }
+              }
+            },
+            "honest_absences": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "enum": [
+                      "unavailable",
+                      "withheld",
+                      "refused",
+                      "not_retained",
+                      "forgotten"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "required": [
+        "subject",
+        "auditum"
+      ],
+      "properties": {
+        "auditum": {
+          "type": "object",
+          "required": [
+            "contract",
+            "listenings",
+            "honest_absences"
+          ],
+          "properties": {
+            "contract": {
+              "const": "earworm/auditum/v3"
+            },
+            "listenings": {
+              "type": "array",
+              "minItems": 1
+            },
+            "honest_absences": {
+              "type": "array",
+              "contains": {
+                "type": "object",
+                "required": [
+                  "kind",
+                  "subject"
+                ],
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "enum": [
+                      "unavailable",
+                      "not_retained"
+                    ]
+                  },
+                  "subject": {
+                    "const": "raw audio"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "required": [
+        "subject",
+        "record_kind",
+        "extensions"
+      ],
+      "properties": {
+        "record_kind": {
+          "const": "research_proposal"
+        },
+        "extensions": {
+          "type": "object",
+          "required": [
+            "earworm_research"
+          ]
+        }
+      }
+    },
+    {
+      "required": [
+        "subject",
+        "record_kind",
+        "extensions"
+      ],
+      "properties": {
+        "record_kind": {
+          "const": "generation_decision"
+        },
+        "extensions": {
+          "type": "object",
+          "required": [
+            "earworm_generation_decision"
+          ]
+        }
+      }
+    },
+    {
+      "required": [
+        "subject",
+        "record_kind",
+        "extensions"
+      ],
+      "properties": {
+        "record_kind": {
+          "const": "observation_account"
+        },
+        "extensions": {
+          "type": "object",
+          "required": [
+            "earworm_observation"
+          ]
+        }
+      }
+    },
+    {
+      "required": [
+        "subject",
+        "record_kind",
+        "extensions"
+      ],
+      "properties": {
+        "record_kind": {
+          "const": "transformation_graph"
+        },
+        "extensions": {
+          "type": "object",
+          "required": [
+            "earworm_transformation_graph"
+          ]
+        }
+      }
+    }
+  ],
+  "properties": {
+    "akousma_id": {
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "1.7.0"
+    },
+    "created_at": {
+      "type": "string"
+    },
+    "session_id": {
+      "type": "string"
+    },
+    "subject": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "\\S",
+      "description": "Category-level object of a listening or attempted listening when no audio asset exists. Never contains withheld content."
+    },
+    "audio": {
+      "type": "object",
+      "required": [
+        "asset_id"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "asset_id": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        },
+        "uri": {
+          "type": "string"
+        },
+        "content_hash": {
+          "type": "string"
+        },
+        "duration_seconds": {
+          "type": "number",
+          "minimum": 0
+        },
+        "sample_rate": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "channels": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "provenance_id": {
+          "type": "string"
+        },
+        "media": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "container": {
+              "type": "string"
+            },
+            "codec": {
+              "type": "string"
+            },
+            "bit_depth": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "codec_history": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Known encode/transcode steps, oldest first."
+            }
+          }
+        }
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "required": [
+        "source_type",
+        "origin",
+        "originating_app"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "provenance_id": {
+          "type": "string"
+        },
+        "source_type": {
+          "type": "string",
+          "enum": [
+            "generated",
+            "recorded",
+            "imported",
+            "cloned",
+            "designed",
+            "unknown"
+          ]
+        },
+        "origin": {
+          "type": "string",
+          "enum": [
+            "live-input",
+            "system-output",
+            "file",
+            "generated",
+            "unknown"
+          ]
+        },
+        "originating_app": {
+          "type": "string"
+        },
+        "device": {
+          "type": "string"
+        },
+        "provider": {
+          "type": "string"
+        },
+        "model_id": {
+          "type": "string"
+        },
+        "seed": {
+          "type": "integer"
+        },
+        "consent_status": {
+          "type": "string",
+          "enum": [
+            "owned",
+            "licensed",
+            "public_domain",
+            "unknown",
+            "restricted"
+          ]
+        },
+        "created_at": {
+          "type": "string"
+        },
+        "capture_conditions": {
+          "type": "string",
+          "description": "Conditions of capture that travel with the sound: who recorded whom, where, under what agreement."
+        },
+        "rights_note": {
+          "type": "string",
+          "description": "Free-text rights/consent nuance beyond consent_status."
+        },
+        "pipeline_effects": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "capture",
+              "telephony",
+              "acousmatization",
+              "amplification",
+              "phonofixation",
+              "phonogeneration",
+              "reshaping"
+            ]
+          },
+          "description": "Which of the seven technological effects (after Chion) the sound has passed through, oldest first."
+        }
+      }
+    },
+    "listening": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "lineage": {
+      "type": "object",
+      "required": [
+        "parent_akousma_ids"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "parent_akousma_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "operation": {
+          "type": "string"
+        },
+        "prompt": {
+          "type": "string"
+        },
+        "model": {
+          "type": "string"
+        },
+        "params": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "event_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "relations": {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "type": "object",
+                "required": [
+                  "type",
+                  "target_akousma_id"
+                ],
+                "additionalProperties": false,
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "variant_of",
+                      "response_to",
+                      "same_source_as",
+                      "recurrence_of",
+                      "series_with",
+                      "compares_with",
+                      "replaces",
+                      "other"
+                    ]
+                  },
+                  "target_akousma_id": {
+                    "type": "string"
+                  },
+                  "note": {
+                    "type": "string"
+                  }
+                }
+              },
+              {
+                "$ref": "#/$defs/evolutionRelation"
+              }
+            ]
+          },
+          "description": "Typed curatorial links between records. Parents are causal genealogy; relations are kinship: variants, responses, recurrences, series."
+        }
+      }
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "annotations": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "extensions": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "earworm_research": {
+          "$ref": "#/$defs/research"
+        },
+        "earworm_generation_decision": {
+          "$ref": "#/$defs/generationDecision"
+        },
+        "earworm_observation": {
+          "$ref": "#/$defs/observationAccount"
+        },
+        "earworm_matter_context": {
+          "$ref": "#/$defs/matterContext"
+        },
+        "earworm_measurements": {
+          "$ref": "#/$defs/measurementSet"
+        },
+        "earworm_agent_sector": {
+          "$ref": "#/$defs/agentSector"
+        },
+        "earworm_transformation_graph": {
+          "$ref": "#/$defs/transformationGraph"
+        }
+      }
+    },
+    "summary": {
+      "type": "string",
+      "description": "One-line human-readable account of the sound for skimming and search; the record stays the source of truth."
+    },
+    "location": {
+      "type": "object",
+      "required": [
+        "lat",
+        "lon"
+      ],
+      "additionalProperties": true,
+      "description": "Where the sound was heard (v1.2). Optional and consent-scoped: producers attach it only when the listener granted it; navigators may add or correct it afterwards. Stripped from open-research exports.",
+      "properties": {
+        "lat": {
+          "type": "number",
+          "minimum": -90,
+          "maximum": 90
+        },
+        "lon": {
+          "type": "number",
+          "minimum": -180,
+          "maximum": 180
+        },
+        "accuracy_m": {
+          "type": "number",
+          "minimum": 0
+        },
+        "altitude_m": {
+          "type": "number"
+        },
+        "label": {
+          "type": "string",
+          "description": "Human place name that travels with the sound."
+        },
+        "source": {
+          "type": "string",
+          "enum": [
+            "gps",
+            "network",
+            "manual",
+            "config",
+            "inferred"
+          ]
+        },
+        "captured_at": {
+          "type": "string"
+        }
+      }
+    },
+    "capture": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "How the listening was triggered (v1.2): temporal direction relative to the trigger and the window length. Device and format detail stay in provenance/audio.",
+      "properties": {
+        "direction": {
+          "type": "string",
+          "enum": [
+            "past",
+            "future",
+            "live"
+          ],
+          "description": "past = the seconds already in the ring buffer when the trigger fired; future = the seconds recorded after it; live = an open-ended or manual session."
+        },
+        "seconds": {
+          "type": "number",
+          "minimum": 0
+        },
+        "trigger": {
+          "type": "string",
+          "description": "What initiated the listen: hotkey, remote-ear, mcp, dashboard, watcher, schedule…"
+        },
+        "armed_at": {
+          "type": "string"
+        },
+        "triggered_at": {
+          "type": "string"
+        }
+      }
+    },
+    "covenant": {
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "additionalProperties": true,
+      "description": "Under which ethics this was listened (v1.3). The listening covenant's identity plus honest absence: what was withheld under its rules, counted and attributed, never described. The covenant's full text stays with its author — records carry identity and hash, so exports stay safe by construction.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "The covenant's stable slug, optionally versioned: 'river-covenant/2'."
+        },
+        "name": {
+          "type": "string"
+        },
+        "version": {
+          "type": "string"
+        },
+        "contract": {
+          "type": "string",
+          "description": "The AKOÚŌ contract the covenant was parsed under, e.g. 'akouo/v0.7'."
+        },
+        "sha256": {
+          "type": "string",
+          "description": "SHA-256 of the covenant's source text: identity without content."
+        },
+        "extends": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "The covenant's declared lineage (manifestos, community protocols, parent covenants)."
+        },
+        "rules_applied": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "The covenant rules that acted on this hearing, as normalized rule lines."
+        },
+        "withheld": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": true,
+            "properties": {
+              "rule": {
+                "type": "string"
+              },
+              "subject": {
+                "type": "string"
+              },
+              "count": {
+                "type": "integer",
+                "minimum": 0
+              }
+            }
+          },
+          "description": "Honest absence: what was withheld, named at category level and attributed to its rule."
+        },
+        "commitments": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "How many non-executable commitments the covenant carries."
+        },
+        "note": {
+          "type": "string"
+        }
+      }
+    },
+    "auditum": {
+      "$ref": "#/$defs/auditum",
+      "description": "The addressable listening record around this sound, listening-only account, or pre-capture decision (v1.6). 'Tokenized' means structured, attributable, versioned, and referenceable; it does not mean a financial token."
+    },
+    "record_kind": {
+      "enum": [
+        "research_proposal",
+        "generation_decision",
+        "observation_account",
+        "transformation_graph"
+      ]
+    }
+  },
+  "$defs": {
+    "auditum": {
+      "type": "object",
+      "required": [
+        "contract",
+        "listenings",
+        "disagreements",
+        "honest_absences",
+        "actions"
+      ],
+      "additionalProperties": false,
+      "anyOf": [
+        {
+          "required": [
+            "contract",
+            "route_decisions"
+          ],
+          "properties": {
+            "contract": {
+              "const": "earworm/auditum/v3"
+            },
+            "route_decisions": {
+              "type": "array",
+              "minItems": 1
+            },
+            "honest_absences": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "enum": [
+                      "unavailable",
+                      "withheld",
+                      "refused",
+                      "not_retained",
+                      "forgotten"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "required": [
+            "revision",
+            "route_decisions"
+          ],
+          "properties": {
+            "listenings": {
+              "type": "array",
+              "maxItems": 0
+            },
+            "route_decisions": {
+              "type": "array",
+              "maxItems": 0
+            },
+            "actions": {
+              "type": "array",
+              "maxItems": 0
+            },
+            "disagreements": {
+              "type": "array",
+              "maxItems": 0
+            },
+            "honest_absences": {
+              "type": "array",
+              "maxItems": 0
+            }
+          }
+        }
+      ],
+      "properties": {
+        "contract": {
+          "const": "earworm/auditum/v3"
+        },
+        "listenings": {
+          "type": "array",
+          "minItems": 0,
+          "items": {
+            "type": "object",
+            "required": [
+              "listening_id",
+              "listener_id",
+              "listener_type",
+              "created_at",
+              "report_namespace",
+              "contract"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "listening_id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "listener_id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "listener_type": {
+                "type": "string",
+                "enum": [
+                  "human",
+                  "agent",
+                  "hybrid",
+                  "community",
+                  "institution",
+                  "sensor",
+                  "habitat",
+                  "other_animal",
+                  "ensemble",
+                  "other"
+                ]
+              },
+              "created_at": {
+                "type": "string",
+                "minLength": 1
+              },
+              "report_namespace": {
+                "type": "string",
+                "minLength": 1
+              },
+              "contract": {
+                "type": "string",
+                "minLength": 1
+              },
+              "context_ref": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "apparatus_ref": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "claim_set_ref": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "covenant_ref": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "route": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "listening_pass_ref": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "listening_provenance_ref": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "route_decision_refs": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "uniqueItems": true
+              },
+              "influenced_by": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "listening_id",
+                    "effect"
+                  ],
+                  "additionalProperties": false,
+                  "properties": {
+                    "listening_id": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "effect": {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  }
+                }
+              },
+              "note": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            }
+          },
+          "description": "Attributable accounts; machine reports do not establish embodied hearing."
+        },
+        "disagreements": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "subject",
+              "listening_ids",
+              "positions",
+              "status"
+            ],
+            "additionalProperties": false,
+            "allOf": [
+              {
+                "if": {
+                  "type": "object",
+                  "required": [
+                    "status"
+                  ],
+                  "properties": {
+                    "status": {
+                      "const": "resolved"
+                    }
+                  }
+                },
+                "then": {
+                  "type": "object",
+                  "required": [
+                    "resolution_note"
+                  ],
+                  "properties": {
+                    "resolution_note": {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  }
+                }
+              }
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "subject": {
+                "type": "string",
+                "minLength": 1
+              },
+              "listening_ids": {
+                "type": "array",
+                "minItems": 2,
+                "uniqueItems": true,
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "positions": {
+                "type": "array",
+                "minItems": 2,
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "listening_id",
+                    "statement"
+                  ],
+                  "additionalProperties": false,
+                  "properties": {
+                    "listening_id": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "statement": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "claim_category": {
+                      "type": "string",
+                      "enum": [
+                        "heard",
+                        "measured",
+                        "inferred",
+                        "interpreted",
+                        "speculative",
+                        "undetermined"
+                      ]
+                    }
+                  }
+                }
+              },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "preserved",
+                  "resolved",
+                  "undetermined"
+                ]
+              },
+              "resolution_note": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            }
+          },
+          "description": "Differences between attributable listenings. Consumers preserve positions and must not manufacture consensus; a resolved disagreement requires a non-empty attributable resolution note."
+        },
+        "honest_absences": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "kind",
+              "subject",
+              "attributed_to"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "kind": {
+                "type": "string",
+                "enum": [
+                  "unavailable",
+                  "withheld",
+                  "refused",
+                  "not_retained",
+                  "forgotten",
+                  "undetermined"
+                ]
+              },
+              "subject": {
+                "type": "string",
+                "minLength": 1
+              },
+              "attributed_to": {
+                "type": "string",
+                "minLength": 1
+              },
+              "listening_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "rule": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "count": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "minimum": 0
+              },
+              "note": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            }
+          }
+        },
+        "actions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "action_id",
+              "proposal",
+              "status",
+              "authority"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "action_id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "proposal": {
+                "type": "string",
+                "minLength": 1
+              },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "proposed",
+                  "authorized",
+                  "refused",
+                  "executed",
+                  "failed",
+                  "reverted"
+                ]
+              },
+              "authority": {
+                "type": "object",
+                "required": [
+                  "mode",
+                  "scopes",
+                  "requires_confirmation"
+                ],
+                "additionalProperties": false,
+                "properties": {
+                  "mode": {
+                    "type": "string",
+                    "enum": [
+                      "observe_only",
+                      "recommend",
+                      "request",
+                      "execute_scoped"
+                    ]
+                  },
+                  "scopes": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  },
+                  "granted_by": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "expires_at": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "requires_confirmation": {
+                    "type": "boolean"
+                  },
+                  "reversible": {
+                    "type": [
+                      "boolean",
+                      "null"
+                    ]
+                  }
+                }
+              },
+              "receipt": {
+                "type": "object",
+                "required": [
+                  "created_at",
+                  "actor"
+                ],
+                "additionalProperties": false,
+                "properties": {
+                  "created_at": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "actor": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "result": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "recovery": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "description": "Action proposals and receipts. Perceptual or technical capability is not authority."
+        },
+        "route_decisions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "decision_id",
+              "gate",
+              "outcome",
+              "subject",
+              "reason",
+              "decided_at",
+              "authority"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "decision_id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "gate": {
+                "type": "string",
+                "enum": [
+                  "input",
+                  "capture",
+                  "inference",
+                  "memory",
+                  "output",
+                  "disclosure",
+                  "retention",
+                  "action"
+                ]
+              },
+              "outcome": {
+                "type": "string",
+                "enum": [
+                  "proceed",
+                  "pause",
+                  "defer",
+                  "abstain",
+                  "refuse",
+                  "withhold",
+                  "forget",
+                  "do_not_act"
+                ]
+              },
+              "subject": {
+                "type": "string",
+                "minLength": 1
+              },
+              "reason": {
+                "type": "string",
+                "minLength": 1
+              },
+              "decided_at": {
+                "type": "string",
+                "minLength": 1
+              },
+              "listening_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "producer_contract": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "producer_decision_ref": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "authority": {
+                "type": "object",
+                "required": [
+                  "mode",
+                  "actor",
+                  "requires_confirmation",
+                  "reversible"
+                ],
+                "additionalProperties": false,
+                "properties": {
+                  "mode": {
+                    "type": "string",
+                    "enum": [
+                      "observe_only",
+                      "recommend",
+                      "request",
+                      "execute_scoped"
+                    ]
+                  },
+                  "actor": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "covenant_ref": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "granted_by": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "requires_confirmation": {
+                    "type": "boolean"
+                  },
+                  "reversible": {
+                    "type": "boolean"
+                  }
+                }
+              },
+              "receipt": {
+                "type": "object",
+                "required": [
+                  "created_at",
+                  "actor"
+                ],
+                "additionalProperties": false,
+                "properties": {
+                  "created_at": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "actor": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "result": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "recovery": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  }
+                }
+              },
+              "note": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            }
+          },
+          "description": "Addressable gate outcomes. Refusal or withholding is a complete record, not a missing listening."
+        },
+        "ensemble": {
+          "type": "object",
+          "required": [
+            "id",
+            "kind",
+            "listening_ids",
+            "influence_edges",
+            "permissions_preserved",
+            "disagreements_preserved",
+            "dissolution_rule"
+          ],
+          "additionalProperties": false,
+          "anyOf": [
+            {
+              "required": [
+                "kind"
+              ],
+              "properties": {
+                "kind": {
+                  "const": "plural_listening"
+                }
+              }
+            },
+            {
+              "required": [
+                "kind",
+                "influence_edges",
+                "permissions_preserved",
+                "disagreements_preserved"
+              ],
+              "properties": {
+                "kind": {
+                  "const": "ear_swarm"
+                },
+                "influence_edges": {
+                  "type": "array",
+                  "minItems": 1
+                },
+                "permissions_preserved": {
+                  "const": true
+                },
+                "disagreements_preserved": {
+                  "const": true
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "kind": {
+              "type": "string",
+              "enum": [
+                "plural_listening",
+                "ear_swarm"
+              ]
+            },
+            "listening_ids": {
+              "type": "array",
+              "minItems": 2,
+              "uniqueItems": true,
+              "items": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "influence_edges": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": [
+                  "from_listening_id",
+                  "to_listening_id",
+                  "effect"
+                ],
+                "additionalProperties": false,
+                "properties": {
+                  "from_listening_id": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "to_listening_id": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "effect": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                }
+              }
+            },
+            "permissions_preserved": {
+              "type": "boolean"
+            },
+            "disagreements_preserved": {
+              "type": "boolean"
+            },
+            "dissolution_rule": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        },
+        "revision": {
+          "type": "object",
+          "required": [
+            "revision_id",
+            "revises_akousma_id",
+            "reason",
+            "changes",
+            "created_at"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "revision_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "revises_akousma_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "reason": {
+              "type": "string",
+              "minLength": 1
+            },
+            "changes": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "created_at": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "description": "A re-listening is a new, attributable revision. The earlier auditum remains intact."
+        },
+        "appeal": {
+          "$ref": "#/$defs/appeal"
+        }
+      }
+    },
+    "evolutionRelation": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "contract": {
+          "const": "earworm/relations/v1"
+        },
+        "relation_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "type": {
+          "enum": [
+            "report_of",
+            "research_for",
+            "decision_on",
+            "observed_from",
+            "mapped_from",
+            "similar_by"
+          ]
+        },
+        "target_akousma_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "declared_by": {
+          "type": "string",
+          "minLength": 1
+        },
+        "evidence_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true,
+          "minItems": 1
+        },
+        "epistemic_status": {
+          "enum": [
+            "reported",
+            "measured",
+            "inferred",
+            "interpreted",
+            "undetermined"
+          ]
+        },
+        "review": {
+          "anyOf": [
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "status": {
+                  "const": "unreviewed"
+                }
+              },
+              "required": [
+                "status"
+              ]
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "status": {
+                  "enum": [
+                    "accepted",
+                    "rejected",
+                    "contested"
+                  ]
+                },
+                "actor_ref": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "reason": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "required": [
+                "status",
+                "actor_ref",
+                "reason"
+              ]
+            }
+          ]
+        },
+        "criterion": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "criterion_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "feature": {
+              "type": "string",
+              "minLength": 1
+            },
+            "unit": {
+              "type": "string",
+              "minLength": 1
+            },
+            "method_ref": {
+              "type": "string",
+              "minLength": 1
+            },
+            "method_revision": {
+              "type": "string",
+              "minLength": 1
+            },
+            "input_refs": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "uniqueItems": true,
+              "minItems": 1
+            },
+            "normalization": {
+              "type": "string",
+              "minLength": 1
+            },
+            "score": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "status": {
+                      "const": "known"
+                    },
+                    "value": {
+                      "type": "number"
+                    },
+                    "policy": {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  },
+                  "required": [
+                    "status",
+                    "value",
+                    "policy"
+                  ]
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "status": {
+                      "enum": [
+                        "unknown",
+                        "unavailable",
+                        "not_applicable"
+                      ]
+                    },
+                    "reason": {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  },
+                  "required": [
+                    "status",
+                    "reason"
+                  ]
+                }
+              ]
+            },
+            "descriptor_refs": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "record_ref",
+                  "descriptor_ref"
+                ],
+                "properties": {
+                  "record_ref": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "descriptor_ref": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                }
+              },
+              "uniqueItems": true,
+              "minItems": 2
+            }
+          },
+          "required": [
+            "criterion_id",
+            "feature",
+            "unit",
+            "method_ref",
+            "method_revision",
+            "input_refs",
+            "normalization",
+            "score"
+          ]
+        }
+      },
+      "required": [
+        "contract",
+        "relation_id",
+        "type",
+        "target_akousma_id",
+        "declared_by",
+        "evidence_refs",
+        "epistemic_status",
+        "review"
+      ],
+      "allOf": [
+        {
+          "if": {
+            "required": [
+              "type"
+            ],
+            "properties": {
+              "type": {
+                "const": "similar_by"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "criterion"
+            ]
+          }
+        }
+      ]
+    },
+    "appeal": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "contract": {
+          "const": "earworm/appeal/v1"
+        },
+        "appeal_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "recorded_by": {
+          "type": "string",
+          "minLength": 1
+        },
+        "subject_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true,
+          "minItems": 1
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1
+        },
+        "status": {
+          "enum": [
+            "unreviewed",
+            "open",
+            "under_review",
+            "resolved",
+            "withdrawn"
+          ]
+        },
+        "evidence_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "resolution": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "decision_ref": {
+              "type": "string",
+              "minLength": 1
+            },
+            "reason": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "decision_ref",
+            "reason"
+          ]
+        },
+        "legacy_source": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "record_ref": {
+              "type": "string",
+              "minLength": 1
+            },
+            "path": {
+              "const": "/extensions/oida/appeal"
+            },
+            "payload": {}
+          },
+          "required": [
+            "record_ref",
+            "path",
+            "payload"
+          ]
+        }
+      },
+      "required": [
+        "contract",
+        "appeal_id",
+        "recorded_by",
+        "subject_refs",
+        "reason",
+        "status",
+        "evidence_refs"
+      ],
+      "allOf": [
+        {
+          "if": {
+            "required": [
+              "status"
+            ],
+            "properties": {
+              "status": {
+                "const": "resolved"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "resolution"
+            ]
+          }
+        }
+      ]
+    },
+    "research": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "contract": {
+          "const": "earworm/research/v1"
+        },
+        "proposal_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "author_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "question": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true,
+          "minItems": 1
+        },
+        "evidence_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true,
+          "minItems": 1
+        },
+        "proposed_relation_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "review": {
+          "anyOf": [
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "status": {
+                  "const": "unreviewed"
+                }
+              },
+              "required": [
+                "status"
+              ]
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "status": {
+                  "enum": [
+                    "accepted",
+                    "rejected",
+                    "contested"
+                  ]
+                },
+                "actor_ref": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "reason": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "required": [
+                "status",
+                "actor_ref",
+                "reason"
+              ]
+            }
+          ]
+        }
+      },
+      "required": [
+        "contract",
+        "proposal_id",
+        "author_ref",
+        "question",
+        "source_refs",
+        "evidence_refs",
+        "proposed_relation_refs",
+        "review"
+      ]
+    },
+    "generationDecision": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "contract": {
+          "const": "earworm/generation-decision/v1"
+        },
+        "decision_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "actor_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "generation_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "subsequent_listenings": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "record_ref": {
+                "type": "string",
+                "minLength": 1
+              },
+              "listening_ref": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": [
+              "record_ref",
+              "listening_ref"
+            ]
+          }
+        },
+        "outcome": {
+          "enum": [
+            "keep",
+            "revise",
+            "discard",
+            "variation"
+          ]
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1
+        },
+        "policy_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "policy_revision": {
+          "type": "string",
+          "minLength": 1
+        },
+        "input_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true,
+          "minItems": 1
+        },
+        "next_job": {
+          "anyOf": [
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "status": {
+                  "const": "planned"
+                },
+                "job_ref": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "required": [
+                "status",
+                "job_ref"
+              ]
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "status": {
+                  "const": "none"
+                },
+                "reason": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "required": [
+                "status",
+                "reason"
+              ]
+            }
+          ]
+        },
+        "stop_outcome": {
+          "enum": [
+            "continue",
+            "stop",
+            "defer"
+          ]
+        },
+        "execution": {
+          "const": "not_requested"
+        }
+      },
+      "required": [
+        "contract",
+        "decision_id",
+        "actor_ref",
+        "generation_ref",
+        "subsequent_listenings",
+        "outcome",
+        "reason",
+        "policy_ref",
+        "policy_revision",
+        "input_refs",
+        "next_job",
+        "stop_outcome",
+        "execution"
+      ]
+    },
+    "observationAccount": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "contract",
+        "mapping_namespace",
+        "mapping_ref",
+        "source_record_ref",
+        "observation_ref",
+        "report_ref",
+        "listening_ref",
+        "relation",
+        "execution"
+      ],
+      "properties": {
+        "contract": {
+          "const": "earworm/observation-account/v1"
+        },
+        "mapping_namespace": {
+          "type": "string",
+          "minLength": 1
+        },
+        "mapping_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_record_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "observation_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "report_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "listening_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "relation": {
+          "const": "retained_observation_report"
+        },
+        "execution": {
+          "const": "not_requested"
+        }
+      }
+    },
+    "measurementSet": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "contract",
+        "sources",
+        "descriptors"
+      ],
+      "properties": {
+        "contract": {
+          "const": "earworm/measurement-set/v1"
+        },
+        "sources": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "record_ref",
+              "record"
+            ],
+            "properties": {
+              "record_ref": {
+                "type": "string",
+                "minLength": 1
+              },
+              "record": {
+                "type": "object"
+              }
+            }
+          },
+          "uniqueItems": true,
+          "minItems": 1
+        },
+        "descriptors": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "descriptor_id",
+              "source_record_ref",
+              "measurement_ref",
+              "feature",
+              "reference_basis",
+              "band_hz",
+              "declared_by",
+              "mapping_reason"
+            ],
+            "properties": {
+              "descriptor_id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "source_record_ref": {
+                "type": "string",
+                "minLength": 1
+              },
+              "measurement_ref": {
+                "type": "string",
+                "minLength": 1
+              },
+              "feature": {
+                "enum": [
+                  "spectral_centroid",
+                  "band_energy",
+                  "level",
+                  "duration"
+                ]
+              },
+              "reference_basis": {
+                "enum": [
+                  "frequency",
+                  "digital_energy",
+                  "digital_full_scale",
+                  "perceptual_loudness",
+                  "sound_pressure",
+                  "time"
+                ]
+              },
+              "band_hz": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "status",
+                      "lower",
+                      "upper"
+                    ],
+                    "properties": {
+                      "status": {
+                        "const": "known"
+                      },
+                      "lower": {
+                        "type": "number",
+                        "minimum": 0
+                      },
+                      "upper": {
+                        "type": "number",
+                        "exclusiveMinimum": 0
+                      }
+                    }
+                  },
+                  {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "status",
+                      "reason"
+                    ],
+                    "properties": {
+                      "status": {
+                        "enum": [
+                          "unknown",
+                          "not_applicable"
+                        ]
+                      },
+                      "reason": {
+                        "type": "string",
+                        "minLength": 1
+                      }
+                    }
+                  }
+                ]
+              },
+              "declared_by": {
+                "type": "string",
+                "minLength": 1
+              },
+              "mapping_reason": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          },
+          "uniqueItems": true,
+          "minItems": 1
+        }
+      }
+    },
+    "agentSector": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "contract",
+        "entries"
+      ],
+      "properties": {
+        "contract": {
+          "const": "earworm/agent-sector/v1"
+        },
+        "entries": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "sector_id",
+              "listening_ref",
+              "subject_ref",
+              "access_declaration_ref",
+              "source_kind",
+              "basis",
+              "measurement_refs",
+              "claim_refs",
+              "renderings"
+            ],
+            "properties": {
+              "sector_id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "listening_ref": {
+                "type": "string",
+                "minLength": 1
+              },
+              "subject_ref": {
+                "type": "string",
+                "minLength": 1
+              },
+              "access_declaration_ref": {
+                "type": "string",
+                "minLength": 1
+              },
+              "source_kind": {
+                "enum": [
+                  "acoustic_signal",
+                  "non_acoustic_observation",
+                  "structured_report"
+                ]
+              },
+              "basis": {
+                "enum": [
+                  "retained_measurement",
+                  "retained_observation",
+                  "interpretation"
+                ]
+              },
+              "measurement_refs": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "uniqueItems": true,
+                "minItems": 0
+              },
+              "claim_refs": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "uniqueItems": true,
+                "minItems": 1
+              },
+              "renderings": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "uniqueItems": true,
+                "minItems": 0
+              }
+            }
+          },
+          "uniqueItems": true,
+          "minItems": 1
+        }
+      }
+    },
+    "matterContext": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "contract",
+        "context_id",
+        "vocabulary",
+        "source_record_ref",
+        "subject_ref",
+        "registers",
+        "scales",
+        "source_modality",
+        "representation",
+        "access_declaration_ref",
+        "temporal_scope"
+      ],
+      "properties": {
+        "contract": {
+          "const": "earworm/matter-context/v1"
+        },
+        "context_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "vocabulary": {
+          "const": "masa/0.2.0"
+        },
+        "source_record_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "subject_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "registers": {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "physical-event",
+                  "perceptual-acoulogical",
+                  "compositional-transformational",
+                  "digital-technical",
+                  "ecological-territorial",
+                  "historical-political",
+                  "cosmological-speculative"
+                ]
+              },
+              {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9-]*:[a-z][a-z0-9_-]*$"
+              }
+            ]
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "scales": {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "microtemporal",
+                  "spectral-stratal",
+                  "object-event",
+                  "meso-form",
+                  "environmental",
+                  "corpus-lineage",
+                  "infrastructural",
+                  "planetary",
+                  "cosmic"
+                ]
+              },
+              {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9-]*:[a-z][a-z0-9_-]*$"
+              }
+            ]
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "source_modality": {
+          "anyOf": [
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "status",
+                "value",
+                "evidence_refs"
+              ],
+              "properties": {
+                "status": {
+                  "const": "known"
+                },
+                "value": {
+                  "enum": [
+                    "acoustic",
+                    "non_acoustic",
+                    "mixed"
+                  ]
+                },
+                "evidence_refs": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "uniqueItems": true,
+                  "minItems": 1
+                }
+              }
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "status",
+                "reason"
+              ],
+              "properties": {
+                "status": {
+                  "enum": [
+                    "unknown",
+                    "withheld",
+                    "unavailable",
+                    "not_applicable"
+                  ]
+                },
+                "reason": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              }
+            }
+          ]
+        },
+        "representation": {
+          "anyOf": [
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "status",
+                "kind",
+                "observation_ref"
+              ],
+              "properties": {
+                "status": {
+                  "const": "known"
+                },
+                "kind": {
+                  "const": "structured_observation"
+                },
+                "observation_ref": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              }
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "status",
+                "reason"
+              ],
+              "properties": {
+                "status": {
+                  "enum": [
+                    "unknown",
+                    "withheld",
+                    "unavailable",
+                    "not_applicable"
+                  ]
+                },
+                "reason": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              }
+            }
+          ]
+        },
+        "access_declaration_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "temporal_scope": {
+          "anyOf": [
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "status",
+                "domain",
+                "window_s",
+                "resolution_s",
+                "sample_rate_hz",
+                "evidence_refs"
+              ],
+              "properties": {
+                "status": {
+                  "const": "known"
+                },
+                "domain": {
+                  "enum": [
+                    "reported_scope",
+                    "mathematical_construction",
+                    "sampled_representation",
+                    "physical_observation"
+                  ]
+                },
+                "window_s": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "start",
+                    "end"
+                  ],
+                  "properties": {
+                    "start": {
+                      "type": "number",
+                      "minimum": 0
+                    },
+                    "end": {
+                      "type": "number",
+                      "exclusiveMinimum": 0
+                    }
+                  }
+                },
+                "resolution_s": {
+                  "type": "number",
+                  "exclusiveMinimum": 0
+                },
+                "sample_rate_hz": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": [
+                        "status",
+                        "value"
+                      ],
+                      "properties": {
+                        "status": {
+                          "const": "known"
+                        },
+                        "value": {
+                          "type": "number",
+                          "exclusiveMinimum": 0
+                        }
+                      }
+                    },
+                    {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": [
+                        "status",
+                        "reason"
+                      ],
+                      "properties": {
+                        "status": {
+                          "enum": [
+                            "unknown",
+                            "withheld",
+                            "unavailable",
+                            "not_applicable"
+                          ]
+                        },
+                        "reason": {
+                          "type": "string",
+                          "minLength": 1
+                        }
+                      }
+                    }
+                  ]
+                },
+                "evidence_refs": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "uniqueItems": true,
+                  "minItems": 1
+                }
+              }
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "status",
+                "reason"
+              ],
+              "properties": {
+                "status": {
+                  "enum": [
+                    "unknown",
+                    "withheld",
+                    "unavailable",
+                    "not_applicable"
+                  ]
+                },
+                "reason": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              }
+            }
+          ]
+        }
+      },
+      "description": "Application-owned MASA 0.2.0 label mapping. Source modality, structured representation, temporal evidence domain and listening access are independent; no label asserts audibility or sensor capability."
+    },
+    "transformationGraph": {
+      "title": "Unreleased application transformation graph v1",
+      "type": "object",
+      "properties": {
+        "contract": {
+          "const": "earworm/transformation-graph/v1"
+        },
+        "graph_id": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "\\S"
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "authored_by": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "\\S"
+        },
+        "scope": {
+          "const": "completed_representation_lineage"
+        },
+        "source_record": {
+          "type": "object"
+        },
+        "nodes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "node_id": {
+                "type": "string",
+                "minLength": 1,
+                "pattern": "\\S"
+              },
+              "representation_ref": {
+                "type": "string",
+                "minLength": 1,
+                "pattern": "\\S"
+              }
+            },
+            "required": [
+              "node_id",
+              "representation_ref"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 1
+        },
+        "edges": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "relation_ref": {
+                "type": "string",
+                "minLength": 1,
+                "pattern": "\\S"
+              },
+              "operation_ref": {
+                "type": "string",
+                "minLength": 1,
+                "pattern": "\\S"
+              },
+              "from_node": {
+                "type": "string",
+                "minLength": 1,
+                "pattern": "\\S"
+              },
+              "to_node": {
+                "type": "string",
+                "minLength": 1,
+                "pattern": "\\S"
+              }
+            },
+            "required": [
+              "relation_ref",
+              "operation_ref",
+              "from_node",
+              "to_node"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "operation_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "\\S"
+          },
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "contract",
+        "graph_id",
+        "revision",
+        "authored_by",
+        "scope",
+        "source_record",
+        "nodes",
+        "edges",
+        "operation_refs"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "required": [
+          "record_kind"
+        ],
+        "properties": {
+          "record_kind": {
+            "const": "research_proposal"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "subject",
+          "extensions"
+        ],
+        "properties": {
+          "extensions": {
+            "type": "object",
+            "required": [
+              "earworm_research"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "required": [
+          "record_kind"
+        ],
+        "properties": {
+          "record_kind": {
+            "const": "generation_decision"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "subject",
+          "extensions"
+        ],
+        "properties": {
+          "extensions": {
+            "type": "object",
+            "required": [
+              "earworm_generation_decision"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "required": [
+          "record_kind"
+        ],
+        "properties": {
+          "record_kind": {
+            "const": "observation_account"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "subject",
+          "extensions"
+        ],
+        "properties": {
+          "extensions": {
+            "type": "object",
+            "required": [
+              "earworm_observation"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "required": [
+          "record_kind"
+        ],
+        "properties": {
+          "record_kind": {
+            "const": "transformation_graph"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "subject",
+          "extensions"
+        ],
+        "properties": {
+          "extensions": {
+            "type": "object",
+            "required": [
+              "earworm_transformation_graph"
+            ]
+          }
+        }
+      }
+    }
+  ]
+}

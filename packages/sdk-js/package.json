@@ -29,7 +29,8 @@
     }
   },
   "dependencies": {
-    "@earworm/core": "workspace:*"
+    "@earworm/core": "workspace:*",
+    "ajv": "8.20.0"
   },
   "license": "MPL-2.0"
 }

@@ -1,0 +1,291 @@
+[
+  {
+    "name": "wrong kind",
+    "path": [
+      "record_kind"
+    ],
+    "value": "research_proposal",
+    "valid": false
+  },
+  {
+    "name": "fabricated audio",
+    "path": [
+      "audio"
+    ],
+    "value": {
+      "asset_id": "invented:audio"
+    },
+    "valid": false
+  },
+  {
+    "name": "unknown binding source",
+    "path": [
+      "extensions",
+      "earworm_observation",
+      "source_record_ref"
+    ],
+    "value": "source:other",
+    "valid": false
+  },
+  {
+    "name": "wrong report",
+    "path": [
+      "extensions",
+      "earworm_observation",
+      "report_ref"
+    ],
+    "value": "report:other",
+    "valid": false
+  },
+  {
+    "name": "wrong mapping namespace",
+    "path": [
+      "extensions",
+      "earworm_observation",
+      "mapping_namespace"
+    ],
+    "value": "other.mapping",
+    "valid": false
+  },
+  {
+    "name": "wrong context access",
+    "path": [
+      "extensions",
+      "earworm_matter_context",
+      "access_declaration_ref"
+    ],
+    "value": "access:other",
+    "valid": false
+  },
+  {
+    "name": "wrong modality",
+    "path": [
+      "extensions",
+      "earworm_matter_context",
+      "source_modality",
+      "value"
+    ],
+    "value": "ultrasound",
+    "valid": false
+  },
+  {
+    "name": "collapsed scale",
+    "path": [
+      "extensions",
+      "earworm_matter_context",
+      "scales"
+    ],
+    "value": [
+      "sample"
+    ],
+    "valid": false
+  },
+  {
+    "name": "changed register",
+    "path": [
+      "extensions",
+      "earworm_matter_context",
+      "registers"
+    ],
+    "value": [
+      "physical-event"
+    ],
+    "valid": false
+  },
+  {
+    "name": "changed subject",
+    "path": [
+      "subject"
+    ],
+    "value": "subject:other",
+    "valid": false
+  },
+  {
+    "name": "wrong representation",
+    "path": [
+      "extensions",
+      "earworm_matter_context",
+      "representation",
+      "observation_ref"
+    ],
+    "value": "observation:other",
+    "valid": false
+  },
+  {
+    "name": "wrong receiving pass",
+    "path": [
+      "auditum",
+      "listenings",
+      0,
+      "listening_pass_ref"
+    ],
+    "value": "pass:other",
+    "valid": false
+  },
+  {
+    "name": "abstained receiving route",
+    "path": [
+      "auditum",
+      "route_decisions",
+      0,
+      "outcome"
+    ],
+    "value": "abstain",
+    "valid": false
+  },
+  {
+    "name": "wrong route actor",
+    "path": [
+      "auditum",
+      "route_decisions",
+      0,
+      "authority",
+      "actor"
+    ],
+    "value": "agent:other",
+    "valid": false
+  },
+  {
+    "name": "later decision",
+    "path": [
+      "auditum",
+      "route_decisions",
+      0,
+      "decided_at"
+    ],
+    "value": "2026-09-06T13:00:00Z",
+    "valid": false
+  },
+  {
+    "name": "receiver claims measurement",
+    "path": [
+      "listening",
+      "akouo.observation",
+      "payload",
+      "report",
+      "features",
+      0,
+      "category"
+    ],
+    "value": "measured",
+    "valid": false
+  },
+  {
+    "name": "receiver erases provider attribution",
+    "path": [
+      "listening",
+      "akouo.observation",
+      "payload",
+      "report",
+      "features",
+      0,
+      "claim",
+      "source"
+    ],
+    "value": "model",
+    "valid": false
+  },
+  {
+    "name": "malformed source mapping",
+    "path": [
+      "listening",
+      "akouo.observation",
+      "payload",
+      "source_snapshot"
+    ],
+    "value": null,
+    "valid": false
+  },
+  {
+    "name": "missing access declaration",
+    "path": [
+      "extensions",
+      "earworm_listening_access"
+    ],
+    "value": null,
+    "valid": false
+  },
+  {
+    "name": "legacy schema version",
+    "path": [
+      "schema_version"
+    ],
+    "value": "1.6.0",
+    "valid": false
+  },
+  {
+    "name": "curatorial summary",
+    "path": [
+      "summary"
+    ],
+    "value": "A local observation account.",
+    "valid": true
+  },
+  {
+    "name": "unknown source extension",
+    "path": [
+      "listening",
+      "akouo.observation",
+      "payload",
+      "source_snapshot",
+      "extensions",
+      "example:later"
+    ],
+    "value": {
+      "keep": [
+        false,
+        0,
+        "value"
+      ]
+    },
+    "valid": true
+  },
+  {
+    "name": "changed context report",
+    "path": [
+      "extensions",
+      "earworm_listening_context",
+      "contexts",
+      0,
+      "report",
+      "ref"
+    ],
+    "value": "report:other",
+    "valid": false
+  },
+  {
+    "name": "changed context recipient",
+    "path": [
+      "extensions",
+      "earworm_listening_context",
+      "contexts",
+      0,
+      "recipients",
+      0,
+      "id"
+    ],
+    "value": "agent:other",
+    "valid": false
+  },
+  {
+    "name": "listening precedes route",
+    "path": [
+      "auditum",
+      "listenings",
+      0,
+      "created_at"
+    ],
+    "value": "2026-09-06T11:00:00Z",
+    "valid": false
+  },
+  {
+    "name": "malformed listening context",
+    "path": [
+      "extensions",
+      "earworm_listening_context",
+      "contexts"
+    ],
+    "value": "invalid",
+    "valid": false
+  }
+]

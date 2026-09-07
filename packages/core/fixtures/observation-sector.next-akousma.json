@@ -1,0 +1,604 @@
+{
+  "akousma_id": "ak_observation_fixture",
+  "schema_version": "1.7.0",
+  "record_kind": "observation_account",
+  "created_at": "2026-09-06T12:00:00Z",
+  "subject": "urn:uuid:00000000-0000-4000-8000-000000000802",
+  "provenance": {
+    "source_type": "unknown",
+    "origin": "unknown",
+    "originating_app": "akousmata",
+    "created_at": "2026-09-06T12:00:00Z"
+  },
+  "lineage": {
+    "parent_akousma_ids": []
+  },
+  "listening": {
+    "akouo.observation": {
+      "contract": "akouo/masa-observation-report/v0.1",
+      "payload": {
+        "contract": "akouo/masa-observation-report/v0.1",
+        "mapping_id": "mapping:cross",
+        "source_record_ref": "urn:uuid:00000000-0000-4000-8000-000000000005",
+        "source_observation_ref": "urn:uuid:00000000-0000-4000-8000-000000000802",
+        "source_snapshot": {
+          "$schema": "https://masa.sonicfield.org/schemas/0.2.0/matter-record.schema.json",
+          "masaVersion": "0.2.0",
+          "id": "urn:uuid:00000000-0000-4000-8000-000000000005",
+          "type": "masa:MatterRecord",
+          "revision": 1,
+          "profiles": [
+            "core",
+            "observation",
+            "mapping"
+          ],
+          "createdAt": "2026-07-27T12:00:00Z",
+          "createdBy": "urn:uuid:00000000-0000-4000-8000-000000000101",
+          "title": "Stale observation skipped explicitly",
+          "description": "A representation is registered without claiming that it is identical to a physical event or perceptual object.",
+          "actors": [
+            {
+              "id": "urn:uuid:00000000-0000-4000-8000-000000000101",
+              "type": "masa:Actor",
+              "actorKind": "human",
+              "roles": [
+                "record-creator"
+              ],
+              "name": {
+                "state": "known",
+                "value": "Local example author"
+              },
+              "disclosure": "private",
+              "extensions": {}
+            }
+          ],
+          "sources": [
+            {
+              "id": "urn:uuid:00000000-0000-4000-8000-000000000801",
+              "type": "masa:Source",
+              "sourceKind": "astronomical-api-field",
+              "identification": {
+                "state": "known",
+                "value": "Example solar activity index"
+              },
+              "locator": {
+                "state": "known",
+                "value": "https://example.invalid/observations/solar-index"
+              },
+              "authority": {
+                "state": "unknown",
+                "reason": "Fixture does not assert institutional authority.",
+                "reasonCode": "fixture_only"
+              },
+              "rights": {
+                "state": "unknown",
+                "reason": "Provider terms were not retrieved for this offline fixture.",
+                "reasonCode": "not_retrieved"
+              },
+              "coverage": {
+                "state": "known",
+                "value": {
+                  "scope": "demonstration only"
+                }
+              },
+              "health": {
+                "status": "degraded",
+                "checkedAt": "2026-07-27T11:00:00Z",
+                "reason": "Fixture marks the feed stale"
+              },
+              "freshness": {
+                "status": "stale",
+                "observedAt": "2026-07-26T11:00:00Z",
+                "ageSeconds": 90000
+              },
+              "policyRefs": [
+                "urn:uuid:00000000-0000-4000-8000-000000000301"
+              ],
+              "disclosure": "private",
+              "extensions": {}
+            }
+          ],
+          "representations": [
+            {
+              "id": "urn:uuid:00000000-0000-4000-8000-000000000201",
+              "type": "masa:Representation",
+              "role": "source-representation",
+              "mediaType": "application/octet-stream",
+              "format": {
+                "state": "unknown",
+                "reason": "The example does not include source bytes.",
+                "reasonCode": "not_bundled"
+              },
+              "availability": "unavailable",
+              "locator": {
+                "state": "unavailable",
+                "reason": "No asset is bundled with this minimal example.",
+                "reasonCode": "not_bundled"
+              },
+              "integrity": {
+                "state": "unknown",
+                "reason": "Integrity cannot be verified without bytes.",
+                "reasonCode": "not_bundled"
+              },
+              "policyRefs": [
+                "urn:uuid:00000000-0000-4000-8000-000000000301"
+              ],
+              "disclosure": "private",
+              "extensions": {}
+            }
+          ],
+          "encounters": [],
+          "apertures": [],
+          "listeningPasses": [],
+          "claims": [],
+          "regions": [],
+          "measurements": [],
+          "observations": [
+            {
+              "id": "urn:uuid:00000000-0000-4000-8000-000000000802",
+              "type": "masa:Observation",
+              "sourceRef": "urn:uuid:00000000-0000-4000-8000-000000000801",
+              "field": "solar_activity_index",
+              "observedAt": "2026-07-26T11:00:00Z",
+              "scope": {
+                "state": "known",
+                "value": "Example interval"
+              },
+              "value": {
+                "state": "known",
+                "value": 72.4
+              },
+              "unit": {
+                "state": "known",
+                "value": "index-point"
+              },
+              "method": {
+                "name": "offline fixture observation",
+                "version": {
+                  "state": "known",
+                  "value": "1.0.0"
+                },
+                "parameters": {}
+              },
+              "health": {
+                "status": "degraded",
+                "checkedAt": "2026-07-27T11:00:00Z",
+                "reason": "Fixture marks the feed stale"
+              },
+              "freshness": {
+                "status": "stale",
+                "observedAt": "2026-07-26T11:00:00Z",
+                "ageSeconds": 90000
+              },
+              "epistemicStatus": "reported",
+              "temporalCharacter": "aggregate",
+              "signalKind": "observation",
+              "disclosure": "private",
+              "extensions": {}
+            }
+          ],
+          "mappings": [
+            {
+              "id": "urn:uuid:00000000-0000-4000-8000-000000000803",
+              "type": "masa:Mapping",
+              "sourceObservationRefs": [
+                "urn:uuid:00000000-0000-4000-8000-000000000802"
+              ],
+              "sourceField": "solar_activity_index",
+              "sourceUnit": "index-point",
+              "inputRange": [
+                0,
+                100
+              ],
+              "normalization": {
+                "method": "linear",
+                "clipping": "clamp",
+                "parameters": {}
+              },
+              "target": "synth.filter.cutoff",
+              "outputRange": [
+                120,
+                7200
+              ],
+              "curve": "exponential",
+              "smoothingMs": 200,
+              "cadence": "once per accepted observation",
+              "missingData": "skip",
+              "epistemicNote": "This authored mapping does not make the synthesized result the source's voice.",
+              "actors": [
+                "urn:uuid:00000000-0000-4000-8000-000000000101"
+              ],
+              "createdAt": "2026-07-27T12:06:00Z",
+              "extensions": {
+                "example:control": {
+                  "parameter": "filter.cutoff"
+                }
+              }
+            }
+          ],
+          "relations": [],
+          "policies": [
+            {
+              "id": "urn:uuid:00000000-0000-4000-8000-000000000301",
+              "type": "masa:Policy",
+              "policyKind": "composite",
+              "issuer": "urn:uuid:00000000-0000-4000-8000-000000000101",
+              "status": "active",
+              "disclosure": "private",
+              "rules": [
+                {
+                  "id": "urn:uuid:00000000-0000-4000-8000-000000000302",
+                  "effect": "permission",
+                  "actions": [
+                    "read",
+                    "validate",
+                    "map"
+                  ],
+                  "targets": [
+                    "urn:uuid:00000000-0000-4000-8000-000000000005"
+                  ],
+                  "subjects": [
+                    "urn:uuid:00000000-0000-4000-8000-000000000101"
+                  ],
+                  "authorityBasis": {
+                    "state": "known",
+                    "value": "Local creator declaration for this private example"
+                  },
+                  "constraints": {
+                    "network": "prohibited"
+                  },
+                  "duties": [
+                    "Preserve provenance and unknown states"
+                  ]
+                }
+              ],
+              "review": {
+                "contact": {
+                  "state": "unknown",
+                  "reason": "No external contact exists for a local fixture.",
+                  "reasonCode": "local_fixture"
+                },
+                "route": {
+                  "state": "known",
+                  "value": "Review the record with the local MASA CLI"
+                }
+              },
+              "extensions": {}
+            }
+          ],
+          "contexts": [],
+          "agentRuns": [],
+          "capabilities": [],
+          "integrity": {
+            "state": "unknown",
+            "reason": "The standalone example is an account rather than a bundled byte artifact.",
+            "reasonCode": "not_bundled"
+          },
+          "history": {
+            "mode": "embedded",
+            "events": [
+              {
+                "id": "urn:uuid:00000000-0000-4000-8000-000000000804",
+                "type": "masa:OperationReceipt",
+                "recordId": "urn:uuid:00000000-0000-4000-8000-000000000005",
+                "sequence": 0,
+                "operationType": "matter.map",
+                "effectClass": "map",
+                "finalStatus": "not_performed",
+                "startedAt": "2026-07-27T12:01:00Z",
+                "endedAt": "2026-07-27T12:01:01Z",
+                "actors": [
+                  "urn:uuid:00000000-0000-4000-8000-000000000101"
+                ],
+                "inputs": [
+                  "urn:uuid:00000000-0000-4000-8000-000000000802"
+                ],
+                "outputs": [],
+                "tool": {
+                  "state": "known",
+                  "value": {
+                    "id": "urn:uuid:00000000-0000-4000-8000-000000000805",
+                    "name": "Generic mapping adapter fixture",
+                    "version": {
+                      "state": "known",
+                      "value": "0.1.0"
+                    },
+                    "kind": "software"
+                  }
+                },
+                "parameters": {
+                  "reason": "stale input",
+                  "missingData": "skip"
+                },
+                "policyEvaluation": {
+                  "action": "map",
+                  "targets": [
+                    "urn:uuid:00000000-0000-4000-8000-000000000803"
+                  ],
+                  "policyRefs": [
+                    "urn:uuid:00000000-0000-4000-8000-000000000301"
+                  ],
+                  "result": "permitted",
+                  "evaluatedAt": "2026-07-27T12:01:00Z",
+                  "evaluator": "urn:uuid:00000000-0000-4000-8000-000000000101",
+                  "authorityRefs": [
+                    "urn:uuid:00000000-0000-4000-8000-000000000302"
+                  ],
+                  "reasons": [
+                    "The active local fixture policy explicitly permits this bounded operation."
+                  ]
+                },
+                "reversibility": "undetermined",
+                "determinism": {
+                  "state": "deterministic"
+                },
+                "warnings": [
+                  "Stale observation was not converted into a control value"
+                ],
+                "errors": [],
+                "claimRefs": [],
+                "extensions": {}
+              }
+            ]
+          },
+          "disclosure": "private",
+          "registers": [
+            "digital-technical"
+          ],
+          "scales": [
+            "object-event"
+          ],
+          "extensions": {
+            "example:roundtrip": {
+              "deep": {
+                "values": [
+                  "preserve",
+                  "without-interpretation"
+                ]
+              }
+            }
+          }
+        },
+        "report": {
+          "contract": "akouo/agent-report/v0.1",
+          "report_id": "report:observation",
+          "listener_id": "agent:receiver",
+          "listening_pass_id": "pass:observation",
+          "subject_ref": "urn:uuid:00000000-0000-4000-8000-000000000802",
+          "input_refs": [
+            "urn:uuid:00000000-0000-4000-8000-000000000005",
+            "urn:uuid:00000000-0000-4000-8000-000000000802"
+          ],
+          "apparatus_ref": "access:observation",
+          "report_format": "structured",
+          "recipients": [
+            {
+              "id": "agent:reviewer",
+              "type": "agent"
+            }
+          ],
+          "report_of_refs": [
+            "urn:uuid:00000000-0000-4000-8000-000000000005"
+          ],
+          "features": [
+            {
+              "feature_id": "report:observation:observation",
+              "namespace": "akouo.masa_observation",
+              "name": "solar_activity_index",
+              "category": "undetermined",
+              "claim": {
+                "claim_id": "report:observation:attribution",
+                "statement": "Retained observation urn:uuid:00000000-0000-4000-8000-000000000802 attributes solar_activity_index to source urn:uuid:00000000-0000-4000-8000-000000000801 with epistemic status reported. This receiving pass does not establish the underlying phenomenon.",
+                "confidence": "undetermined",
+                "source": "provider",
+                "evidence_refs": [
+                  "urn:uuid:00000000-0000-4000-8000-000000000802",
+                  "urn:uuid:00000000-0000-4000-8000-000000000801"
+                ],
+                "listening_pass_id": "pass:observation",
+                "actionability": "none",
+                "basis": "Attribution of a retained MASA observation, not a new measurement or an epistemic upgrade."
+              },
+              "value": {
+                "status": "known",
+                "value": 72.4,
+                "unit": "index-point"
+              }
+            }
+          ],
+          "limitations": [
+            "Retained source attribution only; no new measurement, embodied hearing, freshness assessment, disclosure permission or action authority is established."
+          ]
+        },
+        "attribution": "retained_source",
+        "value_projection": "copied",
+        "execution": "not_requested"
+      }
+    }
+  },
+  "tags": [],
+  "annotations": {},
+  "auditum": {
+    "contract": "earworm/auditum/v3",
+    "listenings": [
+      {
+        "listening_id": "listening:observation",
+        "listener_id": "agent:receiver",
+        "listener_type": "agent",
+        "created_at": "2026-09-06T12:00:00Z",
+        "report_namespace": "akouo.observation",
+        "contract": "akouo/masa-observation-report/v0.1",
+        "listening_pass_ref": "pass:observation",
+        "route_decision_refs": [
+          "route:observation:route"
+        ]
+      }
+    ],
+    "route_decisions": [
+      {
+        "gate": "inference",
+        "outcome": "proceed",
+        "subject": "urn:uuid:00000000-0000-4000-8000-000000000802",
+        "reason": "Declared inputs support this bounded report route; no result or action has been executed.",
+        "decided_at": "2026-09-06T12:00:00Z",
+        "authority": {
+          "mode": "observe_only",
+          "actor": "agent:receiver",
+          "requires_confirmation": true,
+          "reversible": true
+        },
+        "decision_id": "route:observation:route",
+        "listening_id": "listening:observation",
+        "producer_contract": "akouo/agent-route/v0.1",
+        "producer_decision_ref": "route:observation:route"
+      }
+    ],
+    "actions": [],
+    "disagreements": [],
+    "honest_absences": []
+  },
+  "extensions": {
+    "earworm_observation": {
+      "contract": "earworm/observation-account/v1",
+      "mapping_namespace": "akouo.observation",
+      "mapping_ref": "mapping:cross",
+      "source_record_ref": "urn:uuid:00000000-0000-4000-8000-000000000005",
+      "observation_ref": "urn:uuid:00000000-0000-4000-8000-000000000802",
+      "report_ref": "report:observation",
+      "listening_ref": "listening:observation",
+      "relation": "retained_observation_report",
+      "execution": "not_requested"
+    },
+    "earworm_matter_context": {
+      "contract": "earworm/matter-context/v1",
+      "context_id": "matter:observation",
+      "vocabulary": "masa/0.2.0",
+      "source_record_ref": "urn:uuid:00000000-0000-4000-8000-000000000005",
+      "subject_ref": "urn:uuid:00000000-0000-4000-8000-000000000802",
+      "registers": [
+        "digital-technical"
+      ],
+      "scales": [
+        "object-event"
+      ],
+      "source_modality": {
+        "status": "known",
+        "value": "non_acoustic",
+        "evidence_refs": [
+          "urn:uuid:00000000-0000-4000-8000-000000000801"
+        ]
+      },
+      "representation": {
+        "status": "known",
+        "kind": "structured_observation",
+        "observation_ref": "urn:uuid:00000000-0000-4000-8000-000000000802"
+      },
+      "access_declaration_ref": "access:observation",
+      "temporal_scope": {
+        "status": "unknown",
+        "reason": "No temporal window/resolution established by this retained fixture."
+      }
+    },
+    "earworm_listening_access": {
+      "contract": "earworm/listening-access/v1",
+      "declaration_id": "access:observation",
+      "subject_ref": "urn:uuid:00000000-0000-4000-8000-000000000802",
+      "capture": {
+        "status": "not_applicable",
+        "reason": "Retained non-acoustic provider observation."
+      },
+      "sampled_representation": {
+        "status": "not_applicable",
+        "reason": "No sampled audio input."
+      },
+      "model_input": {
+        "status": "not_applicable",
+        "reason": "Attribution of structured source metadata only."
+      },
+      "human_access": [
+        {
+          "status": "unknown",
+          "reason": "No human access report supplied."
+        }
+      ]
+    },
+    "earworm_listening_context": {
+      "contract": "earworm/listening-context/v1",
+      "contexts": [
+        {
+          "listening_ref": "listening:observation",
+          "subject_ref": "urn:uuid:00000000-0000-4000-8000-000000000802",
+          "recipients": [
+            {
+              "id": "agent:reviewer",
+              "type": "agent"
+            }
+          ],
+          "access_declaration_ref": "access:observation",
+          "report": {
+            "ref": "report:observation",
+            "contract": "akouo/masa-observation-report/v0.1",
+            "format": "structured",
+            "readability": {
+              "status": "known",
+              "value": "machine_readable"
+            },
+            "human_rendering": {
+              "status": "none",
+              "reason": "This binding creates no human rendering."
+            }
+          },
+          "renderings": [
+            {
+              "rendering_id": "rendering:observation",
+              "source_ref": "report:observation",
+              "output_ref": "text:observation",
+              "transformation_ref": "receipt:observation-interpretation",
+              "author_ref": "human:curator",
+              "kind": "interpretation",
+              "media_type": "text/plain",
+              "access": {
+                "status": "unknown",
+                "reason": "Publication access has not been assessed."
+              }
+            }
+          ]
+        }
+      ],
+      "claims": [
+        {
+          "claim_ref": "report:observation:attribution",
+          "listening_ref": "listening:observation",
+          "validity": {
+            "status": "unknown",
+            "reason": "No receiving-claim validity policy supplied."
+          },
+          "retention": {
+            "status": "unknown",
+            "reason": "No receiving-claim retention policy supplied."
+          }
+        }
+      ]
+    },
+    "earworm_agent_sector": {
+      "contract": "earworm/agent-sector/v1",
+      "entries": [
+        {
+          "sector_id": "sector:observation",
+          "listening_ref": "listening:observation",
+          "subject_ref": "urn:uuid:00000000-0000-4000-8000-000000000802",
+          "access_declaration_ref": "access:observation",
+          "source_kind": "non_acoustic_observation",
+          "basis": "retained_observation",
+          "measurement_refs": [],
+          "claim_refs": [
+            "report:observation:attribution"
+          ],
+          "renderings": [
+            "rendering:observation"
+          ]
+        }
+      ]
+    }
+  }
+}

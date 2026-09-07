@@ -126,3 +126,36 @@ restoring summary, tags, location, hashes, URIs, or forgotten content.
 
 The bundled `akousma/akousma.schema.json` is the canonical schema, kept in sync with
 `earworm/packages/core/schemas/akousma.schema.json`.
+
+Unreleased opt-in listening helpers are available from
+`akousma.listening_contracts`. See the repository's
+[listening contract guide](../../docs/listening-contracts.md) for offline
+validation, contract negotiation, and pass-to-listening adaptation.
+
+The opt-in `akousma.record_evolution` module provides 1.7/v3 validation, scoped
+reference checks, and retained-appeal promotion. See the
+[unreleased draft](../../spec/akousma-1.7-draft.md). Default constructors remain 1.6.
+
+The unreleased [observation-account binding and matter context](../../spec/observation-accounts.md) retain
+MASA/AKOÚŌ source attribution, register/scale labels and non-acoustic distinctions.
+JavaScript and Python APIs reuse injected foreign validators; local store writes
+protect the retained mapping and independent context declarations.
+
+The unreleased [agent sectors and measurement descriptors](../../spec/agent-sectors.md) reuse existing
+rendering metadata and MASA source records. A conservative scalar comparison
+checks compatible methods/units/windows; it performs no DSP or perceptual scoring.
+
+
+## Local views and transformation graphs (unreleased)
+
+The [auditum view](../../spec/auditum-view.md) checks explicit host permission
+before record or receipt lookups. It distinguishes forgotten, unavailable and
+withheld references, and excludes free-text receipt fields from the projection.
+The Python store exposes `auditum_view`; the JavaScript SDK exports `auditumView`.
+
+The [transformation graph](../../spec/transformation-graph.md) retains one MASA
+source record and maps representations to explicit patch nodes with directed,
+receipt-backed edges. Both SDKs require the host's actual MASA validator and
+versioned direction registry. Graph accounts now use protected storage and explicit patch revisions. Typed
+transposition receipts preserve separate rate/duration/band/hash declarations;
+external engine execution remains downstream.

@@ -28,3 +28,7 @@ jobs:
         run: pnpm install --frozen-lockfile
       - name: Check
         run: pnpm check
+      - name: Install Python contract
+        run: python3 -m pip install ./packages/py-akousma
+      - name: Check Python contract and shared fixtures
+        run: python3 -m unittest discover -s packages/py-akousma/tests

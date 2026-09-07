@@ -218,6 +218,10 @@ def _fallback_validation_errors(record: dict[str, Any]) -> list[str]:
 def validation_errors(record: dict[str, Any]) -> list[str]:
     """Return human-readable validation errors ([] if valid). Uses jsonschema if
     available, else a minimal built-in check of required blocks."""
+    if isinstance(record, dict) and record.get("schema_version") == "1.7.0":
+        from .record_evolution import next_record_errors
+
+        return next_record_errors(record)
     try:
         from jsonschema import Draft7Validator
 
@@ -862,12 +866,22 @@ class AkousmataStore:
         """Return the listening/account fields that an in-place edit may not rewrite.
 
         Curators may still update tags, annotations, summary, location, consent,
-        rights, extensions, and typed kinship relations. A changed listening or
+        rights, ordinary extensions, and typed kinship relations. Listening-access
+        declarations and retained pass adapters are protected evidence. A changed listening or
         causal account must use a fresh id and an ``auditum.revision`` link.
         """
         provenance = record.get("provenance") if isinstance(record.get("provenance"), dict) else {}
         lineage = record.get("lineage") if isinstance(record.get("lineage"), dict) else {}
+        extensions = record.get("extensions") if isinstance(record.get("extensions"), dict) else {}
+        oida = extensions.get("oida") if isinstance(extensions.get("oida"), dict) else {}
         return {
+            "legacy_appeal": {"payload": oida["appeal"]} if "appeal" in oida else {},
+            "listening_contract_extensions": {
+                key: extensions[key] for key in ("earworm_listening_access", "akouo_pass_adapter", "earworm_listening_context", "earworm_research", "earworm_generation_decision", "earworm_observation", "earworm_matter_context", "earworm_measurements", "earworm_agent_sector", "earworm_transformation_graph")
+                if key in extensions
+            },
+            "evolution_relations": [relation for relation in lineage.get("relations", []) if relation.get("contract") == "earworm/relations/v1"],
+            "record_kind": record.get("record_kind"),
             "schema_version": record.get("schema_version"),
             "created_at": record.get("created_at"),
             "audio": record.get("audio"),
@@ -922,8 +936,17 @@ class AkousmataStore:
         return self.objects_dir / digest[:2] / name
 
     # --- records ----------------------------------------------------------
-    def put(self, record: dict[str, Any]) -> str:
+    def put(self, record: dict[str, Any], *, validate_masa=None, lineage_directions=None) -> str:
         errors = validation_errors(record)
+        extensions = record.get("extensions")
+        if isinstance(extensions, dict) and "earworm_listening_access" in extensions:
+            from .listening_contracts import listening_access_errors
+
+            errors.extend(listening_access_errors(extensions["earworm_listening_access"]))
+        if isinstance(extensions, dict) and "earworm_listening_context" in extensions:
+            from .listening_context import listening_context_errors
+
+            errors.extend(listening_context_errors(extensions["earworm_listening_context"], record))
         if errors:
             raise ValueError("invalid akousma:\n" + "\n".join(errors))
         rid = record["akousma_id"]
@@ -937,8 +960,20 @@ class AkousmataStore:
                 raise ValueError("an auditum revision must use a fresh akousma_id, not revise itself")
             if not isinstance(target, str) or self.get(target) is None:
                 raise ValueError(f"auditum revision target {target!r} is not present in this store")
+        if isinstance(extensions, dict) and "earworm_transformation_graph" in extensions:
+            from .transformation_graph import transformation_graph_errors
+            from .graph_records import graph_revision_errors
+            if record.get("schema_version") != "1.7.0":
+                raise ValueError("Graph persistence requires the opt-in 1.7 record contract")
+            graph_errors = transformation_graph_errors(extensions["earworm_transformation_graph"],
+                validate_masa=validate_masa, lineage_directions=lineage_directions)
+            if revision_target:
+                graph_errors.extend(graph_revision_errors(record, self.get(revision_target)))
+            if graph_errors:
+                raise ValueError("invalid transformation graph: " + "; ".join(graph_errors))
         existing = self.get(rid)
-        if existing is not None and self._protected_account(existing) != self._protected_account(record):
+        from .record_evolution import _same_json
+        if existing is not None and not _same_json(self._protected_account(existing), self._protected_account(record)):
             raise ValueError(
                 f"akousma {rid!r} has an existing listening account; create a new record with auditum.revision instead of overwriting it"
             )
@@ -1205,6 +1240,11 @@ class AkousmataStore:
         return out
 
     # --- typed relations (kinship, not parenthood) -------------------------
+    def relation_details(self, akousma_id: str) -> list[dict[str, Any]]:
+        """Full authoritative relation metadata; the existing edge index stays coarse."""
+        record = self.get(akousma_id)
+        return record.get("lineage", {}).get("relations", []) if record else []
+
     def relations(self, akousma_id: str) -> list[dict[str, str]]:
         """Outgoing typed relations of a record."""
         return [
@@ -1442,6 +1482,12 @@ class AkousmataStore:
         ).fetchone()
         return json.loads(row["receipt"]) if row else None
 
+    def auditum_view(self, akousma_id: str, *, can_read, supported_contracts) -> dict[str, Any]:
+        """Read a local auditum and one-hop references after explicit host permission."""
+        from .auditum_view import auditum_view
+        return auditum_view(akousma_id, read_record=self.get, read_receipt=self.forgotten,
+                            can_read=can_read, supported_contracts=supported_contracts)
+
     # --- maintenance --------------------------------------------------------
     def reindex(self) -> int:
         """Rebuild edges and derived indexes without rewriting record JSON."""
@@ -1519,6 +1565,11 @@ class AkousmataStore:
             revised = revision_of(record)
             if revised is not None and revised not in ids:
                 report["dangling_revisions"].append(f"{rid} -> {revised}")
+            if not errors and revised in ids and "earworm_transformation_graph" in record.get("extensions", {}):
+                from .graph_records import graph_revision_errors
+                graph_errors = graph_revision_errors(record, self.get(revised))
+                if graph_errors:
+                    report["invalid_records"].append(f"{rid}: {graph_errors[0]}")
             uri = record.get("audio", {}).get("uri", "")
             if uri.startswith("akousmata://objects/"):
                 path = self.resolve_uri(uri)
