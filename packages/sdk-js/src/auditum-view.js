@@ -1,3 +1,4 @@
+import {record18Errors} from './spectral.js';
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
@@ -34,7 +35,7 @@ function references(record) {
   const refs = [...(record.lineage?.parent_akousma_ids ?? []),
     ...(record.lineage?.relations ?? []).map((r) => r.target_akousma_id),
     record.auditum?.revision?.revises_akousma_id];
-  if (record.schema_version === "1.7.0") {
+  if (["1.7.0","1.8.0"].includes(record.schema_version)) {
     refs.push(record.auditum?.appeal?.legacy_source?.record_ref);
     const decision = record.extensions?.earworm_generation_decision;
     if (decision) refs.push(decision.generation_ref, ...decision.subsequent_listenings.map((r) => r.record_ref));
@@ -57,7 +58,7 @@ export function auditumView(recordId, { readRecord, readReceipt, canRead, suppor
     if (!permitted) return { entry: { record_ref: id, state: "withheld" } };
     const record = readRecord(id);
     if (record !== null) {
-      const errors = record?.schema_version === "1.7.0" ? nextRecordErrors(record) : schemaErrors(validateLegacy, record);
+      const errors = record?.schema_version === "1.8.0" ? record18Errors(record) : record?.schema_version === "1.7.0" ? nextRecordErrors(record) : ["1.0.0","1.1.0","1.2.0","1.3.0","1.4.0","1.5.0","1.6.0"].includes(record?.schema_version) ? schemaErrors(validateLegacy, record) : ["Unsupported record schema version"];
       if (errors.length || record.akousma_id !== id) throw new Error("Invalid or mismatched resolved record");
       return { entry: { record_ref: id, state: "available" }, record };
     }

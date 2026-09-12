@@ -1,0 +1,56 @@
+{
+  "contract": "earworm/spectral-bundle/v1",
+  "bundle_id": "bundle:synthetic",
+  "subject_ref": "1111111111111111111111111111111111111111111111111111111111111111",
+  "excerpt_sha256": "2222222222222222222222222222222222222222222222222222222222222222",
+  "record_ref": "record:example",
+  "sampled_representation": "#/auditum/listenings/0/listening_access/sampled_representation",
+  "source_interval_samples": [
+    0,
+    48000
+  ],
+  "effective_rate_hz": 48000,
+  "channel_layout": [
+    "mono"
+  ],
+  "analysis_version": "fixture/1",
+  "views": [
+    {
+      "view_id": "view:1",
+      "kind": "complex_stft",
+      "settings": {
+        "window": "hann-periodic",
+        "hop": 256,
+        "fft_length": 1024,
+        "scaling": "spectrum",
+        "boundary": "zeros",
+        "f_min": 20,
+        "f_max": 20000
+      },
+      "state": "retained",
+      "object_ref": "akousmata://objects/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.npy",
+      "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "dtype": "complex64",
+      "shape": [
+        2,
+        2
+      ],
+      "byte_count": 160,
+      "expanded_bytes": 32,
+      "axis_order": [
+        "frequency",
+        "time"
+      ],
+      "axis_units": [
+        "Hz",
+        "s"
+      ],
+      "time_origin_s": 0,
+      "phase_convention": "FFT negative exponent, centered window",
+      "reference_level": "digital full scale",
+      "transforms": [],
+      "losses": [],
+      "for": "native"
+    }
+  ]
+}

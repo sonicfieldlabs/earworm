@@ -35,7 +35,7 @@ def _references(record):
     refs = list(lineage.get("parent_akousma_ids", []))
     refs.extend(r.get("target_akousma_id") for r in lineage.get("relations", []))
     refs.append(auditum.get("revision", {}).get("revises_akousma_id"))
-    if record["schema_version"] == "1.7.0":
+    if record["schema_version"] in {"1.7.0", "1.8.0"}:
         refs.append(auditum.get("appeal", {}).get("legacy_source", {}).get("record_ref"))
         decision = record.get("extensions", {}).get("earworm_generation_decision")
         if decision:

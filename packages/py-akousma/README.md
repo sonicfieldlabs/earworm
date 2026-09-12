@@ -7,6 +7,11 @@ with one lineage model.
 Spec: [`earworm/docs/akousma_spec_v1.md`](../../docs/akousma_spec_v1.md) ·
 Store: [`earworm/docs/akousmata-store.md`](../../docs/akousmata-store.md)
 
+Source version 0.8.0 adds explicit Akousma 1.7/1.8 admission and the opt-in
+spectral/native-evidence validators described in
+[`spec/akousma-1.8.md`](../../spec/akousma-1.8.md). Existing constructors still
+produce 1.6 records unless a host deliberately negotiates a newer contract.
+
 ## Install
 
 ```sh

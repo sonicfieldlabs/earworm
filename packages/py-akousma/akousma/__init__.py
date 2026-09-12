@@ -215,9 +215,14 @@ def _fallback_validation_errors(record: dict[str, Any]) -> list[str]:
     return errors
 
 
-def validation_errors(record: dict[str, Any]) -> list[str]:
+def validation_errors(record: dict[str, Any], *, validate_native=None, resolve_object=None) -> list[str]:
     """Return human-readable validation errors ([] if valid). Uses jsonschema if
     available, else a minimal built-in check of required blocks."""
+    if not isinstance(record, dict) or record.get("schema_version") not in {"1.0.0", "1.1.0", "1.2.0", "1.3.0", "1.4.0", "1.5.0", "1.6.0", "1.7.0", "1.8.0"}:
+        return ["Unsupported record schema version"]
+    if record.get("schema_version") == "1.8.0":
+        from .spectral import record_18_errors
+        return record_18_errors(record, validate_native=validate_native, resolve_object=resolve_object)
     if isinstance(record, dict) and record.get("schema_version") == "1.7.0":
         from .record_evolution import next_record_errors
 
@@ -936,8 +941,11 @@ class AkousmataStore:
         return self.objects_dir / digest[:2] / name
 
     # --- records ----------------------------------------------------------
-    def put(self, record: dict[str, Any], *, validate_masa=None, lineage_directions=None) -> str:
-        errors = validation_errors(record)
+    def put(self, record: dict[str, Any], *, validate_masa=None, lineage_directions=None, supported_versions=None, validate_native=None, resolve_object=None, resolve_representation=None) -> str:
+        if record.get("schema_version") == "1.8.0":
+            from .spectral import admit_record
+            admit_record(record, supported_versions=supported_versions or (), validate_native=validate_native, resolve_object=resolve_object, resolve_representation=resolve_representation)
+        errors = validation_errors(record, validate_native=validate_native, resolve_object=resolve_object)
         extensions = record.get("extensions")
         if isinstance(extensions, dict) and "earworm_listening_access" in extensions:
             from .listening_contracts import listening_access_errors
@@ -963,7 +971,7 @@ class AkousmataStore:
         if isinstance(extensions, dict) and "earworm_transformation_graph" in extensions:
             from .transformation_graph import transformation_graph_errors
             from .graph_records import graph_revision_errors
-            if record.get("schema_version") != "1.7.0":
+            if record.get("schema_version") not in {"1.7.0", "1.8.0"}:
                 raise ValueError("Graph persistence requires the opt-in 1.7 record contract")
             graph_errors = transformation_graph_errors(extensions["earworm_transformation_graph"],
                 validate_masa=validate_masa, lineage_directions=lineage_directions)

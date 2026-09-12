@@ -1,4 +1,4 @@
-# Akousma — the sonic memory record (spec v1.6)
+# Akousma — the sonic memory record (spec v1.8)
 
 > **akousma** (ἄκουσμα, "a thing heard"; plural **akousmata**) — one sound's memory:
 > its audio, where it came from, what was heard in it, and how it relates to other sounds.
@@ -163,3 +163,6 @@ the canonical JSON record.
 
 See [`akousmata-store.md`](./akousmata-store.md) for the shared store, and the Python reference
 implementation in [`../packages/py-akousma`](../packages/py-akousma).
+
+
+Spec 1.8 opt-in additions and reader admission: [normative extension contract](../spec/akousma-1.8.md). Existing producer defaults remain unchanged.

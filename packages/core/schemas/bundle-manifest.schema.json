@@ -71,7 +71,8 @@
               "fixture",
               "observed",
               "generated",
-              "unknown"
+              "unknown",
+              "spectral"
             ]
           },
           "covenants": {

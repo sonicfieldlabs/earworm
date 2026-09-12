@@ -5,7 +5,8 @@ agentic signal chains. It keeps audio events, intent, generation metadata,
 analysis, user edits, agent actions, modulation, provenance, retention, and
 render history in one queryable context chain.
 
-Current release: `0.7.0`.
+Current public release: `0.7.0`. The Phase 1 source adds opt-in Akousma 1.8
+contracts and the `akousma` Python 0.8.0 reader; producer defaults remain 1.6.
 
 ## Packages
 
@@ -13,7 +14,7 @@ Current release: `0.7.0`.
 | --- | --- | --- |
 | `@earworm/core` | 0.7.0 | Canonical TypeScript event/session types, schemas, event stores, state reconstruction, context queries, listening events, modulation, snapshots, and consent-gated manifest export. |
 | `@earworm/sdk-js` | 0.7.0 | JavaScript client plus akousma v1.6, listening-only and decision-only records, auditum/v2, and listener-classification helpers. |
-| `akousma` | 0.7.0 | Python reference store for sonic memory, attributable listener indexes, revision heads, route decisions, forgetting receipts, lineage, disagreement, absence, authority, reindexing, and verification. |
+| `akousma` | 0.8.0 source | Python reference store plus explicit 1.7/1.8 reader admission, spectral-bundle validation, and host-validated agent-native evidence. |
 | `earworm-sdk-python` | 0.7.0 | Read-only Python helpers for Earworm fixtures and sessions. |
 
 ## Protocol capabilities
@@ -121,6 +122,11 @@ examples/               runnable integrations
 tests/conformance/      shared conformance vectors
 scripts/                validation, tests, examples, and export tools
 ```
+
+Akousma 1.8 is an opt-in delivery contract. Consumers must explicitly admit
+`1.8.0`; Earworm never strips its extensions, relabels it as 1.7, or treats an
+unavailable host validator as accepted evidence. See
+[`spec/akousma-1.8.md`](spec/akousma-1.8.md).
 
 ## Documentation
 

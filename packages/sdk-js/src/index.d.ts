@@ -647,3 +647,7 @@ export function reviseGraphRecord(record: NextAkousma, options: GraphRevisionOpt
 export function bundleManifestErrors(manifest: unknown): string[];
 
 export declare function modelEcologyErrors(name: "embedding-space" | "analysis-evidence" | "model-deployment", value: unknown): string[];
+
+export function spectralBundleErrors(bundle: unknown, options?: {resolveObject?: (ref: string) => unknown}): string[];
+export function record18Errors(record: unknown, options?: {validateNative?: (value: unknown) => string[]; resolveObject?: (ref: string) => unknown}): string[];
+export function admitRecord18(record: unknown, options: {supportedVersions: string[]; validateNative?: (value: unknown) => string[]; resolveObject?: (ref: string) => unknown; resolveRepresentation?: (ref: string) => unknown}): unknown;

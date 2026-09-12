@@ -165,3 +165,5 @@ export { transformationGraphBindingErrors, graphRevisionErrors, createGraphRecor
 export { bundleManifestErrors } from "./bundles.js";
 
 export { modelEcologyErrors } from "./model-ecology.js";
+
+export {spectralBundleErrors, record18Errors, admitRecord18} from './spectral.js';

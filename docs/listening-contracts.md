@@ -6,6 +6,13 @@ They do not imply that existing applications negotiate or enforce the new contra
 The [shared scenario matrix](../tests/contracts/scenarios/README.md) exercises
 agent-only, independent human/agent, influenced ensemble, second-report,
 beyond-band and generation-lineage accounts through the same JS/Python checks.
+
+Akousma 1.8 adds `extensions["akouo.agent-native"]` and
+`extensions["oida.spectral"]` behind explicit consumer admission. The frozen
+0.7.0 Python reader was measured with an otherwise valid 1.7 record: it
+round-tripped an unknown extension, but its broad fallback also accepted the
+same record labelled 1.8.0. New producer and consumer boundaries therefore
+check supported versions explicitly; old-reader rejection is not assumed.
 Its portable fixture bundle ships under `@earworm/core/fixtures/scenarios/`.
 Legacy envelope acceptance remains distinct from companion negotiation; the
 matrix includes explicit old-reader rejection for 1.7 records.
