@@ -138,3 +138,5 @@ scripts/                validation, tests, examples, and export tools
 
 Code is licensed under MPL-2.0. See [LICENSE](LICENSE). Project names and
 branding are handled separately; see [TRADEMARKS.md](TRADEMARKS.md).
+
+D5 local integration: [bundles](docs/bundles.md). Unreleased; no automatic publication.

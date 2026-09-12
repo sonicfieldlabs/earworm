@@ -4,7 +4,8 @@ version = "0.7.0"
 description = "Python reference implementation of the Sonic Field akousma sonic-memory protocol (part of Earworm)."
 readme = "README.md"
 requires-python = ">=3.10"
-license = { text = "MPL-2.0" }
+license = "MPL-2.0"
+license-files = ["LICENSE"]
 authors = [{ name = "Sonic Field Labs" }]
 dependencies = ["jsonschema>=4.22", "referencing>=0.35"]
 

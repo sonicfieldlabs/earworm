@@ -161,3 +161,7 @@ export { TRANSFORMATION_GRAPH_CONTRACT, createTransformationGraph, transformatio
 
 export { TRANSPOSITION_RECIPE_CONTRACT, transpositionRecipeErrors } from "./transposition-recipes.js";
 export { transformationGraphBindingErrors, graphRevisionErrors, createGraphRecord, reviseGraphRecord } from "./graph-records.js";
+
+export { bundleManifestErrors } from "./bundles.js";
+
+export { modelEcologyErrors } from "./model-ecology.js";

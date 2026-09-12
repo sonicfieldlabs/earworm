@@ -1714,3 +1714,5 @@ function removeUndefined(value: unknown): unknown {
       .map(([key, child]) => [key, removeUndefined(child)])
   );
 }
+
+export type { EmbeddingSpace, AnalysisEvidence, ModelDeployment } from "./modelEcology.js";

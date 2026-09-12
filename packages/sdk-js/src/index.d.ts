@@ -643,3 +643,7 @@ export interface GraphRevisionOptions {
   authored_by: string; nodes: TransformationPatchNode[]; supported_contracts: string[];
 }
 export function reviseGraphRecord(record: NextAkousma, options: GraphRevisionOptions, masa: TransformationMasaAdapter): NextAkousma;
+
+export function bundleManifestErrors(manifest: unknown): string[];
+
+export declare function modelEcologyErrors(name: "embedding-space" | "analysis-evidence" | "model-deployment", value: unknown): string[];

@@ -1055,6 +1055,8 @@ class AkousmataStore:
         record_class: str | None = None,
         revision_of: str | None = None,
         limit: int = 100,
+        offset: int = 0,
+        oldest_first: bool = False,
     ) -> list[dict[str, Any]]:
         clauses, args = [], []
         for col, val in (
@@ -1117,10 +1119,13 @@ class AkousmataStore:
         if record_class is not None and record_class not in RECORD_CLASSES:
             raise ValueError(f"query: record_class must be one of {', '.join(RECORD_CLASSES)}")
         where = f"WHERE {' AND '.join(clauses)}" if clauses else ""
-        args.append(limit)
+        if offset < 0:
+            raise ValueError("query: offset must be nonnegative")
+        args.extend((limit, offset))
+        direction = "ASC" if oldest_first else "DESC"
         # Column names and clauses above come only from fixed literals; all caller values are bound parameters.
         rows = self.conn.execute(  # nosemgrep: python.sqlalchemy.security.sqlalchemy-execute-raw-query.sqlalchemy-execute-raw-query
-            f"SELECT record FROM akousmata {where} ORDER BY created_at DESC LIMIT ?", args
+            f"SELECT record FROM akousmata {where} ORDER BY created_at {direction}, akousma_id {direction} LIMIT ? OFFSET ?", args
         ).fetchall()
         records = [json.loads(r["record"]) for r in rows]
         if tag is not None:

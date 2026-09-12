@@ -1,0 +1,110 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contract",
+    "frame_id",
+    "deployment_id",
+    "model_revision",
+    "capability",
+    "view",
+    "evidence_kind",
+    "confidence_kind",
+    "result",
+    "limitations"
+  ],
+  "properties": {
+    "contract": {
+      "const": "earworm/analysis-evidence/v1"
+    },
+    "frame_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "deployment_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "model_revision": {
+      "type": "string",
+      "pattern": "^([a-fA-F0-9]{40}|[a-fA-F0-9]{64})$"
+    },
+    "capability": {
+      "type": "string",
+      "minLength": 1
+    },
+    "view": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "asset_id",
+        "content_sha256",
+        "start_seconds",
+        "end_seconds",
+        "sample_rate_hz",
+        "channels",
+        "transformations"
+      ],
+      "properties": {
+        "asset_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "content_sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "start_seconds": {
+          "type": "number",
+          "minimum": 0
+        },
+        "end_seconds": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "sample_rate_hz": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "channels": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "transformations": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "evidence_kind": {
+      "enum": [
+        "measured",
+        "model_hypothesis",
+        "inferred",
+        "undetermined"
+      ]
+    },
+    "confidence_kind": {
+      "enum": [
+        "not_provided",
+        "uncalibrated_score",
+        "calibrated_probability"
+      ]
+    },
+    "result": {
+      "type": "object"
+    },
+    "limitations": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    }
+  },
+  "$id": "https://sonicfield.org/earworm/analysis-evidence.schema.json"
+}

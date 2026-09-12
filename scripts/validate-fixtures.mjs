@@ -47,6 +47,7 @@ function assertSupportedSchema(schema, label, path = "$") {
     "contains",
     "enum",
     "minLength",
+    "maxLength",
     "pattern",
     "minItems",
     "maxItems",
@@ -168,6 +169,7 @@ function validate(schema, value, schemas, path = "$", rootSchema = schema) {
   if (typeof value === "string" && typeof schema.minLength === "number" && value.length < schema.minLength) {
     errors.push(`${path}: expected at least ${schema.minLength} characters`);
   }
+  if (typeof value === "string" && schema.maxLength !== undefined && [...value].length > schema.maxLength) errors.push(`${path}: exceeds maximum string length`);
   if (typeof value === "string" && typeof schema.pattern === "string" && !new RegExp(schema.pattern).test(value)) {
     errors.push(`${path}: expected to match ${schema.pattern}`);
   }
