@@ -882,7 +882,7 @@ class AkousmataStore:
         return {
             "legacy_appeal": {"payload": oida["appeal"]} if "appeal" in oida else {},
             "listening_contract_extensions": {
-                key: extensions[key] for key in ("earworm_listening_access", "akouo_pass_adapter", "earworm_listening_context", "earworm_research", "earworm_generation_decision", "earworm_observation", "earworm_matter_context", "earworm_measurements", "earworm_agent_sector", "earworm_transformation_graph")
+                key: extensions[key] for key in ("earworm_listening_access", "akouo_pass_adapter", "earworm_listening_context", "earworm_research", "earworm_generation_decision", "earworm_observation", "earworm_matter_context", "earworm_measurements", "earworm_agent_sector", "earworm_transformation_graph", "oida.spectral", "akouo.agent-native", "oida.aperture", "oida.native-policy")
                 if key in extensions
             },
             "evolution_relations": [relation for relation in lineage.get("relations", []) if relation.get("contract") == "earworm/relations/v1"],
@@ -941,7 +941,7 @@ class AkousmataStore:
         return self.objects_dir / digest[:2] / name
 
     # --- records ----------------------------------------------------------
-    def put(self, record: dict[str, Any], *, validate_masa=None, lineage_directions=None, supported_versions=None, validate_native=None, resolve_object=None, resolve_representation=None) -> str:
+    def put(self, record: dict[str, Any], *, validate_masa=None, lineage_directions=None, supported_versions=None, validate_native=None, resolve_object=None, resolve_representation=None, commit=True) -> str:
         if record.get("schema_version") == "1.8.0":
             from .spectral import admit_record
             admit_record(record, supported_versions=supported_versions or (), validate_native=validate_native, resolve_object=resolve_object, resolve_representation=resolve_representation)
@@ -1032,7 +1032,8 @@ class AkousmataStore:
                 "INSERT OR IGNORE INTO relation_edges (from_id, rel_type, to_id) VALUES (?,?,?)",
                 (rid, rel.get("type", "other"), rel.get("target_akousma_id", "")),
             )
-        self.conn.commit()
+        if commit:
+            self.conn.commit()
         return rid
 
     def get(self, akousma_id: str) -> dict[str, Any] | None:
