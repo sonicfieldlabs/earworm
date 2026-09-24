@@ -12,6 +12,11 @@ spectral/native-evidence validators described in
 [`spec/akousma-1.8.md`](../../spec/akousma-1.8.md). Existing constructors still
 produce 1.6 records unless a host deliberately negotiates a newer contract.
 
+Source version 0.8.2 adds `akousma.retained_policy`: one conservative covenant
+projection for retained, untyped listening prose. Restrictions found at the top
+level, in the auditum, in a native-policy extension or in a listening context are
+combined, so moving a covenant never grants permission to text it restricted.
+
 ## Install
 
 ```sh

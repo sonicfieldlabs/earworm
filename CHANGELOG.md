@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- py-akousma 0.8.2: added `akousma.retained_policy` (`retained_covenant`,
+  `blocks_untyped_prose`). Covenant restrictions from every location a producer
+  may write them are combined cumulatively; a restricted consent status adds
+  `do_not_reveal`. GERM and Oída use it to decide whether retained prose may be
+  shown or reused. No schema change.
+
 - Added a portable six-scenario listening matrix composed from existing local
   fixtures, shared JS/Python negative cases, legacy-reader checks and store
   reopen/reindex preservation. Canonical generation is checked for drift.
