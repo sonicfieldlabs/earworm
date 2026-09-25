@@ -45,7 +45,8 @@ def heavy_lease(owner, capability, *, timeout=900, checkpoint=None):
             checkpoint()
         yield
         return
-    deadline = time.monotonic() + timeout
+    waiting = time.monotonic()
+    deadline = waiting + timeout
     with _open_lock() as stream:
         while True:
             if checkpoint:
@@ -57,6 +58,9 @@ def heavy_lease(owner, capability, *, timeout=900, checkpoint=None):
                 if time.monotonic() >= deadline:
                     raise TimeoutError("heavy worker admission timed out")
                 time.sleep(0.05)
+        # How long this thread waited for another holder: a generation that waited
+        # behind a listening is otherwise indistinguishable from a slow generation.
+        _local.last_wait_seconds = time.monotonic() - waiting
         try:
             if checkpoint:
                 checkpoint()
@@ -80,6 +84,11 @@ def heavy_lease(owner, capability, *, timeout=900, checkpoint=None):
             stream.truncate()
             stream.flush()
             fcntl.flock(stream, fcntl.LOCK_UN)
+
+
+def last_wait_seconds():
+    """Seconds this thread last waited to acquire the lease, or None if it never did."""
+    return getattr(_local, "last_wait_seconds", None)
 
 
 def admission_status():
