@@ -14,7 +14,7 @@ contracts and the `akousma` Python 0.8.0 reader; producer defaults remain 1.6.
 | --- | --- | --- |
 | `@earworm/core` | 0.7.0 | Canonical TypeScript event/session types, schemas, event stores, state reconstruction, context queries, listening events, modulation, snapshots, and consent-gated manifest export. |
 | `@earworm/sdk-js` | 0.7.0 | JavaScript client plus akousma v1.6, listening-only and decision-only records, auditum/v2, and listener-classification helpers. |
-| `akousma` | 0.8.0 source | Python reference store plus explicit 1.7/1.8 reader admission, spectral-bundle validation, and host-validated agent-native evidence. |
+| `akousma` | 0.8.2 source | Python reference store plus explicit 1.7/1.8 reader admission, spectral-bundle validation, and host-validated agent-native evidence. |
 | `earworm-sdk-python` | 0.7.0 | Read-only Python helpers for Earworm fixtures and sessions. |
 
 ## Protocol capabilities
@@ -139,6 +139,21 @@ unavailable host validator as accepted evidence. See
 - [Provenance and policy](docs/governance/provenance-and-policy.md)
 - [Architecture decision: schemas are canonical](docs/adr/0001-json-schema-is-canonical.md)
 - [Changelog](CHANGELOG.md)
+
+## What does not exist yet
+
+- **A release of what this checkout adds.** The last public release is 0.7.0 (`v0.7.0`). The
+  changelog's Unreleased section lists everything since, among it:
+  - `akousma` 0.8.2 and its retained-covenant projection;
+  - observation-account bindings;
+  - agent sectors;
+  - local views;
+  - transformation graphs.
+- **Akousma 1.7 or 1.8 by default.** Default constructors still write 1.6. 1.7 is a draft, and 1.8
+  is an opt-in contract that a consumer must admit explicitly.
+- **An engine.** Earworm has no DSP engine and runs no transformation graph. Its graphs and recipes
+  are contracts, and executing them is the application's work.
+- **Writing from Python sessions.** `earworm-sdk-python` only reads.
 
 ## License and trademarks
 
