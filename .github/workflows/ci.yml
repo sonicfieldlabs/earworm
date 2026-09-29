@@ -5,6 +5,8 @@ on:
   push:
     branches:
       - main
+    tags:
+      - 'v*'
 
 permissions:
   contents: read
@@ -28,7 +30,11 @@ jobs:
         run: pnpm install --frozen-lockfile
       - name: Check
         run: pnpm check
+      - name: Set up minimum supported Python
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
+        with:
+          python-version: "3.10"
       - name: Install Python contract
-        run: python3 -m pip install ./packages/py-akousma
+        run: python3 -m pip install './packages/py-akousma[dev]'
       - name: Check Python contract and shared fixtures
-        run: python3 -m unittest discover -s packages/py-akousma/tests
+        run: python3 -I scripts/check_python.py --junitxml "$RUNNER_TEMP/earworm-python.xml"

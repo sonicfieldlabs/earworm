@@ -100,8 +100,8 @@ Other extension metadata keeps its existing curatorial behavior.
 ## Checks
 
 `pnpm check` covers JavaScript and canonical schema fixtures. Install the Python
-package with Python 3.10+ and run
-`python3 -m unittest discover -s packages/py-akousma/tests`. Both suites use the
+package with Python 3.10+ using `pip install './packages/py-akousma[dev]'` and run
+`python3 -I scripts/check_python.py --junitxml /tmp/earworm-python.xml`. Both suites use the
 same access cases and expected adapter output under `tests/contracts/`.
 `node scripts/sync-akousma-schema.mjs` refreshes the bundled Python schemas; a
 regression check prevents schema drift.

@@ -30,6 +30,24 @@ Audio referenced by an akousma's `audio.uri` uses `akousmata://objects/<sha256>.
 against `objects/`. Records are stored whole (as JSON) in `index.sqlite` for portability; the DB is
 an index/cache that can be rebuilt from the JSON blobs.
 
+Python 0.8.3 accepts only a lowercase 64-character SHA-256 and a 1–16-character
+lowercase ASCII alphanumeric extension in a sharded object URI. Resolution
+verifies existing object bytes and refuses symlinks below the operator-selected
+store root, including symlinks back into that store. `resolve_uri(uri,
+content_hash=...)` also binds the record's SHA-256 identity when supplied; both
+the existing bare digest and `sha256:...` forms are accepted.
+Malformed, redirected or corrupted objects resolve to `None`; valid absent
+objects still resolve to their expected path. `put_audio` validates the extension
+and never overwrites an existing object. External `file://` references remain a
+separate host policy and are not resolved by this API.
+
+Audio forgetting uses the same resolver and requires the matching declared hash.
+An unsafe or unavailable object is left untouched while metadata forgetting still
+writes its durable receipt (`audio_deleted: false`). Any other record sharing
+the hash or exact locator preserves the object. This Path-returning API does not
+provide process isolation against a concurrent same-user filesystem replacement
+between resolution and a host's subsequent file operation.
+
 ## `index.sqlite` schema
 
 ```sql

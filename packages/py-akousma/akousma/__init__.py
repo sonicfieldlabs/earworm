@@ -11,6 +11,7 @@ from __future__ import annotations
 import json
 import math
 import os
+import re
 import secrets
 import sqlite3
 import sys
@@ -695,8 +696,10 @@ class AkousmataStore:
     """SQLite-indexed, content-addressed shared store for akousma records."""
 
     def __init__(self, root: str | Path | None = None) -> None:
-        self.root = Path(root).expanduser() if root else default_store_path()
+        self.root = (Path(root).expanduser() if root else default_store_path()).resolve()
         self.objects_dir = self.root / "objects"
+        if self.objects_dir.is_symlink():
+            raise ValueError("The object directory must not be a symlink")
         self.objects_dir.mkdir(parents=True, exist_ok=True)
         self.db_path = self.root / "index.sqlite"
         self.conn = sqlite3.connect(self.db_path)
@@ -924,21 +927,64 @@ class AkousmataStore:
 
     # --- content-addressed audio -----------------------------------------
     def put_audio(self, data: bytes, ext: str = "wav") -> str:
+        if not isinstance(ext, str) or re.fullmatch(r"[a-z0-9]{1,16}", ext) is None:
+            raise ValueError("Object extension must be 1–16 lowercase ASCII letters or digits")
         digest = sha256(data).hexdigest()
-        shard = self.objects_dir / digest[:2]
-        shard.mkdir(parents=True, exist_ok=True)
-        dest = shard / f"{digest}.{ext}"
-        if not dest.exists():
-            dest.write_bytes(data)
-        return f"akousmata://objects/{digest}.{ext}"
+        uri = f"akousmata://objects/{digest}.{ext}"
+        dest = self.resolve_uri(uri)
+        if dest is None:
+            raise ValueError("Object path or existing content is invalid")
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        if self.resolve_uri(uri) != dest:
+            raise ValueError("Object path changed")
+        try:
+            # Exclusive creation never follows an existing final-file symlink or
+            # overwrites an existing object. Existing bytes must match the hash.
+            with dest.open("xb") as output:
+                output.write(data)
+        except FileExistsError:
+            if self.resolve_uri(uri) != dest:
+                raise ValueError("Existing object content differs from its identity")
+        return uri
 
-    def resolve_uri(self, uri: str) -> Path | None:
-        prefix = "akousmata://objects/"
-        if not uri.startswith(prefix):
+    def resolve_uri(self, uri: str, *, content_hash: str | None = None) -> Path | None:
+        """Resolve a canonical sharded object, refusing unsafe or changed bytes.
+
+        The operator-selected store root is canonicalized when opened. Symlinks
+        anywhere below it are refused, including aliases into the same store.
+        A valid missing object still returns its expected path for compatibility.
+        This Path API is not a sandbox against concurrent same-user filesystem
+        replacement between resolution and a caller's later open/unlink.
+        """
+        if not isinstance(uri, str):
             return None
-        name = uri[len(prefix):]
-        digest = name.split(".")[0]
-        return self.objects_dir / digest[:2] / name
+        match = re.fullmatch(r"akousmata://objects/([0-9a-f]{64})\.([a-z0-9]{1,16})", uri)
+        if match is None:
+            return None
+        digest, ext = match.groups()
+        # Existing producers use both bare SHA-256 and algorithm-prefixed
+        # digests. Both bind to exactly the same locator identity.
+        if content_hash is not None and content_hash not in (digest, "sha256:" + digest):
+            return None
+        shard = self.objects_dir / digest[:2]
+        path = shard / f"{digest}.{ext}"
+        try:
+            if any(part.is_symlink() for part in (self.objects_dir, shard, path)):
+                return None
+            if self.objects_dir.resolve() != self.root / "objects" or path.resolve().parent != shard:
+                return None
+            if path.exists():
+                if not path.is_file():
+                    return None
+                actual = sha256()
+                with path.open("rb") as stream:
+                    for chunk in iter(lambda: stream.read(1024 * 1024), b""):
+                        actual.update(chunk)
+                if actual.hexdigest() != digest:
+                    return None
+            return path
+        except (OSError, RuntimeError, ValueError):
+            return None
 
     # --- records ----------------------------------------------------------
     def put(self, record: dict[str, Any], *, validate_masa=None, lineage_directions=None, supported_versions=None, validate_native=None, resolve_object=None, resolve_representation=None, commit=True) -> str:
@@ -1418,12 +1464,13 @@ class AkousmataStore:
             uri = str(record.get("audio", {}).get("uri") or "")
             others = [
                 r for r in self.conn.execute(
-                    "SELECT akousma_id FROM akousmata WHERE content_hash=? AND akousma_id<>?",
-                    (content_hash, akousma_id),
+                    "SELECT akousma_id FROM akousmata WHERE "
+                    "(content_hash=? OR json_extract(record, '$.audio.uri')=?) AND akousma_id<>?",
+                    (content_hash, uri, akousma_id),
                 ).fetchall()
             ] if content_hash else [True]
             if uri.startswith("akousmata://objects/") and not others:
-                path = self.resolve_uri(uri)
+                path = self.resolve_uri(uri, content_hash=content_hash)
                 if path is not None and path.exists():
                     path.unlink()
                     audio_deleted = True
@@ -1586,8 +1633,8 @@ class AkousmataStore:
                     report["invalid_records"].append(f"{rid}: {graph_errors[0]}")
             uri = record.get("audio", {}).get("uri", "")
             if uri.startswith("akousmata://objects/"):
-                path = self.resolve_uri(uri)
-                if path is not None and not path.exists():
+                path = self.resolve_uri(uri, content_hash=(record.get("audio") or {}).get("content_hash"))
+                if path is None or not path.exists():
                     report["missing_audio"].append(f"{rid}: {uri}")
         forbidden_receipt_fields = {"record", "audio", "summary", "tags", "location", "subject", "content_hash", "uri"}
         for row in self.conn.execute("SELECT receipt_id, receipt FROM forgetting_receipts").fetchall():

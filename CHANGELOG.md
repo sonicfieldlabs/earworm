@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- py-akousma 0.8.3: restrict sharded object locators to canonical SHA-256 names,
+  refuse symlinks below the selected store root and mismatched object bytes,
+  validate extensions before writes, and bind audio forgetting to its declared
+  content hash. Records sharing an object locator preserve it even if their
+  declared hash differs. No record schema or forgetting-receipt change.
+
 - py-akousma 0.8.2: added `akousma.retained_policy` (`retained_covenant`,
   `blocks_untyped_prose`). Covenant restrictions from every location a producer
   may write them are combined cumulatively; a restricted consent status adds
