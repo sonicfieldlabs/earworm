@@ -11,9 +11,11 @@ from __future__ import annotations
 import json
 import math
 import os
+import re
 import secrets
 import sqlite3
 import sys
+import tempfile
 import time
 from hashlib import sha256
 from pathlib import Path
@@ -215,9 +217,18 @@ def _fallback_validation_errors(record: dict[str, Any]) -> list[str]:
     return errors
 
 
-def validation_errors(record: dict[str, Any]) -> list[str]:
+def validation_errors(record: dict[str, Any], *, validate_native=None, resolve_object=None) -> list[str]:
     """Return human-readable validation errors ([] if valid). Uses jsonschema if
     available, else a minimal built-in check of required blocks."""
+    if not isinstance(record, dict) or record.get("schema_version") not in {"1.0.0", "1.1.0", "1.2.0", "1.3.0", "1.4.0", "1.5.0", "1.6.0", "1.7.0", "1.8.0"}:
+        return ["Unsupported record schema version"]
+    if record.get("schema_version") == "1.8.0":
+        from .spectral import record_18_errors
+        return record_18_errors(record, validate_native=validate_native, resolve_object=resolve_object)
+    if isinstance(record, dict) and record.get("schema_version") == "1.7.0":
+        from .record_evolution import next_record_errors
+
+        return next_record_errors(record)
     try:
         from jsonschema import Draft7Validator
 
@@ -686,8 +697,10 @@ class AkousmataStore:
     """SQLite-indexed, content-addressed shared store for akousma records."""
 
     def __init__(self, root: str | Path | None = None) -> None:
-        self.root = Path(root).expanduser() if root else default_store_path()
+        self.root = (Path(root).expanduser() if root else default_store_path()).resolve()
         self.objects_dir = self.root / "objects"
+        if self.objects_dir.is_symlink():
+            raise ValueError("The object directory must not be a symlink")
         self.objects_dir.mkdir(parents=True, exist_ok=True)
         self.db_path = self.root / "index.sqlite"
         self.conn = sqlite3.connect(self.db_path)
@@ -862,12 +875,22 @@ class AkousmataStore:
         """Return the listening/account fields that an in-place edit may not rewrite.
 
         Curators may still update tags, annotations, summary, location, consent,
-        rights, extensions, and typed kinship relations. A changed listening or
+        rights, ordinary extensions, and typed kinship relations. Listening-access
+        declarations and retained pass adapters are protected evidence. A changed listening or
         causal account must use a fresh id and an ``auditum.revision`` link.
         """
         provenance = record.get("provenance") if isinstance(record.get("provenance"), dict) else {}
         lineage = record.get("lineage") if isinstance(record.get("lineage"), dict) else {}
+        extensions = record.get("extensions") if isinstance(record.get("extensions"), dict) else {}
+        oida = extensions.get("oida") if isinstance(extensions.get("oida"), dict) else {}
         return {
+            "legacy_appeal": {"payload": oida["appeal"]} if "appeal" in oida else {},
+            "listening_contract_extensions": {
+                key: extensions[key] for key in ("earworm_listening_access", "akouo_pass_adapter", "earworm_listening_context", "earworm_research", "earworm_generation_decision", "earworm_observation", "earworm_matter_context", "earworm_measurements", "earworm_agent_sector", "earworm_transformation_graph", "oida.spectral", "akouo.agent-native", "oida.aperture", "oida.native-policy")
+                if key in extensions
+            },
+            "evolution_relations": [relation for relation in lineage.get("relations", []) if relation.get("contract") == "earworm/relations/v1"],
+            "record_kind": record.get("record_kind"),
             "schema_version": record.get("schema_version"),
             "created_at": record.get("created_at"),
             "audio": record.get("audio"),
@@ -905,25 +928,106 @@ class AkousmataStore:
 
     # --- content-addressed audio -----------------------------------------
     def put_audio(self, data: bytes, ext: str = "wav") -> str:
+        if not isinstance(ext, str) or re.fullmatch(r"[a-z0-9]{1,16}", ext) is None:
+            raise ValueError("Object extension must be 1–16 lowercase ASCII letters or digits")
         digest = sha256(data).hexdigest()
-        shard = self.objects_dir / digest[:2]
-        shard.mkdir(parents=True, exist_ok=True)
-        dest = shard / f"{digest}.{ext}"
-        if not dest.exists():
-            dest.write_bytes(data)
-        return f"akousmata://objects/{digest}.{ext}"
+        uri = f"akousmata://objects/{digest}.{ext}"
+        dest = self.resolve_uri(uri)
+        if dest is None:
+            raise ValueError("Object path or existing content is invalid")
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        if self.resolve_uri(uri) != dest:
+            raise ValueError("Object path changed")
+        if dest.exists():
+            return uri  # resolve_uri already verified the existing bytes.
+        staged = None
+        try:
+            # Stage privately in the same filesystem. A hard link publishes all
+            # completed bytes atomically, without replacing another writer's
+            # object (or following a final-file symlink).
+            with tempfile.NamedTemporaryFile(mode="w+b", prefix=".audio-", dir=dest.parent, delete=False) as output:
+                staged = Path(output.name)
+                output.write(data)
+                output.flush()
+                output.seek(0)
+                actual = sha256()
+                for chunk in iter(lambda: output.read(1024 * 1024), b""):
+                    actual.update(chunk)
+                if actual.hexdigest() != digest:
+                    raise OSError("Staged audio content differs from its identity")
+                os.fsync(output.fileno())
+            if self.resolve_uri(uri) != dest:
+                raise ValueError("Object path changed")
+            try:
+                os.link(staged, dest)
+            except FileExistsError:
+                if self.resolve_uri(uri) != dest:
+                    raise ValueError("Existing object content differs from its identity")
+            if os.name != "nt":
+                directory_fd = os.open(dest.parent, os.O_RDONLY | getattr(os, "O_DIRECTORY", 0))
+                try:
+                    os.fsync(directory_fd)
+                finally:
+                    os.close(directory_fd)
+        finally:
+            if staged is not None:
+                staged.unlink(missing_ok=True)
+        return uri
 
-    def resolve_uri(self, uri: str) -> Path | None:
-        prefix = "akousmata://objects/"
-        if not uri.startswith(prefix):
+    def resolve_uri(self, uri: str, *, content_hash: str | None = None) -> Path | None:
+        """Resolve a canonical sharded object, refusing unsafe or changed bytes.
+
+        The operator-selected store root is canonicalized when opened. Symlinks
+        anywhere below it are refused, including aliases into the same store.
+        A valid missing object still returns its expected path for compatibility.
+        This Path API is not a sandbox against concurrent same-user filesystem
+        replacement between resolution and a caller's later open/unlink.
+        """
+        if not isinstance(uri, str):
             return None
-        name = uri[len(prefix):]
-        digest = name.split(".")[0]
-        return self.objects_dir / digest[:2] / name
+        match = re.fullmatch(r"akousmata://objects/([0-9a-f]{64})\.([a-z0-9]{1,16})", uri)
+        if match is None:
+            return None
+        digest, ext = match.groups()
+        # Existing producers use both bare SHA-256 and algorithm-prefixed
+        # digests. Both bind to exactly the same locator identity.
+        if content_hash is not None and content_hash not in (digest, "sha256:" + digest):
+            return None
+        shard = self.objects_dir / digest[:2]
+        path = shard / f"{digest}.{ext}"
+        try:
+            if any(part.is_symlink() for part in (self.objects_dir, shard, path)):
+                return None
+            if self.objects_dir.resolve() != self.root / "objects" or path.resolve().parent != shard:
+                return None
+            if path.exists():
+                if not path.is_file():
+                    return None
+                actual = sha256()
+                with path.open("rb") as stream:
+                    for chunk in iter(lambda: stream.read(1024 * 1024), b""):
+                        actual.update(chunk)
+                if actual.hexdigest() != digest:
+                    return None
+            return path
+        except (OSError, RuntimeError, ValueError):
+            return None
 
     # --- records ----------------------------------------------------------
-    def put(self, record: dict[str, Any]) -> str:
-        errors = validation_errors(record)
+    def put(self, record: dict[str, Any], *, validate_masa=None, lineage_directions=None, supported_versions=None, validate_native=None, resolve_object=None, resolve_representation=None, commit=True) -> str:
+        if record.get("schema_version") == "1.8.0":
+            from .spectral import admit_record
+            admit_record(record, supported_versions=supported_versions or (), validate_native=validate_native, resolve_object=resolve_object, resolve_representation=resolve_representation)
+        errors = validation_errors(record, validate_native=validate_native, resolve_object=resolve_object)
+        extensions = record.get("extensions")
+        if isinstance(extensions, dict) and "earworm_listening_access" in extensions:
+            from .listening_contracts import listening_access_errors
+
+            errors.extend(listening_access_errors(extensions["earworm_listening_access"]))
+        if isinstance(extensions, dict) and "earworm_listening_context" in extensions:
+            from .listening_context import listening_context_errors
+
+            errors.extend(listening_context_errors(extensions["earworm_listening_context"], record))
         if errors:
             raise ValueError("invalid akousma:\n" + "\n".join(errors))
         rid = record["akousma_id"]
@@ -937,8 +1041,20 @@ class AkousmataStore:
                 raise ValueError("an auditum revision must use a fresh akousma_id, not revise itself")
             if not isinstance(target, str) or self.get(target) is None:
                 raise ValueError(f"auditum revision target {target!r} is not present in this store")
+        if isinstance(extensions, dict) and "earworm_transformation_graph" in extensions:
+            from .transformation_graph import transformation_graph_errors
+            from .graph_records import graph_revision_errors
+            if record.get("schema_version") not in {"1.7.0", "1.8.0"}:
+                raise ValueError("Graph persistence requires the opt-in 1.7 record contract")
+            graph_errors = transformation_graph_errors(extensions["earworm_transformation_graph"],
+                validate_masa=validate_masa, lineage_directions=lineage_directions)
+            if revision_target:
+                graph_errors.extend(graph_revision_errors(record, self.get(revision_target)))
+            if graph_errors:
+                raise ValueError("invalid transformation graph: " + "; ".join(graph_errors))
         existing = self.get(rid)
-        if existing is not None and self._protected_account(existing) != self._protected_account(record):
+        from .record_evolution import _same_json
+        if existing is not None and not _same_json(self._protected_account(existing), self._protected_account(record)):
             raise ValueError(
                 f"akousma {rid!r} has an existing listening account; create a new record with auditum.revision instead of overwriting it"
             )
@@ -989,7 +1105,8 @@ class AkousmataStore:
                 "INSERT OR IGNORE INTO relation_edges (from_id, rel_type, to_id) VALUES (?,?,?)",
                 (rid, rel.get("type", "other"), rel.get("target_akousma_id", "")),
             )
-        self.conn.commit()
+        if commit:
+            self.conn.commit()
         return rid
 
     def get(self, akousma_id: str) -> dict[str, Any] | None:
@@ -1020,6 +1137,8 @@ class AkousmataStore:
         record_class: str | None = None,
         revision_of: str | None = None,
         limit: int = 100,
+        offset: int = 0,
+        oldest_first: bool = False,
     ) -> list[dict[str, Any]]:
         clauses, args = [], []
         for col, val in (
@@ -1082,10 +1201,13 @@ class AkousmataStore:
         if record_class is not None and record_class not in RECORD_CLASSES:
             raise ValueError(f"query: record_class must be one of {', '.join(RECORD_CLASSES)}")
         where = f"WHERE {' AND '.join(clauses)}" if clauses else ""
-        args.append(limit)
+        if offset < 0:
+            raise ValueError("query: offset must be nonnegative")
+        args.extend((limit, offset))
+        direction = "ASC" if oldest_first else "DESC"
         # Column names and clauses above come only from fixed literals; all caller values are bound parameters.
         rows = self.conn.execute(  # nosemgrep: python.sqlalchemy.security.sqlalchemy-execute-raw-query.sqlalchemy-execute-raw-query
-            f"SELECT record FROM akousmata {where} ORDER BY created_at DESC LIMIT ?", args
+            f"SELECT record FROM akousmata {where} ORDER BY created_at {direction}, akousma_id {direction} LIMIT ? OFFSET ?", args
         ).fetchall()
         records = [json.loads(r["record"]) for r in rows]
         if tag is not None:
@@ -1205,6 +1327,11 @@ class AkousmataStore:
         return out
 
     # --- typed relations (kinship, not parenthood) -------------------------
+    def relation_details(self, akousma_id: str) -> list[dict[str, Any]]:
+        """Full authoritative relation metadata; the existing edge index stays coarse."""
+        record = self.get(akousma_id)
+        return record.get("lineage", {}).get("relations", []) if record else []
+
     def relations(self, akousma_id: str) -> list[dict[str, str]]:
         """Outgoing typed relations of a record."""
         return [
@@ -1364,12 +1491,13 @@ class AkousmataStore:
             uri = str(record.get("audio", {}).get("uri") or "")
             others = [
                 r for r in self.conn.execute(
-                    "SELECT akousma_id FROM akousmata WHERE content_hash=? AND akousma_id<>?",
-                    (content_hash, akousma_id),
+                    "SELECT akousma_id FROM akousmata WHERE "
+                    "(content_hash=? OR json_extract(record, '$.audio.uri')=?) AND akousma_id<>?",
+                    (content_hash, uri, akousma_id),
                 ).fetchall()
             ] if content_hash else [True]
             if uri.startswith("akousmata://objects/") and not others:
-                path = self.resolve_uri(uri)
+                path = self.resolve_uri(uri, content_hash=content_hash)
                 if path is not None and path.exists():
                     path.unlink()
                     audio_deleted = True
@@ -1441,6 +1569,12 @@ class AkousmataStore:
             (akousma_id,),
         ).fetchone()
         return json.loads(row["receipt"]) if row else None
+
+    def auditum_view(self, akousma_id: str, *, can_read, supported_contracts) -> dict[str, Any]:
+        """Read a local auditum and one-hop references after explicit host permission."""
+        from .auditum_view import auditum_view
+        return auditum_view(akousma_id, read_record=self.get, read_receipt=self.forgotten,
+                            can_read=can_read, supported_contracts=supported_contracts)
 
     # --- maintenance --------------------------------------------------------
     def reindex(self) -> int:
@@ -1519,10 +1653,15 @@ class AkousmataStore:
             revised = revision_of(record)
             if revised is not None and revised not in ids:
                 report["dangling_revisions"].append(f"{rid} -> {revised}")
+            if not errors and revised in ids and "earworm_transformation_graph" in record.get("extensions", {}):
+                from .graph_records import graph_revision_errors
+                graph_errors = graph_revision_errors(record, self.get(revised))
+                if graph_errors:
+                    report["invalid_records"].append(f"{rid}: {graph_errors[0]}")
             uri = record.get("audio", {}).get("uri", "")
             if uri.startswith("akousmata://objects/"):
-                path = self.resolve_uri(uri)
-                if path is not None and not path.exists():
+                path = self.resolve_uri(uri, content_hash=(record.get("audio") or {}).get("content_hash"))
+                if path is None or not path.exists():
                     report["missing_audio"].append(f"{rid}: {uri}")
         forbidden_receipt_fields = {"record", "audio", "summary", "tags", "location", "subject", "content_hash", "uri"}
         for row in self.conn.execute("SELECT receipt_id, receipt FROM forgetting_receipts").fetchall():

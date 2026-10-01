@@ -1,0 +1,30 @@
+[
+  {
+    "name": "new reader accepts existing 1.7",
+    "schema_version": "1.7.0",
+    "supported_versions": ["1.7.0", "1.8.0"],
+    "extension": "none",
+    "expected": "accepted"
+  },
+  {
+    "name": "unadmitted consumer refuses 1.8",
+    "schema_version": "1.8.0",
+    "supported_versions": ["1.7.0"],
+    "extension": "none",
+    "expected": "refused"
+  },
+  {
+    "name": "agent-native evidence requires host validation",
+    "schema_version": "1.8.0",
+    "supported_versions": ["1.8.0"],
+    "extension": "agent_native",
+    "expected": "host_validation_required"
+  },
+  {
+    "name": "spectral bundle requires object and representation resolution",
+    "schema_version": "1.8.0",
+    "supported_versions": ["1.8.0"],
+    "extension": "spectral",
+    "expected": "host_resolution_required"
+  }
+]

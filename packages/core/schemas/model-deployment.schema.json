@@ -1,0 +1,108 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contract",
+    "id",
+    "owner",
+    "adapter",
+    "capabilities",
+    "components",
+    "runtime_revision",
+    "license_review",
+    "validation_receipt",
+    "enabled",
+    "provisioned",
+    "max_input_seconds",
+    "max_output_seconds",
+    "measured_peak_memory_mib"
+  ],
+  "properties": {
+    "contract": {
+      "const": "earworm/model-deployment/v1"
+    },
+    "id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "owner": {
+      "type": "string",
+      "minLength": 1
+    },
+    "adapter": {
+      "type": "string",
+      "minLength": 1
+    },
+    "capabilities": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "components": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "revision",
+          "sha256"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "revision": {
+            "type": "string",
+            "pattern": "^([a-fA-F0-9]{40}|[a-fA-F0-9]{64})$"
+          },
+          "sha256": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          }
+        }
+      }
+    },
+    "runtime_revision": {
+      "type": "string",
+      "pattern": "^([a-fA-F0-9]{40}|[a-fA-F0-9]{64})$"
+    },
+    "license_review": {
+      "type": "string",
+      "minLength": 1
+    },
+    "validation_receipt": {
+      "type": "string",
+      "minLength": 1
+    },
+    "enabled": {
+      "type": "boolean"
+    },
+    "provisioned": {
+      "type": "boolean"
+    },
+    "max_input_seconds": {
+      "type": "number",
+      "exclusiveMinimum": 0
+    },
+    "max_output_seconds": {
+      "type": "number",
+      "minimum": 0
+    },
+    "measured_peak_memory_mib": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "exclusiveMinimum": 0
+    }
+  },
+  "$id": "https://sonicfield.org/earworm/model-deployment.schema.json"
+}

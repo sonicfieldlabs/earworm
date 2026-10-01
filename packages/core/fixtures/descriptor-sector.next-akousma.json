@@ -1,0 +1,856 @@
+{
+  "akousma_id": "ak_descriptor_a",
+  "schema_version": "1.7.0",
+  "created_at": "2026-09-06T12:00:00Z",
+  "subject": "asset:descriptor:a",
+  "provenance": {
+    "source_type": "unknown",
+    "origin": "unknown",
+    "originating_app": "akousmata",
+    "created_at": "2026-09-06T12:00:00Z"
+  },
+  "listening": {
+    "agent.report": {
+      "contract": "akouo/agent-report/v0.1",
+      "payload": {
+        "contract": "akouo/agent-report/v0.1",
+        "report_id": "report:second",
+        "listener_id": "agent:fixture",
+        "listening_pass_id": "pass:second",
+        "subject_ref": "asset:descriptor:a",
+        "input_refs": [
+          "urn:uuid:10000000-0000-4000-8000-000000000002",
+          "urn:uuid:10000000-0000-4000-8000-000000000201"
+        ],
+        "apparatus_ref": "access:report-only",
+        "report_format": "structured",
+        "recipients": [
+          {
+            "id": "agent:reviewer",
+            "type": "agent"
+          }
+        ],
+        "report_of_refs": [
+          "urn:uuid:10000000-0000-4000-8000-000000000002"
+        ],
+        "features": [
+          {
+            "feature_id": "feature:inherited",
+            "namespace": "fixture.report",
+            "name": "inherited-reading",
+            "category": "interpreted",
+            "claim": {
+              "claim_id": "claim:inherited",
+              "statement": "Synthetic account of retained descriptor evidence.",
+              "confidence": "high",
+              "source": "memory",
+              "evidence_refs": [
+                "urn:uuid:10000000-0000-4000-8000-000000000002"
+              ],
+              "listening_pass_id": "pass:second",
+              "actionability": "informational"
+            },
+            "value": {
+              "status": "unknown",
+              "reason": "The original audio was not supplied."
+            }
+          }
+        ],
+        "limitations": [
+          "Synthetic conformance data; no physical capture or embodied listening is demonstrated."
+        ]
+      }
+    }
+  },
+  "lineage": {
+    "parent_akousma_ids": [],
+    "relations": [
+      {
+        "contract": "earworm/relations/v1",
+        "relation_id": "relation:centroid",
+        "type": "similar_by",
+        "target_akousma_id": "ak_descriptor_b",
+        "declared_by": "agent:fixture",
+        "evidence_refs": [
+          "urn:fixture:a:measurement:spectral_centroid",
+          "urn:fixture:b:measurement:spectral_centroid"
+        ],
+        "epistemic_status": "inferred",
+        "review": {
+          "status": "unreviewed"
+        },
+        "criterion": {
+          "criterion_id": "criterion:centroid",
+          "feature": "spectral_centroid",
+          "unit": "Hz",
+          "method_ref": "earworm:absolute-difference",
+          "method_revision": "1",
+          "input_refs": [
+            "ak_descriptor_a",
+            "ak_descriptor_b"
+          ],
+          "normalization": "none",
+          "score": {
+            "status": "known",
+            "value": 250,
+            "policy": "absolute_difference; lower is closer under this descriptor only"
+          },
+          "descriptor_refs": [
+            {
+              "record_ref": "ak_descriptor_a",
+              "descriptor_ref": "descriptor:spectral_centroid"
+            },
+            {
+              "record_ref": "ak_descriptor_b",
+              "descriptor_ref": "descriptor:spectral_centroid"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "tags": [
+    "synthetic",
+    "report_of_report"
+  ],
+  "annotations": {},
+  "extensions": {
+    "earworm_listening_access": {
+      "contract": "earworm/listening-access/v1",
+      "declaration_id": "access:report-only",
+      "subject_ref": "asset:descriptor:a",
+      "capture": {
+        "status": "unknown",
+        "reason": "Only a retained report was supplied; no signal apparatus is asserted."
+      },
+      "sampled_representation": {
+        "status": "known",
+        "representation_ref": "urn:uuid:10000000-0000-4000-8000-000000000201",
+        "sample_rate_hz": 48000,
+        "channels": 1,
+        "retained_band_hz": {
+          "lower": 20,
+          "upper": 20000
+        },
+        "evidence_refs": [
+          "urn:uuid:10000000-0000-4000-8000-000000000002"
+        ]
+      },
+      "model_input": {
+        "status": "known",
+        "model_ref": "model:synthetic",
+        "representation_ref": "urn:uuid:10000000-0000-4000-8000-000000000201",
+        "sample_rate_hz": 48000,
+        "channels": 1,
+        "effective_band_hz": {
+          "lower": 20,
+          "upper": 20000
+        },
+        "window_s": {
+          "start": 0,
+          "end": 1
+        },
+        "preprocessing_refs": [],
+        "evidence_refs": [
+          "urn:uuid:10000000-0000-4000-8000-000000000002"
+        ],
+        "blind_spots": []
+      },
+      "human_access": [
+        {
+          "status": "unknown",
+          "reason": "Only a retained report was supplied; no signal apparatus is asserted."
+        }
+      ]
+    },
+    "earworm_listening_context": {
+      "contract": "earworm/listening-context/v1",
+      "contexts": [
+        {
+          "listening_ref": "lst_report_of_report",
+          "subject_ref": "asset:descriptor:a",
+          "recipients": [
+            {
+              "id": "agent:reviewer",
+              "type": "agent"
+            }
+          ],
+          "access_declaration_ref": "access:report-only",
+          "report": {
+            "ref": "report:second",
+            "contract": "akouo/agent-report/v0.1",
+            "format": "structured",
+            "readability": {
+              "status": "known",
+              "value": "machine_readable"
+            },
+            "human_rendering": {
+              "status": "available",
+              "rendering_refs": [
+                "rendering:descriptor"
+              ]
+            }
+          },
+          "renderings": [
+            {
+              "rendering_id": "rendering:descriptor",
+              "source_ref": "report:second",
+              "output_ref": "text:descriptor:a",
+              "transformation_ref": "receipt:interpretation:a",
+              "author_ref": "human:curator",
+              "kind": "interpretation",
+              "media_type": "text/plain",
+              "access": {
+                "status": "known",
+                "value": "private"
+              }
+            }
+          ]
+        }
+      ],
+      "claims": [
+        {
+          "claim_ref": "claim:inherited",
+          "listening_ref": "lst_report_of_report",
+          "validity": {
+            "status": "unknown",
+            "reason": "Inherited report claims have no established currency."
+          },
+          "retention": {
+            "status": "unknown",
+            "reason": "Host policy must govern retention."
+          }
+        }
+      ]
+    },
+    "earworm_measurements": {
+      "contract": "earworm/measurement-set/v1",
+      "sources": [
+        {
+          "record_ref": "urn:uuid:10000000-0000-4000-8000-000000000002",
+          "record": {
+            "$schema": "https://masa.sonicfield.org/schemas/0.2.0/matter-record.schema.json",
+            "masaVersion": "0.2.0",
+            "id": "urn:uuid:10000000-0000-4000-8000-000000000002",
+            "type": "masa:MatterRecord",
+            "revision": 1,
+            "profiles": [
+              "core",
+              "audio",
+              "listening",
+              "analysis"
+            ],
+            "createdAt": "2026-07-27T12:00:00Z",
+            "createdBy": "urn:uuid:10000000-0000-4000-8000-000000000101",
+            "title": "Synthetic scalar-descriptor conformance inputs",
+            "description": "Synthetic numeric fixtures only; no DSP, physical sensing or model execution occurred.",
+            "actors": [
+              {
+                "id": "urn:uuid:10000000-0000-4000-8000-000000000101",
+                "type": "masa:Actor",
+                "actorKind": "human",
+                "roles": [
+                  "record-creator"
+                ],
+                "name": {
+                  "state": "known",
+                  "value": "Local example author"
+                },
+                "disclosure": "private",
+                "extensions": {}
+              }
+            ],
+            "sources": [],
+            "representations": [
+              {
+                "id": "urn:uuid:10000000-0000-4000-8000-000000000201",
+                "type": "masa:Representation",
+                "role": "source-representation",
+                "mediaType": "audio/wav",
+                "format": {
+                  "state": "unknown",
+                  "reason": "The example does not include source bytes.",
+                  "reasonCode": "not_bundled"
+                },
+                "availability": "unavailable",
+                "locator": {
+                  "state": "unavailable",
+                  "reason": "No asset is bundled with this minimal example.",
+                  "reasonCode": "not_bundled"
+                },
+                "integrity": {
+                  "state": "unknown",
+                  "reason": "Integrity cannot be verified without bytes.",
+                  "reasonCode": "not_bundled"
+                },
+                "policyRefs": [
+                  "urn:uuid:10000000-0000-4000-8000-000000000301"
+                ],
+                "disclosure": "private",
+                "extensions": {},
+                "audio": {
+                  "durationSeconds": {
+                    "state": "known",
+                    "value": 1
+                  },
+                  "channels": {
+                    "state": "known",
+                    "value": 1
+                  },
+                  "sampleRateHz": {
+                    "state": "known",
+                    "value": 48000
+                  },
+                  "bitDepth": {
+                    "state": "known",
+                    "value": 24
+                  },
+                  "encoding": {
+                    "state": "known",
+                    "value": "PCM signed integer little-endian"
+                  },
+                  "spatialFormat": {
+                    "state": "known",
+                    "value": "mono"
+                  },
+                  "levelContext": {
+                    "state": "unknown",
+                    "reason": "No calibrated playback or capture level is attached to this fixture.",
+                    "reasonCode": "not_calibrated"
+                  }
+                }
+              }
+            ],
+            "encounters": [
+              {
+                "id": "urn:uuid:10000000-0000-4000-8000-000000000501",
+                "type": "masa:Encounter",
+                "occurredAt": "2026-07-27T12:02:00Z",
+                "actors": [
+                  "urn:uuid:10000000-0000-4000-8000-000000000101"
+                ],
+                "question": "How does the short event hold together across focal and global attention?",
+                "position": {
+                  "state": "known",
+                  "value": "Headphones, seated, local studio; playback level not calibrated"
+                },
+                "accessConditions": [
+                  "One-channel unavailable source is represented by fixture metadata only"
+                ],
+                "contextRefs": [],
+                "extensions": {}
+              }
+            ],
+            "apertures": [
+              {
+                "id": "urn:uuid:10000000-0000-4000-8000-000000000502",
+                "type": "masa:Aperture",
+                "description": "Full-band one-second aperture without preprocessing",
+                "channels": [
+                  "mono"
+                ],
+                "ranges": [
+                  {
+                    "kind": "spectral",
+                    "unit": "Hz",
+                    "start": 20,
+                    "end": 20000
+                  }
+                ],
+                "windows": [
+                  {
+                    "kind": "temporal",
+                    "unit": "s",
+                    "start": 0,
+                    "end": 1
+                  }
+                ],
+                "thresholds": [],
+                "preprocessing": [],
+                "exclusions": [],
+                "blindSpots": [
+                  "Unavailable source bytes prevent independent replay"
+                ],
+                "extensions": {}
+              }
+            ],
+            "listeningPasses": [
+              {
+                "id": "urn:uuid:10000000-0000-4000-8000-000000000505",
+                "type": "masa:ListeningPass",
+                "actors": [
+                  "urn:uuid:10000000-0000-4000-8000-000000000101"
+                ],
+                "representations": [
+                  "urn:uuid:10000000-0000-4000-8000-000000000201"
+                ],
+                "encounterRef": "urn:uuid:10000000-0000-4000-8000-000000000501",
+                "apertureRef": "urn:uuid:10000000-0000-4000-8000-000000000502",
+                "modes": [
+                  "focal",
+                  "material"
+                ],
+                "createdAt": "2026-07-27T12:03:00Z",
+                "outcome": "claims",
+                "claimRefs": [
+                  "urn:uuid:10000000-0000-4000-8000-000000000503"
+                ],
+                "disclosure": "private",
+                "extensions": {}
+              },
+              {
+                "id": "urn:uuid:10000000-0000-4000-8000-000000000506",
+                "type": "masa:ListeningPass",
+                "actors": [
+                  "urn:uuid:10000000-0000-4000-8000-000000000101"
+                ],
+                "representations": [
+                  "urn:uuid:10000000-0000-4000-8000-000000000201"
+                ],
+                "encounterRef": "urn:uuid:10000000-0000-4000-8000-000000000501",
+                "apertureRef": "urn:uuid:10000000-0000-4000-8000-000000000502",
+                "modes": [
+                  "global",
+                  "material"
+                ],
+                "createdAt": "2026-07-27T12:04:00Z",
+                "outcome": "claims",
+                "claimRefs": [
+                  "urn:uuid:10000000-0000-4000-8000-000000000504"
+                ],
+                "disclosure": "private",
+                "extensions": {}
+              }
+            ],
+            "claims": [
+              {
+                "id": "urn:uuid:10000000-0000-4000-8000-000000000503",
+                "type": "masa:Claim",
+                "kind": "heard",
+                "about": [
+                  "urn:uuid:10000000-0000-4000-8000-000000000201"
+                ],
+                "basis": [
+                  {
+                    "ref": "urn:uuid:10000000-0000-4000-8000-000000000201",
+                    "role": "representation"
+                  }
+                ],
+                "actor": "urn:uuid:10000000-0000-4000-8000-000000000101",
+                "createdAt": "2026-07-27T12:03:00Z",
+                "content": "The event was registered as one compact gesture.",
+                "method": {
+                  "name": "focal listening pass",
+                  "version": {
+                    "state": "known",
+                    "value": "1.0.0"
+                  },
+                  "parameters": {}
+                },
+                "listeningPassRef": "urn:uuid:10000000-0000-4000-8000-000000000505",
+                "confidence": {
+                  "status": "not_assessed"
+                },
+                "uncertainty": [
+                  "Playback level was not calibrated"
+                ],
+                "alternativeClaimRefs": [
+                  "urn:uuid:10000000-0000-4000-8000-000000000504"
+                ],
+                "disclosure": "private",
+                "extensions": {}
+              },
+              {
+                "id": "urn:uuid:10000000-0000-4000-8000-000000000504",
+                "type": "masa:Claim",
+                "kind": "heard",
+                "about": [
+                  "urn:uuid:10000000-0000-4000-8000-000000000201"
+                ],
+                "basis": [
+                  {
+                    "ref": "urn:uuid:10000000-0000-4000-8000-000000000201",
+                    "role": "representation"
+                  }
+                ],
+                "actor": "urn:uuid:10000000-0000-4000-8000-000000000101",
+                "createdAt": "2026-07-27T12:04:00Z",
+                "content": "A second pass registered two successive material articulations rather than one gesture.",
+                "method": {
+                  "name": "global re-listening pass",
+                  "version": {
+                    "state": "known",
+                    "value": "1.0.0"
+                  },
+                  "parameters": {}
+                },
+                "listeningPassRef": "urn:uuid:10000000-0000-4000-8000-000000000506",
+                "confidence": {
+                  "status": "not_assessed"
+                },
+                "uncertainty": [
+                  "The two accounts remain intentionally unresolved"
+                ],
+                "alternativeClaimRefs": [
+                  "urn:uuid:10000000-0000-4000-8000-000000000503"
+                ],
+                "disclosure": "private",
+                "extensions": {}
+              }
+            ],
+            "regions": [
+              {
+                "id": "urn:uuid:10000000-0000-4000-8000-000000000507",
+                "type": "masa:Region",
+                "representationRef": "urn:uuid:10000000-0000-4000-8000-000000000201",
+                "basis": "temporal",
+                "bounds": {
+                  "unit": "s",
+                  "start": 0,
+                  "end": 1
+                },
+                "createdBy": "urn:uuid:10000000-0000-4000-8000-000000000101",
+                "createdAt": "2026-07-27T12:05:00Z",
+                "method": {
+                  "name": "fixture interval declaration",
+                  "version": {
+                    "state": "known",
+                    "value": "1.0.0"
+                  },
+                  "parameters": {}
+                },
+                "uncertainty": [
+                  "Region follows metadata duration because bytes are unavailable"
+                ],
+                "extensions": {}
+              }
+            ],
+            "measurements": [
+              {
+                "id": "urn:fixture:a:measurement:spectral_centroid",
+                "type": "masa:Measurement",
+                "about": "urn:uuid:10000000-0000-4000-8000-000000000201",
+                "metric": "fixture spectral_centroid",
+                "value": 1000,
+                "unit": "Hz",
+                "method": {
+                  "name": "synthetic descriptor declaration",
+                  "version": {
+                    "state": "known",
+                    "value": "1.0.0"
+                  },
+                  "parameters": {}
+                },
+                "window": {
+                  "kind": "temporal",
+                  "unit": "s",
+                  "start": 0,
+                  "end": 1
+                },
+                "actor": "urn:uuid:10000000-0000-4000-8000-000000000101",
+                "createdAt": "2026-07-27T12:05:00Z",
+                "uncertainty": [
+                  "Synthetic numeric vector; not a measured physical result."
+                ],
+                "extensions": {}
+              },
+              {
+                "id": "urn:fixture:a:measurement:band_energy",
+                "type": "masa:Measurement",
+                "about": "urn:uuid:10000000-0000-4000-8000-000000000201",
+                "metric": "fixture band_energy",
+                "value": 0.4,
+                "unit": "sample^2",
+                "method": {
+                  "name": "synthetic descriptor declaration",
+                  "version": {
+                    "state": "known",
+                    "value": "1.0.0"
+                  },
+                  "parameters": {}
+                },
+                "window": {
+                  "kind": "temporal",
+                  "unit": "s",
+                  "start": 0,
+                  "end": 1
+                },
+                "actor": "urn:uuid:10000000-0000-4000-8000-000000000101",
+                "createdAt": "2026-07-27T12:05:00Z",
+                "uncertainty": [
+                  "Synthetic numeric vector; not a measured physical result."
+                ],
+                "extensions": {}
+              },
+              {
+                "id": "urn:fixture:a:measurement:level",
+                "type": "masa:Measurement",
+                "about": "urn:uuid:10000000-0000-4000-8000-000000000201",
+                "metric": "fixture level",
+                "value": -18,
+                "unit": "dBFS",
+                "method": {
+                  "name": "synthetic descriptor declaration",
+                  "version": {
+                    "state": "known",
+                    "value": "1.0.0"
+                  },
+                  "parameters": {}
+                },
+                "window": {
+                  "kind": "temporal",
+                  "unit": "s",
+                  "start": 0,
+                  "end": 1
+                },
+                "actor": "urn:uuid:10000000-0000-4000-8000-000000000101",
+                "createdAt": "2026-07-27T12:05:00Z",
+                "uncertainty": [
+                  "Synthetic numeric vector; not a measured physical result."
+                ],
+                "extensions": {}
+              },
+              {
+                "id": "urn:fixture:a:measurement:duration",
+                "type": "masa:Measurement",
+                "about": "urn:uuid:10000000-0000-4000-8000-000000000201",
+                "metric": "fixture duration",
+                "value": 1,
+                "unit": "s",
+                "method": {
+                  "name": "synthetic descriptor declaration",
+                  "version": {
+                    "state": "known",
+                    "value": "1.0.0"
+                  },
+                  "parameters": {}
+                },
+                "window": {
+                  "kind": "temporal",
+                  "unit": "s",
+                  "start": 0,
+                  "end": 1
+                },
+                "actor": "urn:uuid:10000000-0000-4000-8000-000000000101",
+                "createdAt": "2026-07-27T12:05:00Z",
+                "uncertainty": [
+                  "Synthetic numeric vector; not a measured physical result."
+                ],
+                "extensions": {}
+              }
+            ],
+            "observations": [],
+            "mappings": [],
+            "relations": [],
+            "policies": [
+              {
+                "id": "urn:uuid:10000000-0000-4000-8000-000000000301",
+                "type": "masa:Policy",
+                "policyKind": "composite",
+                "issuer": "urn:uuid:10000000-0000-4000-8000-000000000101",
+                "status": "active",
+                "disclosure": "private",
+                "rules": [
+                  {
+                    "id": "urn:uuid:10000000-0000-4000-8000-000000000302",
+                    "effect": "permission",
+                    "actions": [
+                      "read",
+                      "validate"
+                    ],
+                    "targets": [
+                      "urn:uuid:10000000-0000-4000-8000-000000000002"
+                    ],
+                    "subjects": [
+                      "urn:uuid:10000000-0000-4000-8000-000000000101"
+                    ],
+                    "authorityBasis": {
+                      "state": "known",
+                      "value": "Local creator declaration for this private example"
+                    },
+                    "constraints": {
+                      "network": "prohibited"
+                    },
+                    "duties": [
+                      "Preserve provenance and unknown states"
+                    ]
+                  }
+                ],
+                "review": {
+                  "contact": {
+                    "state": "unknown",
+                    "reason": "No external contact exists for a local fixture.",
+                    "reasonCode": "local_fixture"
+                  },
+                  "route": {
+                    "state": "known",
+                    "value": "Review the record with the local MASA CLI"
+                  }
+                },
+                "extensions": {}
+              }
+            ],
+            "contexts": [],
+            "agentRuns": [],
+            "capabilities": [],
+            "integrity": {
+              "state": "unknown",
+              "reason": "The standalone example is an account rather than a bundled byte artifact.",
+              "reasonCode": "not_bundled"
+            },
+            "history": {
+              "mode": "embedded",
+              "events": []
+            },
+            "disclosure": "private",
+            "registers": [
+              "digital-technical"
+            ],
+            "scales": [
+              "object-event"
+            ],
+            "extensions": {
+              "example:roundtrip": {
+                "deep": {
+                  "values": [
+                    "preserve",
+                    "without-interpretation"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      ],
+      "descriptors": [
+        {
+          "descriptor_id": "descriptor:spectral_centroid",
+          "source_record_ref": "urn:uuid:10000000-0000-4000-8000-000000000002",
+          "measurement_ref": "urn:fixture:a:measurement:spectral_centroid",
+          "feature": "spectral_centroid",
+          "reference_basis": "frequency",
+          "band_hz": {
+            "status": "known",
+            "lower": 20,
+            "upper": 20000
+          },
+          "declared_by": "agent:fixture",
+          "mapping_reason": "Explicit synthetic descriptor mapping, not inferred from a metric name."
+        },
+        {
+          "descriptor_id": "descriptor:band_energy",
+          "source_record_ref": "urn:uuid:10000000-0000-4000-8000-000000000002",
+          "measurement_ref": "urn:fixture:a:measurement:band_energy",
+          "feature": "band_energy",
+          "reference_basis": "digital_energy",
+          "band_hz": {
+            "status": "known",
+            "lower": 20,
+            "upper": 20000
+          },
+          "declared_by": "agent:fixture",
+          "mapping_reason": "Explicit synthetic descriptor mapping, not inferred from a metric name."
+        },
+        {
+          "descriptor_id": "descriptor:level",
+          "source_record_ref": "urn:uuid:10000000-0000-4000-8000-000000000002",
+          "measurement_ref": "urn:fixture:a:measurement:level",
+          "feature": "level",
+          "reference_basis": "digital_full_scale",
+          "band_hz": {
+            "status": "not_applicable",
+            "reason": "No separate spectral band for this scalar fixture."
+          },
+          "declared_by": "agent:fixture",
+          "mapping_reason": "Explicit synthetic descriptor mapping, not inferred from a metric name."
+        },
+        {
+          "descriptor_id": "descriptor:duration",
+          "source_record_ref": "urn:uuid:10000000-0000-4000-8000-000000000002",
+          "measurement_ref": "urn:fixture:a:measurement:duration",
+          "feature": "duration",
+          "reference_basis": "time",
+          "band_hz": {
+            "status": "not_applicable",
+            "reason": "No separate spectral band for this scalar fixture."
+          },
+          "declared_by": "agent:fixture",
+          "mapping_reason": "Explicit synthetic descriptor mapping, not inferred from a metric name."
+        }
+      ]
+    },
+    "earworm_agent_sector": {
+      "contract": "earworm/agent-sector/v1",
+      "entries": [
+        {
+          "sector_id": "sector:descriptors",
+          "listening_ref": "lst_report_of_report",
+          "subject_ref": "asset:descriptor:a",
+          "access_declaration_ref": "access:report-only",
+          "source_kind": "acoustic_signal",
+          "basis": "retained_measurement",
+          "measurement_refs": [
+            "descriptor:spectral_centroid",
+            "descriptor:band_energy",
+            "descriptor:level",
+            "descriptor:duration"
+          ],
+          "claim_refs": [
+            "claim:inherited"
+          ],
+          "renderings": [
+            "rendering:descriptor"
+          ]
+        }
+      ]
+    }
+  },
+  "summary": "Synthetic agent interpretation of a retained human account.",
+  "auditum": {
+    "contract": "earworm/auditum/v3",
+    "listenings": [
+      {
+        "listening_id": "lst_report_of_report",
+        "listener_id": "agent:fixture",
+        "listener_type": "agent",
+        "created_at": "2026-09-06T12:00:00Z",
+        "report_namespace": "agent.report",
+        "contract": "akouo/agent-report/v0.1",
+        "note": "Only the retained report was supplied; this is not original hearing.",
+        "listening_pass_ref": "pass:second"
+      }
+    ],
+    "disagreements": [],
+    "honest_absences": [
+      {
+        "id": "absence:report",
+        "kind": "unavailable",
+        "subject": "raw audio",
+        "attributed_to": "local retention boundary",
+        "listening_id": "lst_report_of_report",
+        "count": 1,
+        "note": "Only the retained report was supplied; no original audio was available."
+      }
+    ],
+    "actions": [],
+    "route_decisions": [
+      {
+        "decision_id": "decision:report",
+        "gate": "memory",
+        "outcome": "proceed",
+        "subject": "asset:descriptor:a",
+        "reason": "Synthetic fixture-only report inspection.",
+        "decided_at": "2026-09-06T12:00:00Z",
+        "listening_id": "lst_report_of_report",
+        "producer_contract": "akouo/v0.9",
+        "authority": {
+          "mode": "request",
+          "actor": "agent:fixture",
+          "granted_by": "local-listener-001",
+          "requires_confirmation": true,
+          "reversible": true
+        }
+      }
+    ]
+  }
+}

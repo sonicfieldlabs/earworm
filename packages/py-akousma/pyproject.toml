@@ -1,12 +1,13 @@
 [project]
 name = "akousma"
-version = "0.7.0"
+version = "0.8.4"
 description = "Python reference implementation of the Sonic Field akousma sonic-memory protocol (part of Earworm)."
 readme = "README.md"
 requires-python = ">=3.10"
-license = { text = "MPL-2.0" }
+license = "MPL-2.0"
+license-files = ["LICENSE"]
 authors = [{ name = "Sonic Field Labs" }]
-dependencies = ["jsonschema>=4.0"]
+dependencies = ["jsonschema>=4.22", "referencing>=0.35"]
 
 [project.optional-dependencies]
 dev = ["pytest>=8.0"]
@@ -17,4 +18,8 @@ build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
 packages = ["akousma"]
-artifacts = ["akousma/akousma.schema.json"]
+artifacts = ["akousma/*.schema.json"]
+
+# Explicit source inputs exclude local reports, plans and operator state.
+[tool.hatch.build.targets.sdist]
+include = ["akousma", "pyproject.toml", "README.md", "LICENSE"]

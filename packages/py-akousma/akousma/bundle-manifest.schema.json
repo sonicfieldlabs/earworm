@@ -1,0 +1,162 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "contract": {
+      "enum": [
+        "earworm/listening-memories/v1",
+        "earworm/agent-sounds/v1"
+      ]
+    },
+    "bundle_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 512
+    },
+    "created_at": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 512
+    },
+    "producer": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 512
+    },
+    "disclosure": {
+      "enum": [
+        "private",
+        "public-projection"
+      ]
+    },
+    "entries": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 128,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512
+          },
+          "path": {
+            "type": "string",
+            "pattern": "^(records|assets)/[A-Za-z0-9_.-]+$"
+          },
+          "sha256": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "source_sha256": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "schema_version": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512
+          },
+          "kind": {
+            "enum": [
+              "canonical-record",
+              "metadata-projection",
+              "audio"
+            ]
+          },
+          "evidence_class": {
+            "enum": [
+              "fixture",
+              "observed",
+              "generated",
+              "unknown",
+              "spectral"
+            ]
+          },
+          "covenants": {
+            "type": "array",
+            "maxItems": 64
+          },
+          "transforms": {
+            "type": "array",
+            "maxItems": 64
+          },
+          "recipient_requirements": {
+            "type": "array",
+            "maxItems": 64,
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512
+            }
+          },
+          "representation": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "encoding": {
+                "type": "string"
+              },
+              "sample_rate_hz": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "channels": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "sampled_band_hz": {
+                "type": "object"
+              },
+              "human_perceptual_access": {
+                "const": "unknown"
+              }
+            },
+            "required": [
+              "encoding",
+              "sample_rate_hz",
+              "channels",
+              "sampled_band_hz",
+              "human_perceptual_access"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "path",
+          "sha256",
+          "source_sha256",
+          "schema_version",
+          "kind",
+          "evidence_class",
+          "covenants",
+          "transforms",
+          "recipient_requirements"
+        ]
+      }
+    },
+    "human_rendering": {
+      "enum": [
+        "none",
+        "unknown",
+        "withheld",
+        "unavailable",
+        "included"
+      ]
+    }
+  },
+  "required": [
+    "contract",
+    "bundle_id",
+    "created_at",
+    "producer",
+    "disclosure",
+    "entries",
+    "human_rendering"
+  ],
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Listening memory and agent sound manifest",
+  "$id": "https://earworm.dev/schemas/bundle-manifest.schema.json"
+}

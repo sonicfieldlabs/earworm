@@ -1,0 +1,46 @@
+{
+  "contract": "earworm/listening-context/v1",
+  "contexts": [
+    {
+      "listening_ref": "lst_human_001",
+      "subject_ref": "event:context",
+      "recipients": [
+        {
+          "id": "reviewer:fixture",
+          "type": "agent"
+        }
+      ],
+      "access_declaration_ref": "access:context",
+      "report": {
+        "ref": "report:context",
+        "contract": "akouo/v0.9",
+        "format": "structured",
+        "readability": {
+          "status": "known",
+          "value": "machine_readable"
+        },
+        "human_rendering": {
+          "status": "none",
+          "reason": "No human rendering was created."
+        }
+      },
+      "renderings": []
+    }
+  ],
+  "claims": [
+    {
+      "claim_ref": "claim:context",
+      "listening_ref": "lst_human_001",
+      "validity": {
+        "status": "expires",
+        "issued_at": "2026-09-06T12:00:00Z",
+        "expires_at": "2026-09-06T13:00:00Z"
+      },
+      "retention": {
+        "status": "review_after",
+        "review_after": "2026-09-08T13:00:00Z",
+        "policy_ref": "policy:fixture"
+      }
+    }
+  ]
+}

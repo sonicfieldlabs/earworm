@@ -1,0 +1,39 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "model",
+    "revision",
+    "preprocessing_sha256",
+    "dimensions",
+    "pooling",
+    "metric"
+  ],
+  "properties": {
+    "model": {
+      "type": "string",
+      "minLength": 1
+    },
+    "revision": {
+      "type": "string",
+      "pattern": "^([a-fA-F0-9]{40}|[a-fA-F0-9]{64})$"
+    },
+    "preprocessing_sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "dimensions": {
+      "type": "integer",
+      "minimum": 2
+    },
+    "pooling": {
+      "type": "string",
+      "minLength": 1
+    },
+    "metric": {
+      "const": "cosine"
+    }
+  },
+  "$id": "https://sonicfield.org/earworm/embedding-space.schema.json"
+}

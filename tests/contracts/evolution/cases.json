@@ -1,0 +1,269 @@
+[
+  {
+    "name": "closed source type stays closed",
+    "base": "research",
+    "path": [
+      "provenance",
+      "source_type"
+    ],
+    "value": "research",
+    "valid": false
+  },
+  {
+    "name": "missing proposed relation",
+    "base": "research",
+    "path": [
+      "extensions",
+      "earworm_research",
+      "proposed_relation_refs"
+    ],
+    "value": [
+      "missing"
+    ],
+    "valid": false
+  },
+  {
+    "name": "unknown relation kind",
+    "base": "research",
+    "path": [
+      "lineage",
+      "relations",
+      0,
+      "type"
+    ],
+    "value": "influenced_by",
+    "valid": false
+  },
+  {
+    "name": "self relation",
+    "base": "research",
+    "path": [
+      "lineage",
+      "relations",
+      0,
+      "target_akousma_id"
+    ],
+    "value": "ak_research",
+    "valid": false
+  },
+  {
+    "name": "unversioned new relation",
+    "base": "research",
+    "path": [
+      "lineage",
+      "relations",
+      0,
+      "contract"
+    ],
+    "value": "earworm/relations/v99",
+    "valid": false
+  },
+  {
+    "name": "criterion needs units",
+    "base": "research",
+    "path": [
+      "lineage",
+      "relations",
+      1,
+      "criterion",
+      "unit"
+    ],
+    "value": "",
+    "valid": false
+  },
+  {
+    "name": "criterion target input omitted",
+    "base": "research",
+    "path": [
+      "lineage",
+      "relations",
+      1,
+      "criterion",
+      "input_refs"
+    ],
+    "value": [
+      "other"
+    ],
+    "valid": false
+  },
+  {
+    "name": "review distinct from confidence",
+    "base": "research",
+    "path": [
+      "lineage",
+      "relations",
+      1,
+      "review"
+    ],
+    "value": {
+      "status": "accepted",
+      "actor_ref": "reviewer:fixture",
+      "reason": "Reviewed the proposal only."
+    },
+    "valid": true
+  },
+  {
+    "name": "score not a review status",
+    "base": "research",
+    "path": [
+      "lineage",
+      "relations",
+      1,
+      "review"
+    ],
+    "value": {
+      "status": 0.9
+    },
+    "valid": false
+  },
+  {
+    "name": "missing research kind",
+    "base": "research",
+    "path": [
+      "record_kind"
+    ],
+    "value": "generation_decision",
+    "valid": false
+  },
+  {
+    "name": "decision requires generation input",
+    "base": "decision",
+    "path": [
+      "extensions",
+      "earworm_generation_decision",
+      "input_refs"
+    ],
+    "value": [
+      "ak_subsequent_listening"
+    ],
+    "valid": false
+  },
+  {
+    "name": "decision target disagrees",
+    "base": "decision",
+    "path": [
+      "lineage",
+      "relations",
+      0,
+      "target_akousma_id"
+    ],
+    "value": "other",
+    "valid": false
+  },
+  {
+    "name": "no listening evidence",
+    "base": "decision",
+    "path": [
+      "extensions",
+      "earworm_generation_decision",
+      "subsequent_listenings"
+    ],
+    "value": [],
+    "valid": false
+  },
+  {
+    "name": "duplicate listening refs",
+    "base": "decision",
+    "path": [
+      "extensions",
+      "earworm_generation_decision",
+      "subsequent_listenings"
+    ],
+    "value": [
+      {
+        "record_ref": "ak_subsequent_listening",
+        "listening_ref": "lst_human_001"
+      },
+      {
+        "record_ref": "ak_subsequent_listening",
+        "listening_ref": "lst_human_001"
+      }
+    ],
+    "valid": false
+  },
+  {
+    "name": "discard cannot continue",
+    "base": "decision",
+    "path": [
+      "extensions",
+      "earworm_generation_decision",
+      "outcome"
+    ],
+    "value": "discard",
+    "valid": false
+  },
+  {
+    "name": "stop cannot schedule",
+    "base": "decision",
+    "path": [
+      "extensions",
+      "earworm_generation_decision",
+      "stop_outcome"
+    ],
+    "value": "stop",
+    "valid": false
+  },
+  {
+    "name": "proposal cannot execute",
+    "base": "decision",
+    "path": [
+      "extensions",
+      "earworm_generation_decision",
+      "execution"
+    ],
+    "value": "executed",
+    "valid": false
+  },
+  {
+    "name": "policy revision is required",
+    "base": "decision",
+    "path": [
+      "extensions",
+      "earworm_generation_decision",
+      "policy_revision"
+    ],
+    "value": "",
+    "valid": false
+  },
+  {
+    "name": "honest absence must remain attributable",
+    "base": "report",
+    "path": [
+      "auditum",
+      "honest_absences",
+      0,
+      "listening_id"
+    ],
+    "value": "missing",
+    "valid": false
+  },
+  {
+    "name": "route decision must remain attributable",
+    "base": "report",
+    "path": [
+      "auditum",
+      "route_decisions",
+      0,
+      "listening_id"
+    ],
+    "value": "missing",
+    "valid": false
+  },
+  {
+    "name": "listening influence cannot be invented",
+    "base": "report",
+    "path": [
+      "auditum",
+      "listenings",
+      0,
+      "influenced_by"
+    ],
+    "value": [
+      {
+        "listening_id": "missing",
+        "effect": "Invented influence."
+      }
+    ],
+    "valid": false
+  }
+]

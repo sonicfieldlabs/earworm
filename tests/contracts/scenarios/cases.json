@@ -1,0 +1,15 @@
+[
+  {"name":"agent access subject mismatch","scenario":"agent_only","validator":"context","target":"record","path":["extensions","earworm_listening_context","contexts",0,"subject_ref"],"value":"wrong:subject"},
+  {"name":"duplicate receiving recipient","scenario":"agent_only","validator":"context","target":"record","path":["extensions","earworm_listening_context","contexts",0,"recipients"],"value":[{"id":"same","type":"human"},{"id":"same","type":"agent"}]},
+  {"name":"effective input exceeds Nyquist","scenario":"beyond_band","validator":"access","target":"record","path":["extensions","earworm_listening_access","model_input","sample_rate_hz"],"value":8000},
+  {"name":"human access cannot be boolean","scenario":"human_agent","validator":"access","target":"record","path":["extensions","earworm_listening_access","human_access"],"value":true},
+  {"name":"human report borrowed agent context","scenario":"human_agent","validator":"context","target":"record","path":["extensions","earworm_listening_context","contexts",1,"access_declaration_ref"],"value":"access:synthetic-wideband"},
+  {"name":"missing human pass mapping","scenario":"human_agent","validator":"adapter","target":"adapter","path":["bindings",1,"pass_id"],"value":"pass:missing"},
+  {"name":"influence does not match receiving pass","scenario":"influenced_ensemble","validator":"adapter","target":"adapter","path":["ensemble","influence_edges",0,"effect"],"value":"Invented effect"},
+  {"name":"independent passes do not imply influence","scenario":"human_agent","validator":"adapter","target":"adapter","path":["ensemble","influence_edges"],"value":[{"from_pass_id":"pass:a","to_pass_id":"pass:h","effect":"Invented influence"}]},
+  {"name":"ear swarm cannot discard influence","scenario":"influenced_ensemble","validator":"adapter","target":"adapter","path":["ensemble","influence_edges"],"value":[]},
+  {"name":"second report source is unresolved","scenario":"second_report","validator":"references","target":"scope","path":[],"value":[]},
+  {"name":"generation listening before output","scenario":"generation_lineage","validator":"references","target":"scope","path":[2,"auditum","listenings",0,"created_at"],"value":"2026-09-06T09:00:00Z"},
+  {"name":"decision cannot lose input scope","scenario":"generation_lineage","validator":"references","target":"scope","path":[],"value":[]},
+  {"name":"malformed agent record","scenario":"agent_only","validator":"record","target":"record","path":["lineage","parent_akousma_ids"],"value":false}
+]

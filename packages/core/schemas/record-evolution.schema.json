@@ -1,0 +1,874 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://earworm.dev/schemas/record-evolution.schema.json",
+  "title": "Unreleased record evolution definitions",
+  "$defs": {
+    "evolutionRelation": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "contract": {
+          "const": "earworm/relations/v1"
+        },
+        "relation_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "type": {
+          "enum": [
+            "report_of",
+            "research_for",
+            "decision_on",
+            "observed_from",
+            "mapped_from",
+            "similar_by"
+          ]
+        },
+        "target_akousma_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "declared_by": {
+          "type": "string",
+          "minLength": 1
+        },
+        "evidence_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true,
+          "minItems": 1
+        },
+        "epistemic_status": {
+          "enum": [
+            "reported",
+            "measured",
+            "inferred",
+            "interpreted",
+            "undetermined"
+          ]
+        },
+        "review": {
+          "anyOf": [
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "status": {
+                  "const": "unreviewed"
+                }
+              },
+              "required": [
+                "status"
+              ]
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "status": {
+                  "enum": [
+                    "accepted",
+                    "rejected",
+                    "contested"
+                  ]
+                },
+                "actor_ref": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "reason": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "required": [
+                "status",
+                "actor_ref",
+                "reason"
+              ]
+            }
+          ]
+        },
+        "criterion": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "criterion_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "feature": {
+              "type": "string",
+              "minLength": 1
+            },
+            "unit": {
+              "type": "string",
+              "minLength": 1
+            },
+            "method_ref": {
+              "type": "string",
+              "minLength": 1
+            },
+            "method_revision": {
+              "type": "string",
+              "minLength": 1
+            },
+            "input_refs": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "uniqueItems": true,
+              "minItems": 1
+            },
+            "normalization": {
+              "type": "string",
+              "minLength": 1
+            },
+            "score": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "status": {
+                      "const": "known"
+                    },
+                    "value": {
+                      "type": "number"
+                    },
+                    "policy": {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  },
+                  "required": [
+                    "status",
+                    "value",
+                    "policy"
+                  ]
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "status": {
+                      "enum": [
+                        "unknown",
+                        "unavailable",
+                        "not_applicable"
+                      ]
+                    },
+                    "reason": {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  },
+                  "required": [
+                    "status",
+                    "reason"
+                  ]
+                }
+              ]
+            },
+            "descriptor_refs": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "record_ref",
+                  "descriptor_ref"
+                ],
+                "properties": {
+                  "record_ref": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "descriptor_ref": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                }
+              },
+              "uniqueItems": true,
+              "minItems": 2
+            }
+          },
+          "required": [
+            "criterion_id",
+            "feature",
+            "unit",
+            "method_ref",
+            "method_revision",
+            "input_refs",
+            "normalization",
+            "score"
+          ]
+        }
+      },
+      "required": [
+        "contract",
+        "relation_id",
+        "type",
+        "target_akousma_id",
+        "declared_by",
+        "evidence_refs",
+        "epistemic_status",
+        "review"
+      ],
+      "allOf": [
+        {
+          "if": {
+            "required": [
+              "type"
+            ],
+            "properties": {
+              "type": {
+                "const": "similar_by"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "criterion"
+            ]
+          }
+        }
+      ]
+    },
+    "appeal": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "contract": {
+          "const": "earworm/appeal/v1"
+        },
+        "appeal_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "recorded_by": {
+          "type": "string",
+          "minLength": 1
+        },
+        "subject_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true,
+          "minItems": 1
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1
+        },
+        "status": {
+          "enum": [
+            "unreviewed",
+            "open",
+            "under_review",
+            "resolved",
+            "withdrawn"
+          ]
+        },
+        "evidence_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "resolution": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "decision_ref": {
+              "type": "string",
+              "minLength": 1
+            },
+            "reason": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "decision_ref",
+            "reason"
+          ]
+        },
+        "legacy_source": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "record_ref": {
+              "type": "string",
+              "minLength": 1
+            },
+            "path": {
+              "const": "/extensions/oida/appeal"
+            },
+            "payload": {}
+          },
+          "required": [
+            "record_ref",
+            "path",
+            "payload"
+          ]
+        }
+      },
+      "required": [
+        "contract",
+        "appeal_id",
+        "recorded_by",
+        "subject_refs",
+        "reason",
+        "status",
+        "evidence_refs"
+      ],
+      "allOf": [
+        {
+          "if": {
+            "required": [
+              "status"
+            ],
+            "properties": {
+              "status": {
+                "const": "resolved"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "resolution"
+            ]
+          }
+        }
+      ]
+    },
+    "research": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "contract": {
+          "const": "earworm/research/v1"
+        },
+        "proposal_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "author_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "question": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true,
+          "minItems": 1
+        },
+        "evidence_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true,
+          "minItems": 1
+        },
+        "proposed_relation_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "review": {
+          "anyOf": [
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "status": {
+                  "const": "unreviewed"
+                }
+              },
+              "required": [
+                "status"
+              ]
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "status": {
+                  "enum": [
+                    "accepted",
+                    "rejected",
+                    "contested"
+                  ]
+                },
+                "actor_ref": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "reason": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "required": [
+                "status",
+                "actor_ref",
+                "reason"
+              ]
+            }
+          ]
+        }
+      },
+      "required": [
+        "contract",
+        "proposal_id",
+        "author_ref",
+        "question",
+        "source_refs",
+        "evidence_refs",
+        "proposed_relation_refs",
+        "review"
+      ]
+    },
+    "generationDecision": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "contract": {
+          "const": "earworm/generation-decision/v1"
+        },
+        "decision_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "actor_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "generation_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "subsequent_listenings": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "record_ref": {
+                "type": "string",
+                "minLength": 1
+              },
+              "listening_ref": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": [
+              "record_ref",
+              "listening_ref"
+            ]
+          }
+        },
+        "outcome": {
+          "enum": [
+            "keep",
+            "revise",
+            "discard",
+            "variation"
+          ]
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1
+        },
+        "policy_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "policy_revision": {
+          "type": "string",
+          "minLength": 1
+        },
+        "input_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true,
+          "minItems": 1
+        },
+        "next_job": {
+          "anyOf": [
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "status": {
+                  "const": "planned"
+                },
+                "job_ref": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "required": [
+                "status",
+                "job_ref"
+              ]
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "status": {
+                  "const": "none"
+                },
+                "reason": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "required": [
+                "status",
+                "reason"
+              ]
+            }
+          ]
+        },
+        "stop_outcome": {
+          "enum": [
+            "continue",
+            "stop",
+            "defer"
+          ]
+        },
+        "execution": {
+          "const": "not_requested"
+        }
+      },
+      "required": [
+        "contract",
+        "decision_id",
+        "actor_ref",
+        "generation_ref",
+        "subsequent_listenings",
+        "outcome",
+        "reason",
+        "policy_ref",
+        "policy_revision",
+        "input_refs",
+        "next_job",
+        "stop_outcome",
+        "execution"
+      ]
+    },
+    "observationAccount": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "contract",
+        "mapping_namespace",
+        "mapping_ref",
+        "source_record_ref",
+        "observation_ref",
+        "report_ref",
+        "listening_ref",
+        "relation",
+        "execution"
+      ],
+      "properties": {
+        "contract": {
+          "const": "earworm/observation-account/v1"
+        },
+        "mapping_namespace": {
+          "type": "string",
+          "minLength": 1
+        },
+        "mapping_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_record_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "observation_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "report_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "listening_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "relation": {
+          "const": "retained_observation_report"
+        },
+        "execution": {
+          "const": "not_requested"
+        }
+      }
+    },
+    "measurementSet": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "contract",
+        "sources",
+        "descriptors"
+      ],
+      "properties": {
+        "contract": {
+          "const": "earworm/measurement-set/v1"
+        },
+        "sources": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "record_ref",
+              "record"
+            ],
+            "properties": {
+              "record_ref": {
+                "type": "string",
+                "minLength": 1
+              },
+              "record": {
+                "type": "object"
+              }
+            }
+          },
+          "uniqueItems": true,
+          "minItems": 1
+        },
+        "descriptors": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "descriptor_id",
+              "source_record_ref",
+              "measurement_ref",
+              "feature",
+              "reference_basis",
+              "band_hz",
+              "declared_by",
+              "mapping_reason"
+            ],
+            "properties": {
+              "descriptor_id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "source_record_ref": {
+                "type": "string",
+                "minLength": 1
+              },
+              "measurement_ref": {
+                "type": "string",
+                "minLength": 1
+              },
+              "feature": {
+                "enum": [
+                  "spectral_centroid",
+                  "band_energy",
+                  "level",
+                  "duration"
+                ]
+              },
+              "reference_basis": {
+                "enum": [
+                  "frequency",
+                  "digital_energy",
+                  "digital_full_scale",
+                  "perceptual_loudness",
+                  "sound_pressure",
+                  "time"
+                ]
+              },
+              "band_hz": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "status",
+                      "lower",
+                      "upper"
+                    ],
+                    "properties": {
+                      "status": {
+                        "const": "known"
+                      },
+                      "lower": {
+                        "type": "number",
+                        "minimum": 0
+                      },
+                      "upper": {
+                        "type": "number",
+                        "exclusiveMinimum": 0
+                      }
+                    }
+                  },
+                  {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "status",
+                      "reason"
+                    ],
+                    "properties": {
+                      "status": {
+                        "enum": [
+                          "unknown",
+                          "not_applicable"
+                        ]
+                      },
+                      "reason": {
+                        "type": "string",
+                        "minLength": 1
+                      }
+                    }
+                  }
+                ]
+              },
+              "declared_by": {
+                "type": "string",
+                "minLength": 1
+              },
+              "mapping_reason": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          },
+          "uniqueItems": true,
+          "minItems": 1
+        }
+      }
+    },
+    "agentSector": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "contract",
+        "entries"
+      ],
+      "properties": {
+        "contract": {
+          "const": "earworm/agent-sector/v1"
+        },
+        "entries": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "sector_id",
+              "listening_ref",
+              "subject_ref",
+              "access_declaration_ref",
+              "source_kind",
+              "basis",
+              "measurement_refs",
+              "claim_refs",
+              "renderings"
+            ],
+            "properties": {
+              "sector_id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "listening_ref": {
+                "type": "string",
+                "minLength": 1
+              },
+              "subject_ref": {
+                "type": "string",
+                "minLength": 1
+              },
+              "access_declaration_ref": {
+                "type": "string",
+                "minLength": 1
+              },
+              "source_kind": {
+                "enum": [
+                  "acoustic_signal",
+                  "non_acoustic_observation",
+                  "structured_report"
+                ]
+              },
+              "basis": {
+                "enum": [
+                  "retained_measurement",
+                  "retained_observation",
+                  "interpretation"
+                ]
+              },
+              "measurement_refs": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "uniqueItems": true,
+                "minItems": 0
+              },
+              "claim_refs": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "uniqueItems": true,
+                "minItems": 1
+              },
+              "renderings": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "uniqueItems": true,
+                "minItems": 0
+              }
+            }
+          },
+          "uniqueItems": true,
+          "minItems": 1
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,1279 @@
+[
+  {
+    "name": "unknown physical capture and human access",
+    "valid": true,
+    "value": {
+      "contract": "earworm/listening-access/v1",
+      "declaration_id": "access:synthetic-wideband",
+      "subject_ref": "asset:synthetic-01",
+      "capture": {
+        "status": "unknown",
+        "reason": "Synthetic fixture; no physical capture evidence."
+      },
+      "sampled_representation": {
+        "status": "known",
+        "representation_ref": "repr:96k",
+        "sample_rate_hz": 96000,
+        "retained_band_hz": {
+          "lower": 0,
+          "upper": 40000
+        },
+        "evidence_refs": [
+          "receipt:synthetic-source"
+        ],
+        "channels": 1
+      },
+      "model_input": {
+        "status": "known",
+        "model_ref": "model:fixture",
+        "representation_ref": "repr:16k",
+        "sample_rate_hz": 16000,
+        "effective_band_hz": {
+          "lower": 0,
+          "upper": 7500
+        },
+        "window_s": {
+          "start": 0,
+          "end": 10
+        },
+        "preprocessing_refs": [
+          "receipt:filtered-resample"
+        ],
+        "evidence_refs": [
+          "model-card:fixture",
+          "receipt:filtered-resample"
+        ],
+        "channels": 1,
+        "blind_spots": []
+      },
+      "human_access": [
+        {
+          "status": "unknown",
+          "reason": "No human access declaration supplied."
+        }
+      ]
+    }
+  },
+  {
+    "name": "sample rate does not imply model bandwidth",
+    "valid": true,
+    "value": {
+      "contract": "earworm/listening-access/v1",
+      "declaration_id": "access:synthetic-wideband",
+      "subject_ref": "asset:synthetic-01",
+      "capture": {
+        "status": "unknown",
+        "reason": "Synthetic fixture; no physical capture evidence."
+      },
+      "sampled_representation": {
+        "status": "known",
+        "representation_ref": "repr:96k",
+        "sample_rate_hz": 96000,
+        "retained_band_hz": {
+          "lower": 0,
+          "upper": 40000
+        },
+        "evidence_refs": [
+          "receipt:synthetic-source"
+        ],
+        "channels": 1
+      },
+      "model_input": {
+        "status": "known",
+        "model_ref": "model:fixture",
+        "representation_ref": "repr:16k",
+        "sample_rate_hz": 16000,
+        "effective_band_hz": {
+          "lower": 0,
+          "upper": 6000
+        },
+        "window_s": {
+          "start": 0,
+          "end": 10
+        },
+        "preprocessing_refs": [
+          "receipt:filtered-resample"
+        ],
+        "evidence_refs": [
+          "model-card:fixture",
+          "receipt:filtered-resample"
+        ],
+        "channels": 1,
+        "blind_spots": []
+      },
+      "human_access": [
+        {
+          "status": "unknown",
+          "reason": "No human access declaration supplied."
+        }
+      ]
+    }
+  },
+  {
+    "name": "known physical aperture",
+    "valid": true,
+    "value": {
+      "contract": "earworm/listening-access/v1",
+      "declaration_id": "access:synthetic-wideband",
+      "subject_ref": "asset:synthetic-01",
+      "capture": {
+        "status": "known",
+        "apparatus_ref": "sensor:fixture",
+        "supported_band_hz": {
+          "lower": 10,
+          "upper": 40000
+        },
+        "evidence_refs": [
+          "calibration:fixture"
+        ]
+      },
+      "sampled_representation": {
+        "status": "known",
+        "representation_ref": "repr:96k",
+        "sample_rate_hz": 96000,
+        "retained_band_hz": {
+          "lower": 0,
+          "upper": 40000
+        },
+        "evidence_refs": [
+          "receipt:synthetic-source"
+        ],
+        "channels": 1
+      },
+      "model_input": {
+        "status": "known",
+        "model_ref": "model:fixture",
+        "representation_ref": "repr:16k",
+        "sample_rate_hz": 16000,
+        "effective_band_hz": {
+          "lower": 0,
+          "upper": 7500
+        },
+        "window_s": {
+          "start": 0,
+          "end": 10
+        },
+        "preprocessing_refs": [
+          "receipt:filtered-resample"
+        ],
+        "evidence_refs": [
+          "model-card:fixture",
+          "receipt:filtered-resample"
+        ],
+        "channels": 1,
+        "blind_spots": []
+      },
+      "human_access": [
+        {
+          "status": "unknown",
+          "reason": "No human access declaration supplied."
+        }
+      ]
+    }
+  },
+  {
+    "name": "visual rendering does not assert acoustic access",
+    "valid": true,
+    "value": {
+      "contract": "earworm/listening-access/v1",
+      "declaration_id": "access:synthetic-wideband",
+      "subject_ref": "asset:synthetic-01",
+      "capture": {
+        "status": "unknown",
+        "reason": "Synthetic fixture; no physical capture evidence."
+      },
+      "sampled_representation": {
+        "status": "known",
+        "representation_ref": "repr:96k",
+        "sample_rate_hz": 96000,
+        "retained_band_hz": {
+          "lower": 0,
+          "upper": 40000
+        },
+        "evidence_refs": [
+          "receipt:synthetic-source"
+        ],
+        "channels": 1
+      },
+      "model_input": {
+        "status": "known",
+        "model_ref": "model:fixture",
+        "representation_ref": "repr:16k",
+        "sample_rate_hz": 16000,
+        "effective_band_hz": {
+          "lower": 0,
+          "upper": 7500
+        },
+        "window_s": {
+          "start": 0,
+          "end": 10
+        },
+        "preprocessing_refs": [
+          "receipt:filtered-resample"
+        ],
+        "evidence_refs": [
+          "model-card:fixture",
+          "receipt:filtered-resample"
+        ],
+        "channels": 1,
+        "blind_spots": []
+      },
+      "human_access": [
+        {
+          "status": "known",
+          "listener_ref": "human:fixture",
+          "chain_refs": [
+            "display:fixture"
+          ],
+          "conditions": "Synthetic visual inspection only.",
+          "rendering_refs": [
+            "view:spectrogram"
+          ],
+          "access_modes": [
+            "visual"
+          ],
+          "evidence_refs": [
+            "declaration:fixture"
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "withheld",
+    "valid": true,
+    "value": {
+      "contract": "earworm/listening-access/v1",
+      "declaration_id": "access:synthetic-wideband",
+      "subject_ref": "asset:synthetic-01",
+      "capture": {
+        "status": "withheld",
+        "reason": "Declared fixture condition."
+      },
+      "sampled_representation": {
+        "status": "known",
+        "representation_ref": "repr:96k",
+        "sample_rate_hz": 96000,
+        "retained_band_hz": {
+          "lower": 0,
+          "upper": 40000
+        },
+        "evidence_refs": [
+          "receipt:synthetic-source"
+        ],
+        "channels": 1
+      },
+      "model_input": {
+        "status": "known",
+        "model_ref": "model:fixture",
+        "representation_ref": "repr:16k",
+        "sample_rate_hz": 16000,
+        "effective_band_hz": {
+          "lower": 0,
+          "upper": 7500
+        },
+        "window_s": {
+          "start": 0,
+          "end": 10
+        },
+        "preprocessing_refs": [
+          "receipt:filtered-resample"
+        ],
+        "evidence_refs": [
+          "model-card:fixture",
+          "receipt:filtered-resample"
+        ],
+        "channels": 1,
+        "blind_spots": []
+      },
+      "human_access": [
+        {
+          "status": "unknown",
+          "reason": "No human access declaration supplied."
+        }
+      ]
+    }
+  },
+  {
+    "name": "unavailable",
+    "valid": true,
+    "value": {
+      "contract": "earworm/listening-access/v1",
+      "declaration_id": "access:synthetic-wideband",
+      "subject_ref": "asset:synthetic-01",
+      "capture": {
+        "status": "unavailable",
+        "reason": "Declared fixture condition."
+      },
+      "sampled_representation": {
+        "status": "known",
+        "representation_ref": "repr:96k",
+        "sample_rate_hz": 96000,
+        "retained_band_hz": {
+          "lower": 0,
+          "upper": 40000
+        },
+        "evidence_refs": [
+          "receipt:synthetic-source"
+        ],
+        "channels": 1
+      },
+      "model_input": {
+        "status": "known",
+        "model_ref": "model:fixture",
+        "representation_ref": "repr:16k",
+        "sample_rate_hz": 16000,
+        "effective_band_hz": {
+          "lower": 0,
+          "upper": 7500
+        },
+        "window_s": {
+          "start": 0,
+          "end": 10
+        },
+        "preprocessing_refs": [
+          "receipt:filtered-resample"
+        ],
+        "evidence_refs": [
+          "model-card:fixture",
+          "receipt:filtered-resample"
+        ],
+        "channels": 1,
+        "blind_spots": []
+      },
+      "human_access": [
+        {
+          "status": "unknown",
+          "reason": "No human access declaration supplied."
+        }
+      ]
+    }
+  },
+  {
+    "name": "not_applicable",
+    "valid": true,
+    "value": {
+      "contract": "earworm/listening-access/v1",
+      "declaration_id": "access:synthetic-wideband",
+      "subject_ref": "asset:synthetic-01",
+      "capture": {
+        "status": "not_applicable",
+        "reason": "Declared fixture condition."
+      },
+      "sampled_representation": {
+        "status": "known",
+        "representation_ref": "repr:96k",
+        "sample_rate_hz": 96000,
+        "retained_band_hz": {
+          "lower": 0,
+          "upper": 40000
+        },
+        "evidence_refs": [
+          "receipt:synthetic-source"
+        ],
+        "channels": 1
+      },
+      "model_input": {
+        "status": "known",
+        "model_ref": "model:fixture",
+        "representation_ref": "repr:16k",
+        "sample_rate_hz": 16000,
+        "effective_band_hz": {
+          "lower": 0,
+          "upper": 7500
+        },
+        "window_s": {
+          "start": 0,
+          "end": 10
+        },
+        "preprocessing_refs": [
+          "receipt:filtered-resample"
+        ],
+        "evidence_refs": [
+          "model-card:fixture",
+          "receipt:filtered-resample"
+        ],
+        "channels": 1,
+        "blind_spots": []
+      },
+      "human_access": [
+        {
+          "status": "unknown",
+          "reason": "No human access declaration supplied."
+        }
+      ]
+    }
+  },
+  {
+    "name": "no bare human access boolean",
+    "valid": false,
+    "value": {
+      "contract": "earworm/listening-access/v1",
+      "declaration_id": "access:synthetic-wideband",
+      "subject_ref": "asset:synthetic-01",
+      "capture": {
+        "status": "unknown",
+        "reason": "Synthetic fixture; no physical capture evidence."
+      },
+      "sampled_representation": {
+        "status": "known",
+        "representation_ref": "repr:96k",
+        "sample_rate_hz": 96000,
+        "retained_band_hz": {
+          "lower": 0,
+          "upper": 40000
+        },
+        "evidence_refs": [
+          "receipt:synthetic-source"
+        ],
+        "channels": 1
+      },
+      "model_input": {
+        "status": "known",
+        "model_ref": "model:fixture",
+        "representation_ref": "repr:16k",
+        "sample_rate_hz": 16000,
+        "effective_band_hz": {
+          "lower": 0,
+          "upper": 7500
+        },
+        "window_s": {
+          "start": 0,
+          "end": 10
+        },
+        "preprocessing_refs": [
+          "receipt:filtered-resample"
+        ],
+        "evidence_refs": [
+          "model-card:fixture",
+          "receipt:filtered-resample"
+        ],
+        "channels": 1,
+        "blind_spots": []
+      },
+      "human_access": false
+    }
+  },
+  {
+    "name": "unknown cannot carry invented bands",
+    "valid": false,
+    "value": {
+      "contract": "earworm/listening-access/v1",
+      "declaration_id": "access:synthetic-wideband",
+      "subject_ref": "asset:synthetic-01",
+      "capture": {
+        "status": "unknown",
+        "reason": "Synthetic fixture; no physical capture evidence.",
+        "supported_band_hz": {
+          "lower": 0,
+          "upper": 40000
+        }
+      },
+      "sampled_representation": {
+        "status": "known",
+        "representation_ref": "repr:96k",
+        "sample_rate_hz": 96000,
+        "retained_band_hz": {
+          "lower": 0,
+          "upper": 40000
+        },
+        "evidence_refs": [
+          "receipt:synthetic-source"
+        ],
+        "channels": 1
+      },
+      "model_input": {
+        "status": "known",
+        "model_ref": "model:fixture",
+        "representation_ref": "repr:16k",
+        "sample_rate_hz": 16000,
+        "effective_band_hz": {
+          "lower": 0,
+          "upper": 7500
+        },
+        "window_s": {
+          "start": 0,
+          "end": 10
+        },
+        "preprocessing_refs": [
+          "receipt:filtered-resample"
+        ],
+        "evidence_refs": [
+          "model-card:fixture",
+          "receipt:filtered-resample"
+        ],
+        "channels": 1,
+        "blind_spots": []
+      },
+      "human_access": [
+        {
+          "status": "unknown",
+          "reason": "No human access declaration supplied."
+        }
+      ]
+    }
+  },
+  {
+    "name": "representation exceeds Nyquist",
+    "valid": false,
+    "value": {
+      "contract": "earworm/listening-access/v1",
+      "declaration_id": "access:synthetic-wideband",
+      "subject_ref": "asset:synthetic-01",
+      "capture": {
+        "status": "unknown",
+        "reason": "Synthetic fixture; no physical capture evidence."
+      },
+      "sampled_representation": {
+        "status": "known",
+        "representation_ref": "repr:96k",
+        "sample_rate_hz": 96000,
+        "retained_band_hz": {
+          "lower": 0,
+          "upper": 50000
+        },
+        "evidence_refs": [
+          "receipt:synthetic-source"
+        ],
+        "channels": 1
+      },
+      "model_input": {
+        "status": "known",
+        "model_ref": "model:fixture",
+        "representation_ref": "repr:16k",
+        "sample_rate_hz": 16000,
+        "effective_band_hz": {
+          "lower": 0,
+          "upper": 7500
+        },
+        "window_s": {
+          "start": 0,
+          "end": 10
+        },
+        "preprocessing_refs": [
+          "receipt:filtered-resample"
+        ],
+        "evidence_refs": [
+          "model-card:fixture",
+          "receipt:filtered-resample"
+        ],
+        "channels": 1,
+        "blind_spots": []
+      },
+      "human_access": [
+        {
+          "status": "unknown",
+          "reason": "No human access declaration supplied."
+        }
+      ]
+    }
+  },
+  {
+    "name": "model exceeds its own Nyquist",
+    "valid": false,
+    "value": {
+      "contract": "earworm/listening-access/v1",
+      "declaration_id": "access:synthetic-wideband",
+      "subject_ref": "asset:synthetic-01",
+      "capture": {
+        "status": "unknown",
+        "reason": "Synthetic fixture; no physical capture evidence."
+      },
+      "sampled_representation": {
+        "status": "known",
+        "representation_ref": "repr:96k",
+        "sample_rate_hz": 96000,
+        "retained_band_hz": {
+          "lower": 0,
+          "upper": 40000
+        },
+        "evidence_refs": [
+          "receipt:synthetic-source"
+        ],
+        "channels": 1
+      },
+      "model_input": {
+        "status": "known",
+        "model_ref": "model:fixture",
+        "representation_ref": "repr:16k",
+        "sample_rate_hz": 16000,
+        "effective_band_hz": {
+          "lower": 0,
+          "upper": 10000
+        },
+        "window_s": {
+          "start": 0,
+          "end": 10
+        },
+        "preprocessing_refs": [
+          "receipt:filtered-resample"
+        ],
+        "evidence_refs": [
+          "model-card:fixture",
+          "receipt:filtered-resample"
+        ],
+        "channels": 1,
+        "blind_spots": []
+      },
+      "human_access": [
+        {
+          "status": "unknown",
+          "reason": "No human access declaration supplied."
+        }
+      ]
+    }
+  },
+  {
+    "name": "reversed band",
+    "valid": false,
+    "value": {
+      "contract": "earworm/listening-access/v1",
+      "declaration_id": "access:synthetic-wideband",
+      "subject_ref": "asset:synthetic-01",
+      "capture": {
+        "status": "unknown",
+        "reason": "Synthetic fixture; no physical capture evidence."
+      },
+      "sampled_representation": {
+        "status": "known",
+        "representation_ref": "repr:96k",
+        "sample_rate_hz": 96000,
+        "retained_band_hz": {
+          "lower": 0,
+          "upper": 40000
+        },
+        "evidence_refs": [
+          "receipt:synthetic-source"
+        ],
+        "channels": 1
+      },
+      "model_input": {
+        "status": "known",
+        "model_ref": "model:fixture",
+        "representation_ref": "repr:16k",
+        "sample_rate_hz": 16000,
+        "effective_band_hz": {
+          "lower": 8000,
+          "upper": 7500
+        },
+        "window_s": {
+          "start": 0,
+          "end": 10
+        },
+        "preprocessing_refs": [
+          "receipt:filtered-resample"
+        ],
+        "evidence_refs": [
+          "model-card:fixture",
+          "receipt:filtered-resample"
+        ],
+        "channels": 1,
+        "blind_spots": []
+      },
+      "human_access": [
+        {
+          "status": "unknown",
+          "reason": "No human access declaration supplied."
+        }
+      ]
+    }
+  },
+  {
+    "name": "empty analysis window",
+    "valid": false,
+    "value": {
+      "contract": "earworm/listening-access/v1",
+      "declaration_id": "access:synthetic-wideband",
+      "subject_ref": "asset:synthetic-01",
+      "capture": {
+        "status": "unknown",
+        "reason": "Synthetic fixture; no physical capture evidence."
+      },
+      "sampled_representation": {
+        "status": "known",
+        "representation_ref": "repr:96k",
+        "sample_rate_hz": 96000,
+        "retained_band_hz": {
+          "lower": 0,
+          "upper": 40000
+        },
+        "evidence_refs": [
+          "receipt:synthetic-source"
+        ],
+        "channels": 1
+      },
+      "model_input": {
+        "status": "known",
+        "model_ref": "model:fixture",
+        "representation_ref": "repr:16k",
+        "sample_rate_hz": 16000,
+        "effective_band_hz": {
+          "lower": 0,
+          "upper": 7500
+        },
+        "window_s": {
+          "start": 0,
+          "end": 0
+        },
+        "preprocessing_refs": [
+          "receipt:filtered-resample"
+        ],
+        "evidence_refs": [
+          "model-card:fixture",
+          "receipt:filtered-resample"
+        ],
+        "channels": 1,
+        "blind_spots": []
+      },
+      "human_access": [
+        {
+          "status": "unknown",
+          "reason": "No human access declaration supplied."
+        }
+      ]
+    }
+  },
+  {
+    "name": "missing evidence",
+    "valid": false,
+    "value": {
+      "contract": "earworm/listening-access/v1",
+      "declaration_id": "access:synthetic-wideband",
+      "subject_ref": "asset:synthetic-01",
+      "capture": {
+        "status": "unknown",
+        "reason": "Synthetic fixture; no physical capture evidence."
+      },
+      "sampled_representation": {
+        "status": "known",
+        "representation_ref": "repr:96k",
+        "sample_rate_hz": 96000,
+        "retained_band_hz": {
+          "lower": 0,
+          "upper": 40000
+        },
+        "evidence_refs": [],
+        "channels": 1
+      },
+      "model_input": {
+        "status": "known",
+        "model_ref": "model:fixture",
+        "representation_ref": "repr:16k",
+        "sample_rate_hz": 16000,
+        "effective_band_hz": {
+          "lower": 0,
+          "upper": 7500
+        },
+        "window_s": {
+          "start": 0,
+          "end": 10
+        },
+        "preprocessing_refs": [
+          "receipt:filtered-resample"
+        ],
+        "evidence_refs": [
+          "model-card:fixture",
+          "receipt:filtered-resample"
+        ],
+        "channels": 1,
+        "blind_spots": []
+      },
+      "human_access": [
+        {
+          "status": "unknown",
+          "reason": "No human access declaration supplied."
+        }
+      ]
+    }
+  },
+  {
+    "name": "future contract unsupported",
+    "valid": false,
+    "value": {
+      "contract": "earworm/listening-access/v99",
+      "declaration_id": "access:synthetic-wideband",
+      "subject_ref": "asset:synthetic-01",
+      "capture": {
+        "status": "unknown",
+        "reason": "Synthetic fixture; no physical capture evidence."
+      },
+      "sampled_representation": {
+        "status": "known",
+        "representation_ref": "repr:96k",
+        "sample_rate_hz": 96000,
+        "retained_band_hz": {
+          "lower": 0,
+          "upper": 40000
+        },
+        "evidence_refs": [
+          "receipt:synthetic-source"
+        ]
+      },
+      "model_input": {
+        "status": "known",
+        "model_ref": "model:fixture",
+        "representation_ref": "repr:16k",
+        "sample_rate_hz": 16000,
+        "effective_band_hz": {
+          "lower": 0,
+          "upper": 7500
+        },
+        "window_s": {
+          "start": 0,
+          "end": 10
+        },
+        "preprocessing_refs": [
+          "receipt:filtered-resample"
+        ],
+        "evidence_refs": [
+          "model-card:fixture",
+          "receipt:filtered-resample"
+        ]
+      },
+      "human_access": [
+        {
+          "status": "unknown",
+          "reason": "No human access declaration supplied."
+        }
+      ]
+    }
+  },
+  {
+    "name": "unitless sample rate string",
+    "valid": false,
+    "value": {
+      "contract": "earworm/listening-access/v1",
+      "declaration_id": "access:synthetic-wideband",
+      "subject_ref": "asset:synthetic-01",
+      "capture": {
+        "status": "unknown",
+        "reason": "Synthetic fixture; no physical capture evidence."
+      },
+      "sampled_representation": {
+        "status": "known",
+        "representation_ref": "repr:96k",
+        "sample_rate_hz": 96000,
+        "retained_band_hz": {
+          "lower": 0,
+          "upper": 40000
+        },
+        "evidence_refs": [
+          "receipt:synthetic-source"
+        ],
+        "channels": 1
+      },
+      "model_input": {
+        "status": "known",
+        "model_ref": "model:fixture",
+        "representation_ref": "repr:16k",
+        "sample_rate_hz": "16k",
+        "effective_band_hz": {
+          "lower": 0,
+          "upper": 7500
+        },
+        "window_s": {
+          "start": 0,
+          "end": 10
+        },
+        "preprocessing_refs": [
+          "receipt:filtered-resample"
+        ],
+        "evidence_refs": [
+          "model-card:fixture",
+          "receipt:filtered-resample"
+        ],
+        "channels": 1,
+        "blind_spots": []
+      },
+      "human_access": [
+        {
+          "status": "unknown",
+          "reason": "No human access declaration supplied."
+        }
+      ]
+    }
+  },
+  {
+    "name": "boolean is not a rate",
+    "valid": false,
+    "value": {
+      "contract": "earworm/listening-access/v1",
+      "declaration_id": "access:synthetic-wideband",
+      "subject_ref": "asset:synthetic-01",
+      "capture": {
+        "status": "unknown",
+        "reason": "Synthetic fixture; no physical capture evidence."
+      },
+      "sampled_representation": {
+        "status": "known",
+        "representation_ref": "repr:96k",
+        "sample_rate_hz": 96000,
+        "retained_band_hz": {
+          "lower": 0,
+          "upper": 40000
+        },
+        "evidence_refs": [
+          "receipt:synthetic-source"
+        ],
+        "channels": 1
+      },
+      "model_input": {
+        "status": "known",
+        "model_ref": "model:fixture",
+        "representation_ref": "repr:16k",
+        "sample_rate_hz": true,
+        "effective_band_hz": {
+          "lower": 0,
+          "upper": 7500
+        },
+        "window_s": {
+          "start": 0,
+          "end": 10
+        },
+        "preprocessing_refs": [
+          "receipt:filtered-resample"
+        ],
+        "evidence_refs": [
+          "model-card:fixture",
+          "receipt:filtered-resample"
+        ],
+        "channels": 1,
+        "blind_spots": []
+      },
+      "human_access": [
+        {
+          "status": "unknown",
+          "reason": "No human access declaration supplied."
+        }
+      ]
+    }
+  },
+  {
+    "name": "zero channels",
+    "valid": false,
+    "value": {
+      "contract": "earworm/listening-access/v1",
+      "declaration_id": "access:synthetic-wideband",
+      "subject_ref": "asset:synthetic-01",
+      "capture": {
+        "status": "unknown",
+        "reason": "Synthetic fixture; no physical capture evidence."
+      },
+      "sampled_representation": {
+        "status": "known",
+        "representation_ref": "repr:96k",
+        "sample_rate_hz": 96000,
+        "retained_band_hz": {
+          "lower": 0,
+          "upper": 40000
+        },
+        "evidence_refs": [
+          "receipt:synthetic-source"
+        ],
+        "channels": 1
+      },
+      "model_input": {
+        "status": "known",
+        "model_ref": "model:fixture",
+        "representation_ref": "repr:16k",
+        "sample_rate_hz": 16000,
+        "effective_band_hz": {
+          "lower": 0,
+          "upper": 7500
+        },
+        "window_s": {
+          "start": 0,
+          "end": 10
+        },
+        "preprocessing_refs": [
+          "receipt:filtered-resample"
+        ],
+        "evidence_refs": [
+          "model-card:fixture",
+          "receipt:filtered-resample"
+        ],
+        "channels": 0,
+        "blind_spots": []
+      },
+      "human_access": [
+        {
+          "status": "unknown",
+          "reason": "No human access declaration supplied."
+        }
+      ]
+    }
+  },
+  {
+    "name": "fractional channels",
+    "valid": false,
+    "value": {
+      "contract": "earworm/listening-access/v1",
+      "declaration_id": "access:synthetic-wideband",
+      "subject_ref": "asset:synthetic-01",
+      "capture": {
+        "status": "unknown",
+        "reason": "Synthetic fixture; no physical capture evidence."
+      },
+      "sampled_representation": {
+        "status": "known",
+        "representation_ref": "repr:96k",
+        "sample_rate_hz": 96000,
+        "retained_band_hz": {
+          "lower": 0,
+          "upper": 40000
+        },
+        "evidence_refs": [
+          "receipt:synthetic-source"
+        ],
+        "channels": 1
+      },
+      "model_input": {
+        "status": "known",
+        "model_ref": "model:fixture",
+        "representation_ref": "repr:16k",
+        "sample_rate_hz": 16000,
+        "effective_band_hz": {
+          "lower": 0,
+          "upper": 7500
+        },
+        "window_s": {
+          "start": 0,
+          "end": 10
+        },
+        "preprocessing_refs": [
+          "receipt:filtered-resample"
+        ],
+        "evidence_refs": [
+          "model-card:fixture",
+          "receipt:filtered-resample"
+        ],
+        "channels": 1.5,
+        "blind_spots": []
+      },
+      "human_access": [
+        {
+          "status": "unknown",
+          "reason": "No human access declaration supplied."
+        }
+      ]
+    }
+  },
+  {
+    "name": "boolean channels",
+    "valid": false,
+    "value": {
+      "contract": "earworm/listening-access/v1",
+      "declaration_id": "access:synthetic-wideband",
+      "subject_ref": "asset:synthetic-01",
+      "capture": {
+        "status": "unknown",
+        "reason": "Synthetic fixture; no physical capture evidence."
+      },
+      "sampled_representation": {
+        "status": "known",
+        "representation_ref": "repr:96k",
+        "sample_rate_hz": 96000,
+        "retained_band_hz": {
+          "lower": 0,
+          "upper": 40000
+        },
+        "evidence_refs": [
+          "receipt:synthetic-source"
+        ],
+        "channels": 1
+      },
+      "model_input": {
+        "status": "known",
+        "model_ref": "model:fixture",
+        "representation_ref": "repr:16k",
+        "sample_rate_hz": 16000,
+        "effective_band_hz": {
+          "lower": 0,
+          "upper": 7500
+        },
+        "window_s": {
+          "start": 0,
+          "end": 10
+        },
+        "preprocessing_refs": [
+          "receipt:filtered-resample"
+        ],
+        "evidence_refs": [
+          "model-card:fixture",
+          "receipt:filtered-resample"
+        ],
+        "channels": true,
+        "blind_spots": []
+      },
+      "human_access": [
+        {
+          "status": "unknown",
+          "reason": "No human access declaration supplied."
+        }
+      ]
+    }
+  },
+  {
+    "name": "blind spots cannot be absent",
+    "valid": false,
+    "value": {
+      "contract": "earworm/listening-access/v1",
+      "declaration_id": "access:synthetic-wideband",
+      "subject_ref": "asset:synthetic-01",
+      "capture": {
+        "status": "unknown",
+        "reason": "Synthetic fixture; no physical capture evidence."
+      },
+      "sampled_representation": {
+        "status": "known",
+        "representation_ref": "repr:96k",
+        "sample_rate_hz": 96000,
+        "retained_band_hz": {
+          "lower": 0,
+          "upper": 40000
+        },
+        "evidence_refs": [
+          "receipt:synthetic-source"
+        ],
+        "channels": 1
+      },
+      "model_input": {
+        "status": "known",
+        "model_ref": "model:fixture",
+        "representation_ref": "repr:16k",
+        "sample_rate_hz": 16000,
+        "effective_band_hz": {
+          "lower": 0,
+          "upper": 7500
+        },
+        "window_s": {
+          "start": 0,
+          "end": 10
+        },
+        "preprocessing_refs": [
+          "receipt:filtered-resample"
+        ],
+        "evidence_refs": [
+          "model-card:fixture",
+          "receipt:filtered-resample"
+        ],
+        "channels": 1,
+        "blind_spots": null
+      },
+      "human_access": [
+        {
+          "status": "unknown",
+          "reason": "No human access declaration supplied."
+        }
+      ]
+    }
+  },
+  {
+    "name": "sampled_representation channels required",
+    "valid": false,
+    "value": {
+      "contract": "earworm/listening-access/v1",
+      "declaration_id": "access:synthetic-wideband",
+      "subject_ref": "asset:synthetic-01",
+      "capture": {
+        "status": "unknown",
+        "reason": "Synthetic fixture; no physical capture evidence."
+      },
+      "sampled_representation": {
+        "status": "known",
+        "representation_ref": "repr:96k",
+        "sample_rate_hz": 96000,
+        "retained_band_hz": {
+          "lower": 0,
+          "upper": 40000
+        },
+        "evidence_refs": [
+          "receipt:synthetic-source"
+        ]
+      },
+      "model_input": {
+        "status": "known",
+        "model_ref": "model:fixture",
+        "representation_ref": "repr:16k",
+        "sample_rate_hz": 16000,
+        "effective_band_hz": {
+          "lower": 0,
+          "upper": 7500
+        },
+        "window_s": {
+          "start": 0,
+          "end": 10
+        },
+        "preprocessing_refs": [
+          "receipt:filtered-resample"
+        ],
+        "evidence_refs": [
+          "model-card:fixture",
+          "receipt:filtered-resample"
+        ],
+        "channels": 1,
+        "blind_spots": []
+      },
+      "human_access": [
+        {
+          "status": "unknown",
+          "reason": "No human access declaration supplied."
+        }
+      ]
+    }
+  },
+  {
+    "name": "model_input channels required",
+    "valid": false,
+    "value": {
+      "contract": "earworm/listening-access/v1",
+      "declaration_id": "access:synthetic-wideband",
+      "subject_ref": "asset:synthetic-01",
+      "capture": {
+        "status": "unknown",
+        "reason": "Synthetic fixture; no physical capture evidence."
+      },
+      "sampled_representation": {
+        "status": "known",
+        "representation_ref": "repr:96k",
+        "sample_rate_hz": 96000,
+        "retained_band_hz": {
+          "lower": 0,
+          "upper": 40000
+        },
+        "evidence_refs": [
+          "receipt:synthetic-source"
+        ],
+        "channels": 1
+      },
+      "model_input": {
+        "status": "known",
+        "model_ref": "model:fixture",
+        "representation_ref": "repr:16k",
+        "sample_rate_hz": 16000,
+        "effective_band_hz": {
+          "lower": 0,
+          "upper": 7500
+        },
+        "window_s": {
+          "start": 0,
+          "end": 10
+        },
+        "preprocessing_refs": [
+          "receipt:filtered-resample"
+        ],
+        "evidence_refs": [
+          "model-card:fixture",
+          "receipt:filtered-resample"
+        ],
+        "blind_spots": []
+      },
+      "human_access": [
+        {
+          "status": "unknown",
+          "reason": "No human access declaration supplied."
+        }
+      ]
+    }
+  }
+]

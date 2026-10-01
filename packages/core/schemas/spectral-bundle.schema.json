@@ -1,0 +1,310 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "contract": {
+      "const": "earworm/spectral-bundle/v1"
+    },
+    "bundle_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "subject_ref": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "excerpt_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "record_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "sampled_representation": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source_interval_samples": {
+      "type": "array",
+      "items": {
+        "type": "integer",
+        "minimum": 0
+      },
+      "minItems": 2,
+      "maxItems": 2
+    },
+    "effective_rate_hz": {
+      "type": "number",
+      "exclusiveMinimum": 0
+    },
+    "channel_layout": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "analysis_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "views": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 64,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "view_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "kind": {
+            "enum": [
+              "complex_stft",
+              "magnitude",
+              "mel",
+              "log_cq",
+              "nsgt",
+              "scattering",
+              "compact",
+              "projection_png",
+              "projection_svg"
+            ]
+          },
+          "settings": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "window": {
+                "type": "string",
+                "minLength": 1
+              },
+              "hop": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "fft_length": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "scaling": {
+                "type": "string",
+                "minLength": 1
+              },
+              "boundary": {
+                "type": "string",
+                "minLength": 1
+              },
+              "f_min": {
+                "type": "number",
+                "minimum": 0
+              },
+              "f_max": {
+                "type": "number",
+                "minimum": 0
+              },
+              "bands": {
+                "type": "array",
+                "items": {
+                  "type": "array",
+                  "items": {
+                    "type": "number"
+                  },
+                  "minItems": 2,
+                  "maxItems": 2
+                }
+              },
+              "mel_count": {
+                "type": "integer",
+                "minimum": 1
+              }
+            },
+            "required": [
+              "window",
+              "hop",
+              "fft_length",
+              "scaling",
+              "boundary",
+              "f_min",
+              "f_max"
+            ]
+          },
+          "state": {
+            "enum": [
+              "retained",
+              "ephemeral",
+              "omitted"
+            ]
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 1
+          },
+          "object_ref": {
+            "type": "string",
+            "pattern": "^akousmata://objects/[0-9a-f]{64}\\.(npy|npz|png|svg)$"
+          },
+          "sha256": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "dtype": {
+            "enum": [
+              "float32",
+              "float64",
+              "complex64",
+              "complex128",
+              "uint8"
+            ]
+          },
+          "shape": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 4,
+            "items": {
+              "type": "integer",
+              "minimum": 1
+            }
+          },
+          "byte_count": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 67108864
+          },
+          "expanded_bytes": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 268435456
+          },
+          "axis_order": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 1
+          },
+          "axis_units": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 1
+          },
+          "time_origin_s": {
+            "type": "number"
+          },
+          "phase_convention": {
+            "type": "string",
+            "minLength": 1
+          },
+          "reference_level": {
+            "type": "string",
+            "minLength": 1
+          },
+          "transforms": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "losses": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "for": {
+            "enum": [
+              "native",
+              "model",
+              "human"
+            ]
+          }
+        },
+        "required": [
+          "view_id",
+          "kind",
+          "settings",
+          "state",
+          "losses",
+          "for"
+        ],
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "state": {
+                  "const": "retained"
+                }
+              }
+            },
+            "then": {
+              "required": [
+                "object_ref",
+                "sha256",
+                "dtype",
+                "shape",
+                "byte_count",
+                "expanded_bytes",
+                "axis_order",
+                "axis_units",
+                "time_origin_s",
+                "phase_convention",
+                "reference_level",
+                "transforms"
+              ]
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "state": {
+                  "enum": [
+                    "ephemeral",
+                    "omitted"
+                  ]
+                }
+              }
+            },
+            "then": {
+              "required": [
+                "reason"
+              ],
+              "properties": {
+                "object_ref": {
+                  "type": "null"
+                },
+                "sha256": {
+                  "type": "null"
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  "required": [
+    "contract",
+    "bundle_id",
+    "subject_ref",
+    "excerpt_sha256",
+    "record_ref",
+    "sampled_representation",
+    "source_interval_samples",
+    "effective_rate_hz",
+    "channel_layout",
+    "analysis_version",
+    "views"
+  ],
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://earworm.dev/schemas/spectral-bundle.schema.json"
+}

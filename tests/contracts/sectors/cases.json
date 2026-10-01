@@ -1,0 +1,402 @@
+[
+  {
+    "name": "unresolved sector listening",
+    "path": [
+      "extensions",
+      "earworm_agent_sector",
+      "entries",
+      0,
+      "listening_ref"
+    ],
+    "value": "listening:absent",
+    "base": "left",
+    "valid": false,
+    "scope": false
+  },
+  {
+    "name": "wrong access declaration",
+    "path": [
+      "extensions",
+      "earworm_agent_sector",
+      "entries",
+      0,
+      "access_declaration_ref"
+    ],
+    "value": "access:other",
+    "base": "left",
+    "valid": false,
+    "scope": false
+  },
+  {
+    "name": "unattributed claim",
+    "path": [
+      "extensions",
+      "earworm_agent_sector",
+      "entries",
+      0,
+      "claim_refs"
+    ],
+    "value": [
+      "claim:absent"
+    ],
+    "base": "left",
+    "valid": false,
+    "scope": false
+  },
+  {
+    "name": "unresolved rendering",
+    "path": [
+      "extensions",
+      "earworm_agent_sector",
+      "entries",
+      0,
+      "renderings"
+    ],
+    "value": [
+      "rendering:absent"
+    ],
+    "base": "left",
+    "valid": false,
+    "scope": false
+  },
+  {
+    "name": "unrelated rendering source",
+    "path": [
+      "extensions",
+      "earworm_listening_context",
+      "contexts",
+      0,
+      "renderings",
+      0,
+      "source_ref"
+    ],
+    "value": "source:unrelated",
+    "base": "left",
+    "valid": false,
+    "scope": false
+  },
+  {
+    "name": "nonacoustic claim from acoustic sector",
+    "path": [
+      "extensions",
+      "earworm_agent_sector",
+      "entries",
+      0,
+      "source_kind"
+    ],
+    "value": "non_acoustic_observation",
+    "base": "left",
+    "valid": false,
+    "scope": false
+  },
+  {
+    "name": "measurement basis without descriptors",
+    "path": [
+      "extensions",
+      "earworm_agent_sector",
+      "entries",
+      0,
+      "measurement_refs"
+    ],
+    "value": [],
+    "base": "left",
+    "valid": false,
+    "scope": false
+  },
+  {
+    "name": "misstated interpretation basis",
+    "path": [
+      "extensions",
+      "earworm_agent_sector",
+      "entries",
+      0,
+      "basis"
+    ],
+    "value": "interpretation",
+    "base": "left",
+    "valid": false,
+    "scope": false
+  },
+  {
+    "name": "wrong representation",
+    "path": [
+      "extensions",
+      "earworm_measurements",
+      "sources",
+      0,
+      "record",
+      "measurements",
+      0,
+      "about"
+    ],
+    "value": "representation:missing",
+    "base": "left",
+    "valid": false,
+    "scope": false
+  },
+  {
+    "name": "boolean is not a measurement",
+    "path": [
+      "extensions",
+      "earworm_measurements",
+      "sources",
+      0,
+      "record",
+      "measurements",
+      0,
+      "value"
+    ],
+    "value": true,
+    "base": "left",
+    "valid": false,
+    "scope": false
+  },
+  {
+    "name": "negative energy",
+    "path": [
+      "extensions",
+      "earworm_measurements",
+      "sources",
+      0,
+      "record",
+      "measurements",
+      1,
+      "value"
+    ],
+    "value": -1,
+    "base": "left",
+    "valid": false,
+    "scope": false
+  },
+  {
+    "name": "unit reference mismatch",
+    "path": [
+      "extensions",
+      "earworm_measurements",
+      "descriptors",
+      2,
+      "reference_basis"
+    ],
+    "value": "sound_pressure",
+    "base": "left",
+    "valid": false,
+    "scope": false
+  },
+  {
+    "name": "missing spectral band",
+    "path": [
+      "extensions",
+      "earworm_measurements",
+      "descriptors",
+      0,
+      "band_hz"
+    ],
+    "value": {
+      "status": "unknown",
+      "reason": "Not established"
+    },
+    "base": "left",
+    "valid": false,
+    "scope": false
+  },
+  {
+    "name": "inverted spectral band",
+    "path": [
+      "extensions",
+      "earworm_measurements",
+      "descriptors",
+      0,
+      "band_hz",
+      "lower"
+    ],
+    "value": 25000,
+    "base": "left",
+    "valid": false,
+    "scope": false
+  },
+  {
+    "name": "band exceeds effective input",
+    "path": [
+      "extensions",
+      "earworm_measurements",
+      "descriptors",
+      0,
+      "band_hz",
+      "upper"
+    ],
+    "value": 30000,
+    "base": "left",
+    "valid": false,
+    "scope": false
+  },
+  {
+    "name": "invalid raw unit",
+    "path": [
+      "extensions",
+      "earworm_measurements",
+      "sources",
+      0,
+      "record",
+      "measurements",
+      0,
+      "unit"
+    ],
+    "value": [],
+    "base": "left",
+    "valid": false,
+    "scope": false
+  },
+  {
+    "name": "unresolved measurement source",
+    "path": [
+      "extensions",
+      "earworm_measurements",
+      "descriptors",
+      0,
+      "source_record_ref"
+    ],
+    "value": "source:missing",
+    "base": "left",
+    "valid": false,
+    "scope": false
+  },
+  {
+    "name": "duplicate measurement source",
+    "path": [
+      "extensions",
+      "earworm_measurements",
+      "sources"
+    ],
+    "value": [],
+    "base": "left",
+    "valid": false,
+    "scope": false
+  },
+  {
+    "name": "signal relabel of nonacoustic observation",
+    "path": [
+      "extensions",
+      "earworm_agent_sector",
+      "entries",
+      0,
+      "source_kind"
+    ],
+    "value": "acoustic_signal",
+    "base": "observation",
+    "valid": false,
+    "scope": false
+  },
+  {
+    "name": "nonacoustic rendering withheld",
+    "path": [
+      "extensions",
+      "earworm_listening_context",
+      "contexts",
+      0,
+      "renderings",
+      0,
+      "access"
+    ],
+    "value": {
+      "status": "withheld",
+      "reason": "Host policy"
+    },
+    "base": "observation",
+    "valid": true,
+    "scope": false
+  },
+  {
+    "name": "view does not make private rendering public",
+    "path": [
+      "extensions",
+      "earworm_listening_context",
+      "contexts",
+      0,
+      "renderings",
+      0,
+      "access"
+    ],
+    "value": {
+      "status": "known",
+      "value": "private"
+    },
+    "base": "left",
+    "valid": true,
+    "scope": false
+  },
+  {
+    "name": "changed score",
+    "path": [
+      "lineage",
+      "relations",
+      0,
+      "criterion",
+      "score",
+      "value"
+    ],
+    "value": 0,
+    "base": "left",
+    "valid": false,
+    "scope": true
+  },
+  {
+    "name": "changed difference method",
+    "path": [
+      "lineage",
+      "relations",
+      0,
+      "criterion",
+      "method_revision"
+    ],
+    "value": "2",
+    "base": "left",
+    "valid": false,
+    "scope": true
+  },
+  {
+    "name": "missing descriptor target",
+    "path": [
+      "lineage",
+      "relations",
+      0,
+      "criterion",
+      "descriptor_refs",
+      1,
+      "descriptor_ref"
+    ],
+    "value": "descriptor:absent",
+    "base": "left",
+    "valid": false,
+    "scope": true
+  },
+  {
+    "name": "claim difference is sensing",
+    "path": [
+      "lineage",
+      "relations",
+      0,
+      "epistemic_status"
+    ],
+    "value": "measured",
+    "base": "left",
+    "valid": false,
+    "scope": true
+  },
+  {
+    "name": "review remains separate",
+    "path": [
+      "lineage",
+      "relations",
+      0,
+      "review"
+    ],
+    "value": {
+      "status": "accepted",
+      "actor_ref": "reviewer:fixture",
+      "reason": "Reviewed fixture scope only"
+    },
+    "base": "left",
+    "valid": true,
+    "scope": true
+  }
+]

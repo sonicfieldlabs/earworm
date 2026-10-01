@@ -1,0 +1,148 @@
+[
+  {
+    "name": "wrong direction",
+    "path": [
+      "edges",
+      0,
+      "from_node"
+    ],
+    "value": "patch:texture"
+  },
+  {
+    "name": "lost receipt",
+    "path": [
+      "operation_refs"
+    ],
+    "value": []
+  },
+  {
+    "name": "fabricated operation",
+    "path": [
+      "edges",
+      0,
+      "operation_ref"
+    ],
+    "value": "operation:fake"
+  },
+  {
+    "name": "lost edge",
+    "path": [
+      "edges"
+    ],
+    "value": []
+  },
+  {
+    "name": "duplicate patch node",
+    "path": [
+      "nodes",
+      1,
+      "node_id"
+    ],
+    "value": "patch:source"
+  },
+  {
+    "name": "missing representation",
+    "path": [
+      "nodes"
+    ],
+    "value": [
+      {
+        "node_id": "patch:source",
+        "representation_ref": "urn:uuid:00000000-0000-4000-8000-000000000d01"
+      }
+    ]
+  },
+  {
+    "name": "zero revision",
+    "path": [
+      "revision"
+    ],
+    "value": 0
+  },
+  {
+    "name": "boolean revision",
+    "path": [
+      "revision"
+    ],
+    "value": true
+  },
+  {
+    "name": "unknown contract",
+    "path": [
+      "contract"
+    ],
+    "value": "earworm/transformation-graph/v2"
+  },
+  {
+    "name": "unknown representation",
+    "path": [
+      "nodes",
+      1,
+      "representation_ref"
+    ],
+    "value": "rep:absent"
+  },
+  {
+    "name": "external history",
+    "path": [
+      "source_record",
+      "history"
+    ],
+    "value": {
+      "mode": "external",
+      "eventIds": []
+    }
+  },
+  {
+    "name": "unresolved operation",
+    "path": [
+      "source_record",
+      "relations",
+      0,
+      "operationRef"
+    ],
+    "value": "operation:absent"
+  },
+  {
+    "name": "reversed source lineage",
+    "path": [
+      "source_record",
+      "relations",
+      0,
+      "predicate"
+    ],
+    "value": "masa:derivation-of"
+  },
+  {
+    "name": "input overwritten",
+    "path": [
+      "source_record",
+      "history",
+      "events",
+      0,
+      "outputs"
+    ],
+    "value": [
+      "urn:uuid:00000000-0000-4000-8000-000000000d01"
+    ]
+  },
+  {
+    "name": "refusal with output",
+    "path": [
+      "source_record",
+      "history",
+      "events",
+      0,
+      "finalStatus"
+    ],
+    "value": "refused"
+  },
+  {
+    "name": "missing output lineage",
+    "path": [
+      "source_record",
+      "relations"
+    ],
+    "value": []
+  }
+]

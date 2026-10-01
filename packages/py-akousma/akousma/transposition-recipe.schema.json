@@ -1,0 +1,153 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://earworm.dev/schemas/transposition-recipe.schema.json",
+  "title": "Unreleased transposition receipt recipe v1",
+  "type": "object",
+  "properties": {
+    "contract": {
+      "const": "earworm/transposition-recipe/v1"
+    },
+    "kind": {
+      "enum": [
+        "filtered_resample",
+        "playback_rate",
+        "frequency_translation",
+        "pitch_shift"
+      ]
+    },
+    "algorithm": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "\\S"
+        },
+        "version": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "\\S"
+        }
+      },
+      "required": [
+        "name",
+        "version"
+      ],
+      "additionalProperties": false
+    },
+    "input_window_s": {
+      "type": "object",
+      "properties": {
+        "start": {
+          "type": "number",
+          "minimum": 0
+        },
+        "end": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        }
+      },
+      "required": [
+        "start",
+        "end"
+      ],
+      "additionalProperties": false
+    },
+    "input_band_hz": {
+      "type": "object",
+      "properties": {
+        "lower": {
+          "type": "number",
+          "minimum": 0
+        },
+        "upper": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        }
+      },
+      "required": [
+        "lower",
+        "upper"
+      ],
+      "additionalProperties": false
+    },
+    "output_band_hz": {
+      "type": "object",
+      "properties": {
+        "lower": {
+          "type": "number",
+          "minimum": 0
+        },
+        "upper": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        }
+      },
+      "required": [
+        "lower",
+        "upper"
+      ],
+      "additionalProperties": false
+    },
+    "duration_behavior": {
+      "enum": [
+        "preserved",
+        "changed"
+      ]
+    }
+  },
+  "required": [
+    "contract",
+    "kind",
+    "algorithm",
+    "input_window_s",
+    "input_band_hz",
+    "output_band_hz",
+    "duration_behavior"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "filtered_resample": {
+      "type": "object"
+    },
+    "playback_rate": {
+      "type": "object",
+      "required": [
+        "rate_ratio"
+      ],
+      "properties": {
+        "rate_ratio": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        }
+      },
+      "additionalProperties": true
+    },
+    "frequency_translation": {
+      "type": "object",
+      "required": [
+        "offset_hz"
+      ],
+      "properties": {
+        "offset_hz": {
+          "type": "number"
+        }
+      },
+      "additionalProperties": true
+    },
+    "pitch_shift": {
+      "type": "object",
+      "required": [
+        "cents"
+      ],
+      "properties": {
+        "cents": {
+          "type": "number",
+          "minimum": -14400,
+          "maximum": 14400
+        }
+      },
+      "additionalProperties": true
+    }
+  }
+}

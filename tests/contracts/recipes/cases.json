@@ -1,0 +1,309 @@
+[
+  {
+    "base": 0,
+    "name": "missing filter version",
+    "path": [
+      "history",
+      "events",
+      0,
+      "extensions",
+      "earworm:transposition",
+      "algorithm",
+      "version"
+    ],
+    "value": ""
+  },
+  {
+    "base": 0,
+    "name": "no rate conversion",
+    "path": [
+      "representations",
+      1,
+      "audio",
+      "sampleRateHz",
+      "value"
+    ],
+    "value": 48000
+  },
+  {
+    "base": 0,
+    "name": "alias band",
+    "path": [
+      "history",
+      "events",
+      0,
+      "extensions",
+      "earworm:transposition",
+      "output_band_hz",
+      "upper"
+    ],
+    "value": 13000
+  },
+  {
+    "base": 0,
+    "name": "resample changed duration",
+    "path": [
+      "representations",
+      1,
+      "audio",
+      "durationSeconds",
+      "value"
+    ],
+    "value": 1
+  },
+  {
+    "base": 1,
+    "name": "wrong rate ratio",
+    "path": [
+      "history",
+      "events",
+      0,
+      "parameters",
+      "rate_ratio"
+    ],
+    "value": 2
+  },
+  {
+    "base": 1,
+    "name": "boolean ratio",
+    "path": [
+      "history",
+      "events",
+      0,
+      "parameters",
+      "rate_ratio"
+    ],
+    "value": true
+  },
+  {
+    "base": 1,
+    "name": "overflow ratio",
+    "path": [
+      "history",
+      "events",
+      0,
+      "parameters",
+      "rate_ratio"
+    ],
+    "value": 1e+308
+  },
+  {
+    "base": 1,
+    "name": "wrong duration",
+    "path": [
+      "representations",
+      1,
+      "audio",
+      "durationSeconds",
+      "value"
+    ],
+    "value": 0.5
+  },
+  {
+    "base": 1,
+    "name": "wrong shifted band",
+    "path": [
+      "history",
+      "events",
+      0,
+      "extensions",
+      "earworm:transposition",
+      "output_band_hz",
+      "lower"
+    ],
+    "value": 1000
+  },
+  {
+    "base": 2,
+    "name": "translation mislabeled as pitchshift",
+    "path": [
+      "history",
+      "events",
+      0,
+      "operationType"
+    ],
+    "value": "matter.pitchshift"
+  },
+  {
+    "base": 2,
+    "name": "translation ratio instead of offset",
+    "path": [
+      "history",
+      "events",
+      0,
+      "parameters"
+    ],
+    "value": {
+      "cents": 500
+    }
+  },
+  {
+    "base": 2,
+    "name": "wrong additive band",
+    "path": [
+      "history",
+      "events",
+      0,
+      "extensions",
+      "earworm:transposition",
+      "output_band_hz",
+      "upper"
+    ],
+    "value": 4000
+  },
+  {
+    "base": 2,
+    "name": "zero crossing",
+    "path": [
+      "history",
+      "events",
+      0,
+      "extensions",
+      "earworm:transposition",
+      "output_band_hz",
+      "lower"
+    ],
+    "value": -100
+  },
+  {
+    "base": 3,
+    "name": "wrong cents",
+    "path": [
+      "history",
+      "events",
+      0,
+      "parameters",
+      "cents"
+    ],
+    "value": 700
+  },
+  {
+    "base": 3,
+    "name": "out of range cents",
+    "path": [
+      "history",
+      "events",
+      0,
+      "parameters",
+      "cents"
+    ],
+    "value": 20000
+  },
+  {
+    "base": 3,
+    "name": "unacknowledged duration",
+    "path": [
+      "representations",
+      1,
+      "audio",
+      "durationSeconds",
+      "value"
+    ],
+    "value": 0.75
+  },
+  {
+    "base": 0,
+    "name": "unknown sample rate",
+    "path": [
+      "representations",
+      0,
+      "audio",
+      "sampleRateHz"
+    ],
+    "value": {
+      "state": "unknown",
+      "reason": "Missing rate"
+    }
+  },
+  {
+    "base": 0,
+    "name": "invalid hash",
+    "path": [
+      "representations",
+      0,
+      "integrity"
+    ],
+    "value": {
+      "state": "known",
+      "value": {
+        "sha256": "wrong"
+      }
+    }
+  },
+  {
+    "base": 0,
+    "name": "engine without version",
+    "path": [
+      "history",
+      "events",
+      0,
+      "tool",
+      "value",
+      "version"
+    ],
+    "value": {
+      "state": "unknown",
+      "reason": "missing"
+    }
+  },
+  {
+    "base": 0,
+    "name": "outside source window",
+    "path": [
+      "history",
+      "events",
+      0,
+      "extensions",
+      "earworm:transposition",
+      "input_window_s",
+      "end"
+    ],
+    "value": 2
+  },
+  {
+    "base": 0,
+    "name": "refused operation",
+    "path": [
+      "history",
+      "events",
+      0,
+      "finalStatus"
+    ],
+    "value": "refused"
+  },
+  {
+    "base": 0,
+    "name": "unpermitted operation",
+    "path": [
+      "history",
+      "events",
+      0,
+      "policyEvaluation",
+      "result"
+    ],
+    "value": "refused"
+  },
+  {
+    "base": 0,
+    "name": "missing required recipe",
+    "path": [
+      "history",
+      "events",
+      0,
+      "extensions"
+    ],
+    "value": {}
+  },
+  {
+    "base": 0,
+    "name": "silent channel mix",
+    "path": [
+      "representations",
+      1,
+      "audio",
+      "channels",
+      "value"
+    ],
+    "value": 2
+  }
+]

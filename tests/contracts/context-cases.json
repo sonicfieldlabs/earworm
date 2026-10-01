@@ -1,0 +1,351 @@
+[
+  {
+    "name": "unresolved listening",
+    "valid": false,
+    "path": [
+      "contexts",
+      0,
+      "listening_ref"
+    ],
+    "value": "missing"
+  },
+  {
+    "name": "duplicate recipient identity",
+    "valid": false,
+    "path": [
+      "contexts",
+      0,
+      "recipients"
+    ],
+    "value": [
+      {
+        "id": "same",
+        "type": "agent"
+      },
+      {
+        "id": "same",
+        "type": "human"
+      }
+    ]
+  },
+  {
+    "name": "unknown access",
+    "valid": false,
+    "path": [
+      "contexts",
+      0,
+      "access_declaration_ref"
+    ],
+    "value": "missing"
+  },
+  {
+    "name": "wrong subject",
+    "valid": false,
+    "path": [
+      "contexts",
+      0,
+      "subject_ref"
+    ],
+    "value": "event:other"
+  },
+  {
+    "name": "wrong report contract",
+    "valid": false,
+    "path": [
+      "contexts",
+      0,
+      "report",
+      "contract"
+    ],
+    "value": "future/v9"
+  },
+  {
+    "name": "bare rendering boolean",
+    "valid": false,
+    "path": [
+      "contexts",
+      0,
+      "report",
+      "human_rendering"
+    ],
+    "value": false
+  },
+  {
+    "name": "unknown readability",
+    "valid": true,
+    "path": [
+      "contexts",
+      0,
+      "report",
+      "readability"
+    ],
+    "value": {
+      "status": "unknown",
+      "reason": "Not assessed."
+    }
+  },
+  {
+    "name": "unresolved rendering",
+    "valid": false,
+    "path": [
+      "contexts",
+      0,
+      "report",
+      "human_rendering"
+    ],
+    "value": {
+      "status": "available",
+      "rendering_refs": [
+        "rendering:missing"
+      ]
+    }
+  },
+  {
+    "name": "expires before issued",
+    "valid": false,
+    "path": [
+      "claims",
+      0,
+      "validity",
+      "expires_at"
+    ],
+    "value": "2026-09-06T11:59:59Z"
+  },
+  {
+    "name": "expiry equals issuance",
+    "valid": false,
+    "path": [
+      "claims",
+      0,
+      "validity",
+      "expires_at"
+    ],
+    "value": "2026-09-06T12:00:00Z"
+  },
+  {
+    "name": "invalid calendar date",
+    "valid": false,
+    "path": [
+      "claims",
+      0,
+      "validity",
+      "expires_at"
+    ],
+    "value": "2026-02-30T12:00:00Z"
+  },
+  {
+    "name": "timezone must be explicit canonical UTC",
+    "valid": false,
+    "path": [
+      "claims",
+      0,
+      "validity",
+      "expires_at"
+    ],
+    "value": "2026-09-06T14:00:00"
+  },
+  {
+    "name": "unsupported submillisecond timestamp",
+    "valid": false,
+    "path": [
+      "claims",
+      0,
+      "validity",
+      "expires_at"
+    ],
+    "value": "2026-09-06T14:00:00.123456Z"
+  },
+  {
+    "name": "unknown validity",
+    "valid": true,
+    "path": [
+      "claims",
+      0,
+      "validity"
+    ],
+    "value": {
+      "status": "unknown",
+      "reason": "Not supplied."
+    }
+  },
+  {
+    "name": "explicit no expiry",
+    "valid": true,
+    "path": [
+      "claims",
+      0,
+      "validity"
+    ],
+    "value": {
+      "status": "no_expiry",
+      "issued_at": "2026-09-06T12:00:00Z",
+      "reason": "Declared policy; truth still requires assessment."
+    }
+  },
+  {
+    "name": "retention is separate policy",
+    "valid": true,
+    "path": [
+      "claims",
+      0,
+      "retention"
+    ],
+    "value": {
+      "status": "policy",
+      "policy_ref": "policy:hold"
+    }
+  },
+  {
+    "name": "retention unknown",
+    "valid": true,
+    "path": [
+      "claims",
+      0,
+      "retention"
+    ],
+    "value": {
+      "status": "unknown",
+      "reason": "Host must determine applicable policy."
+    }
+  },
+  {
+    "name": "unresolved claim listening",
+    "valid": false,
+    "path": [
+      "claims",
+      0,
+      "listening_ref"
+    ],
+    "value": "missing"
+  },
+  {
+    "name": "duplicate claim",
+    "valid": false,
+    "path": [
+      "claims"
+    ],
+    "value": [
+      {
+        "claim_ref": "claim:context",
+        "listening_ref": "lst_human_001",
+        "validity": {
+          "status": "expires",
+          "issued_at": "2026-09-06T12:00:00Z",
+          "expires_at": "2026-09-06T13:00:00Z"
+        },
+        "retention": {
+          "status": "review_after",
+          "review_after": "2026-09-08T13:00:00Z",
+          "policy_ref": "policy:fixture"
+        }
+      },
+      {
+        "claim_ref": "claim:context",
+        "listening_ref": "lst_human_001",
+        "validity": {
+          "status": "expires",
+          "issued_at": "2026-09-06T12:00:00Z",
+          "expires_at": "2026-09-06T13:00:00Z"
+        },
+        "retention": {
+          "status": "review_after",
+          "review_after": "2026-09-08T13:00:00Z",
+          "policy_ref": "policy:fixture"
+        }
+      }
+    ]
+  },
+  {
+    "name": "missing context",
+    "valid": false,
+    "path": [
+      "contexts"
+    ],
+    "value": []
+  },
+  {
+    "name": "interpretation has its own author and output",
+    "valid": true,
+    "path": [
+      "contexts",
+      0,
+      "renderings"
+    ],
+    "value": [
+      {
+        "rendering_id": "rendering:text",
+        "source_ref": "report:context",
+        "output_ref": "report:interpretation",
+        "transformation_ref": "receipt:interpretation",
+        "author_ref": "human:editor",
+        "kind": "interpretation",
+        "media_type": "text/plain",
+        "access": {
+          "status": "known",
+          "value": "restricted"
+        }
+      }
+    ]
+  },
+  {
+    "name": "rendering cannot overwrite source",
+    "valid": false,
+    "path": [
+      "contexts",
+      0,
+      "renderings"
+    ],
+    "value": [
+      {
+        "rendering_id": "rendering:text",
+        "source_ref": "report:context",
+        "output_ref": "report:context",
+        "transformation_ref": "receipt:interpretation",
+        "author_ref": "human:editor",
+        "kind": "interpretation",
+        "media_type": "text/plain",
+        "access": {
+          "status": "known",
+          "value": "restricted"
+        }
+      }
+    ]
+  },
+  {
+    "name": "rendering identity unique",
+    "valid": false,
+    "path": [
+      "contexts",
+      0,
+      "renderings"
+    ],
+    "value": [
+      {
+        "rendering_id": "rendering:text",
+        "source_ref": "report:context",
+        "output_ref": "report:interpretation",
+        "transformation_ref": "receipt:interpretation",
+        "author_ref": "human:editor",
+        "kind": "interpretation",
+        "media_type": "text/plain",
+        "access": {
+          "status": "known",
+          "value": "restricted"
+        }
+      },
+      {
+        "rendering_id": "rendering:text",
+        "source_ref": "report:context",
+        "output_ref": "report:interpretation",
+        "transformation_ref": "receipt:interpretation",
+        "author_ref": "human:editor",
+        "kind": "interpretation",
+        "media_type": "text/plain",
+        "access": {
+          "status": "known",
+          "value": "restricted"
+        }
+      }
+    ]
+  }
+]
