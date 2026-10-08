@@ -1,5 +1,7 @@
 """Object reads/writes/forgetting stay inside an audit-owned temporary store."""
 import hashlib
+import subprocess
+import sys
 from pathlib import Path
 import tempfile
 import unittest
@@ -73,6 +75,51 @@ class ObjectBoundaryTests(unittest.TestCase):
                 self.assertEqual(list(self.store.objects_dir.rglob(".audio-*")), [])
                 self.assertEqual(unrelated.read_bytes(), b"unrelated")
         self.assertEqual(self.store.put_audio(self.data), self.uri)
+
+    def test_process_exit_during_staging_never_publishes_partial_audio(self):
+        script = """
+import os, sys, akousma
+from pathlib import Path
+factory = akousma.tempfile.NamedTemporaryFile
+def interrupted(*args, **kwargs):
+    output = factory(*args, **kwargs)
+    write = output.write
+    def partial(data):
+        write(data[:3])
+        output.flush()
+        os._exit(17)
+    output.write = partial
+    return output
+akousma.tempfile.NamedTemporaryFile = interrupted
+with akousma.AkousmataStore(Path(sys.argv[1])) as store:
+    store.put_audio(bytes.fromhex(sys.argv[2]))
+"""
+        result = subprocess.run([sys.executable, "-I", "-c", script,
+                                 str(self.base / "store"), self.data.hex()], check=False)
+        self.assertEqual(result.returncode, 17)
+        self.assertFalse(self.store.resolve_uri(self.uri).exists())
+        # Abrupt death can leave private staging debris, never a usable final locator.
+        self.assertEqual(self.store.put_audio(self.data), self.uri)
+        self.assertEqual(self.store.resolve_uri(self.uri).read_bytes(), self.data)
+
+    def test_postpublication_sync_failure_keeps_complete_object_and_retry_reuses_it(self):
+        fsync = akousma.os.fsync
+        calls = 0
+
+        def fail_directory_sync(fd):
+            nonlocal calls
+            calls += 1
+            if calls == 2:
+                raise OSError("injected directory sync failure")
+            return fsync(fd)
+
+        with patch.object(akousma.os, "fsync", fail_directory_sync):
+            with self.assertRaises(OSError):
+                self.store.put_audio(self.data)
+        self.assertEqual(self.store.resolve_uri(self.uri).read_bytes(), self.data)
+        self.assertEqual(list(self.store.objects_dir.rglob(".audio-*")), [])
+        with patch.object(akousma.os, "link", side_effect=AssertionError("retry must reuse")):
+            self.assertEqual(self.store.put_audio(self.data), self.uri)
 
     def test_concurrent_readers_see_only_complete_published_bytes(self):
         staged = threading.Event()
