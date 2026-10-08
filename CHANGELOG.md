@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Package py-akousma 0.8.4 with atomic audio publication; record schemas stay unchanged.
+- Publish Python audio objects atomically from verified, synced private staging
+  files. Interrupted writes never expose partial canonical objects; concurrent
+  writers deduplicate without overwriting existing data. Object identities,
+  record schemas and forgetting receipts are unchanged.
+
 - py-akousma 0.8.3: restrict sharded object locators to canonical SHA-256 names,
   refuse symlinks below the selected store root and mismatched object bytes,
   validate extensions before writes, and bind audio forgetting to its declared

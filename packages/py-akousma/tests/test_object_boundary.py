@@ -1,8 +1,15 @@
 """Object reads/writes/forgetting stay inside an audit-owned temporary store."""
 import hashlib
+import subprocess
+import sys
 from pathlib import Path
 import tempfile
 import unittest
+from concurrent.futures import ThreadPoolExecutor
+import threading
+from unittest.mock import patch
+
+import akousma
 
 from akousma import AkousmataStore, new_akousma
 
@@ -34,6 +41,122 @@ class ObjectBoundaryTests(unittest.TestCase):
         self.assertEqual(self.store.put_audio(self.data), self.uri)
         self.assertEqual(self.store.resolve_uri(self.uri, content_hash="sha256:" + self.digest), expected)
         self.assertEqual(self.store.resolve_uri(self.uri, content_hash=self.digest), expected)
+
+    def test_interrupted_staging_leaves_no_final_object_and_can_retry(self):
+        factory = akousma.tempfile.NamedTemporaryFile
+
+        def interrupted_file(*args, **kwargs):
+            output = factory(*args, **kwargs)
+            write = output.write
+
+            def interrupted_write(data):
+                write(data[:3])
+                raise OSError("injected interrupted write")
+
+            output.write = interrupted_write
+            return output
+
+        with patch.object(akousma.tempfile, "NamedTemporaryFile", interrupted_file):
+            with self.assertRaises(OSError):
+                self.store.put_audio(self.data)
+        self.assertFalse(self.store.resolve_uri(self.uri).exists())
+        self.assertEqual(list(self.store.objects_dir.rglob(".audio-*")), [])
+        self.assertEqual(self.store.put_audio(self.data), self.uri)
+
+    def test_prepublication_failures_keep_unrelated_files_and_allow_retry(self):
+        unrelated = self.store.objects_dir / "keep"
+        unrelated.write_bytes(b"unrelated")
+        for operation in ("fsync", "link"):
+            with self.subTest(operation=operation):
+                with patch.object(akousma.os, operation, side_effect=OSError("injected failure")):
+                    with self.assertRaises(OSError):
+                        self.store.put_audio(self.data)
+                self.assertFalse(self.store.resolve_uri(self.uri).exists())
+                self.assertEqual(list(self.store.objects_dir.rglob(".audio-*")), [])
+                self.assertEqual(unrelated.read_bytes(), b"unrelated")
+        self.assertEqual(self.store.put_audio(self.data), self.uri)
+
+    def test_process_exit_during_staging_never_publishes_partial_audio(self):
+        script = """
+import os, sys, akousma
+from pathlib import Path
+factory = akousma.tempfile.NamedTemporaryFile
+def interrupted(*args, **kwargs):
+    output = factory(*args, **kwargs)
+    write = output.write
+    def partial(data):
+        write(data[:3])
+        output.flush()
+        os._exit(17)
+    output.write = partial
+    return output
+akousma.tempfile.NamedTemporaryFile = interrupted
+with akousma.AkousmataStore(Path(sys.argv[1])) as store:
+    store.put_audio(bytes.fromhex(sys.argv[2]))
+"""
+        result = subprocess.run([sys.executable, "-I", "-c", script,
+                                 str(self.base / "store"), self.data.hex()], check=False)
+        self.assertEqual(result.returncode, 17)
+        self.assertFalse(self.store.resolve_uri(self.uri).exists())
+        # Abrupt death can leave private staging debris, never a usable final locator.
+        self.assertEqual(self.store.put_audio(self.data), self.uri)
+        self.assertEqual(self.store.resolve_uri(self.uri).read_bytes(), self.data)
+
+    def test_postpublication_sync_failure_keeps_complete_object_and_retry_reuses_it(self):
+        fsync = akousma.os.fsync
+        calls = 0
+
+        def fail_directory_sync(fd):
+            nonlocal calls
+            calls += 1
+            if calls == 2:
+                raise OSError("injected directory sync failure")
+            return fsync(fd)
+
+        with patch.object(akousma.os, "fsync", fail_directory_sync):
+            with self.assertRaises(OSError):
+                self.store.put_audio(self.data)
+        self.assertEqual(self.store.resolve_uri(self.uri).read_bytes(), self.data)
+        self.assertEqual(list(self.store.objects_dir.rglob(".audio-*")), [])
+        with patch.object(akousma.os, "link", side_effect=AssertionError("retry must reuse")):
+            self.assertEqual(self.store.put_audio(self.data), self.uri)
+
+    def test_concurrent_readers_see_only_complete_published_bytes(self):
+        staged = threading.Event()
+        release = threading.Event()
+        link = akousma.os.link
+
+        def paused_link(*args, **kwargs):
+            staged.set()
+            if not release.wait(5):
+                raise TimeoutError("test writer was not released")
+            return link(*args, **kwargs)
+
+        with ThreadPoolExecutor(max_workers=1) as pool:
+            with patch.object(akousma.os, "link", paused_link):
+                writer = pool.submit(self.store.put_audio, self.data)
+                try:
+                    self.assertTrue(staged.wait(5))
+                    self.assertFalse(self.store.resolve_uri(self.uri).exists())
+                finally:
+                    release.set()
+                self.assertEqual(writer.result(timeout=5), self.uri)
+        self.assertEqual(self.store.resolve_uri(self.uri).read_bytes(), self.data)
+
+    def test_concurrent_identical_writers_deduplicate_without_overwriting(self):
+        barrier = threading.Barrier(4)
+        link = akousma.os.link
+
+        def simultaneous_link(*args, **kwargs):
+            barrier.wait(timeout=5)
+            return link(*args, **kwargs)
+
+        with ThreadPoolExecutor(max_workers=4) as pool:
+            with patch.object(akousma.os, "link", simultaneous_link):
+                writers = [pool.submit(self.store.put_audio, self.data) for _ in range(4)]
+                self.assertEqual([writer.result(timeout=10) for writer in writers], [self.uri] * 4)
+        self.assertEqual(self.store.resolve_uri(self.uri).read_bytes(), self.data)
+        self.assertEqual(list(self.store.objects_dir.rglob(".audio-*")), [])
 
     def test_malformed_locators_do_not_resolve(self):
         for name in ("../outside.wav", "/tmp/outside.wav", "aa/../../outside.wav",

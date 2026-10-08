@@ -15,6 +15,7 @@ import re
 import secrets
 import sqlite3
 import sys
+import tempfile
 import time
 from hashlib import sha256
 from pathlib import Path
@@ -937,14 +938,40 @@ class AkousmataStore:
         dest.parent.mkdir(parents=True, exist_ok=True)
         if self.resolve_uri(uri) != dest:
             raise ValueError("Object path changed")
+        if dest.exists():
+            return uri  # resolve_uri already verified the existing bytes.
+        staged = None
         try:
-            # Exclusive creation never follows an existing final-file symlink or
-            # overwrites an existing object. Existing bytes must match the hash.
-            with dest.open("xb") as output:
+            # Stage privately in the same filesystem. A hard link publishes all
+            # completed bytes atomically, without replacing another writer's
+            # object (or following a final-file symlink).
+            with tempfile.NamedTemporaryFile(mode="w+b", prefix=".audio-", dir=dest.parent, delete=False) as output:
+                staged = Path(output.name)
                 output.write(data)
-        except FileExistsError:
+                output.flush()
+                output.seek(0)
+                actual = sha256()
+                for chunk in iter(lambda: output.read(1024 * 1024), b""):
+                    actual.update(chunk)
+                if actual.hexdigest() != digest:
+                    raise OSError("Staged audio content differs from its identity")
+                os.fsync(output.fileno())
             if self.resolve_uri(uri) != dest:
-                raise ValueError("Existing object content differs from its identity")
+                raise ValueError("Object path changed")
+            try:
+                os.link(staged, dest)
+            except FileExistsError:
+                if self.resolve_uri(uri) != dest:
+                    raise ValueError("Existing object content differs from its identity")
+            if os.name != "nt":
+                directory_fd = os.open(dest.parent, os.O_RDONLY | getattr(os, "O_DIRECTORY", 0))
+                try:
+                    os.fsync(directory_fd)
+                finally:
+                    os.close(directory_fd)
+        finally:
+            if staged is not None:
+                staged.unlink(missing_ok=True)
         return uri
 
     def resolve_uri(self, uri: str, *, content_hash: str | None = None) -> Path | None:
