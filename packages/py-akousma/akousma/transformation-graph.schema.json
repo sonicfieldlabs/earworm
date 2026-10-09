@@ -1,0 +1,112 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://earworm.dev/schemas/transformation-graph.schema.json",
+  "title": "Unreleased application transformation graph v1",
+  "type": "object",
+  "properties": {
+    "contract": {
+      "const": "earworm/transformation-graph/v1"
+    },
+    "graph_id": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "\\S"
+    },
+    "revision": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 9007199254740991
+    },
+    "authored_by": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "\\S"
+    },
+    "scope": {
+      "const": "completed_representation_lineage"
+    },
+    "source_record": {
+      "type": "object"
+    },
+    "nodes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "node_id": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "\\S"
+          },
+          "representation_ref": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "\\S"
+          }
+        },
+        "required": [
+          "node_id",
+          "representation_ref"
+        ],
+        "additionalProperties": false
+      },
+      "minItems": 1
+    },
+    "edges": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "relation_ref": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "\\S"
+          },
+          "operation_ref": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "\\S"
+          },
+          "from_node": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "\\S"
+          },
+          "to_node": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "\\S"
+          }
+        },
+        "required": [
+          "relation_ref",
+          "operation_ref",
+          "from_node",
+          "to_node"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "operation_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "pattern": "\\S"
+      },
+      "uniqueItems": true
+    }
+  },
+  "required": [
+    "contract",
+    "graph_id",
+    "revision",
+    "authored_by",
+    "scope",
+    "source_record",
+    "nodes",
+    "edges",
+    "operation_refs"
+  ],
+  "additionalProperties": false
+}

@@ -18,10 +18,10 @@
   },
   "packageManager": "pnpm@10.32.1",
   "scripts": {
-    "validate": "node scripts/validate-fixtures.mjs",
-    "test": "pnpm build && node scripts/test-event-store.mjs && node scripts/test-sdk-js.mjs",
+    "validate": "node scripts/generate-spectral-schema.mjs --check && node scripts/generate-next-schema.mjs --check && node scripts/generate-listening-scenarios.mjs --check && node scripts/validate-fixtures.mjs",
+    "test": "pnpm build && node scripts/test-event-store.mjs && node scripts/test-sdk-js.mjs && node scripts/test-listening-contracts.mjs && node scripts/test-listening-context.mjs && node scripts/test-record-evolution.mjs && node scripts/test-observation-accounts.mjs && node scripts/test-agent-sectors.mjs && node scripts/test-auditum-view.mjs && node scripts/test-transformation-graph.mjs && node scripts/test-graph-records.mjs && node scripts/test-listening-scenarios.mjs && node scripts/test-bundles.mjs && node scripts/test-model-ecology.mjs && node scripts/test-spectral.mjs",
     "build": "tsc -p tsconfig.json",
-    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "typecheck": "tsc -p tsconfig.json --noEmit && tsc --noEmit --strict --module NodeNext --moduleResolution NodeNext --target ES2022 tests/listening-contracts-types.mts",
     "lint": "node scripts/lint.mjs",
     "manifest:fixture": "pnpm build && node scripts/export-manifest.mjs --session packages/core/fixtures/aum-voice-generation.session.json --asset asset_voice_line_001 --out tests/fixtures/aum-voice-generation.export-manifest.json",
     "manifest:validate": "node scripts/validate-manifest.mjs tests/fixtures/aum-voice-generation.export-manifest.json",
@@ -43,5 +43,10 @@
   "devDependencies": {
     "@types/node": "^24.0.0",
     "typescript": "^5.8.0"
+  },
+  "pnpm": {
+    "overrides": {
+      "fast-uri@3": "3.1.8"
+    }
   }
 }

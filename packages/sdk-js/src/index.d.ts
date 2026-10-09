@@ -402,3 +402,252 @@ export function germImportUrl(
   akousmaId: string,
   mode?: "sound" | "prompt" | "lineage"
 ): string;
+
+/** Opt-in companion contract; does not change akousma 1.6 or auditum/v2. */
+export const LISTENING_ACCESS_CONTRACT: "earworm/listening-access/v1";
+export type QualifiedDeclaration<T> = ({ status: "known" } & T) | {
+  status: "unknown" | "withheld" | "unavailable" | "not_applicable";
+  reason: string;
+};
+export interface FrequencyBand { lower: number; upper: number }
+export interface ListeningAccess {
+  contract: typeof LISTENING_ACCESS_CONTRACT;
+  declaration_id: string;
+  subject_ref: string;
+  capture: QualifiedDeclaration<{ apparatus_ref: string; supported_band_hz: FrequencyBand; evidence_refs: string[] }>;
+  sampled_representation: QualifiedDeclaration<{ representation_ref: string; sample_rate_hz: number; channels: number; retained_band_hz: FrequencyBand; evidence_refs: string[] }>;
+  model_input: QualifiedDeclaration<{
+    model_ref: string; representation_ref: string; sample_rate_hz: number; channels: number; blind_spots: string[];
+    effective_band_hz: FrequencyBand; window_s: { start: number; end: number };
+    preprocessing_refs: string[]; evidence_refs: string[];
+  }>;
+  human_access: QualifiedDeclaration<{
+    listener_ref: string; chain_refs: string[]; conditions: string; rendering_refs: string[];
+    access_modes: ("acoustic" | "visual" | "tactile" | "textual" | "other")[]; evidence_refs: string[];
+  }>[];
+}
+export function listeningAccessErrors(value: unknown): string[];
+export function assertSupportedContracts(required: string[], supported: string[]): void;
+export interface ListeningPassAdapterInput {
+  passes: (Record<string, unknown> & {
+    id: string; listener_id: string; started_at: string; route: string[]; decision_refs: string[];
+    influenced_by: { pass_id: string; effect: string }[]; revision_of?: string | null;
+  })[];
+  participants: (Record<string, unknown> & { id: string; type: AuditumListening["listener_type"] })[];
+  bindings: { pass_id: string; listening_id: string; report_namespace: string; contract: string }[];
+  ensemble?: (Record<string, unknown> & {
+    id: string; kind: "plural_listening" | "ear_swarm"; participant_ids: string[];
+    listening_pass_ids: string[]; influence_edges: { from_pass_id: string; to_pass_id: string; effect: string }[];
+    permissions_preserved: boolean; disagreements_preserved: boolean; dissolution_rule: string;
+  }) | null;
+}
+export function adaptListeningPasses(input: ListeningPassAdapterInput): {
+  listenings: AuditumListening[];
+  ensemble: AuditumEnsemble | null;
+  pass_to_listening: Record<string, string>;
+  source: { passes: ListeningPassAdapterInput["passes"]; participants: ListeningPassAdapterInput["participants"]; ensemble: ListeningPassAdapterInput["ensemble"] };
+};
+
+export const LISTENING_CONTEXT_CONTRACT: "earworm/listening-context/v1";
+export type ClaimValidity = { status: "expires"; issued_at: string; expires_at: string }
+  | { status: "no_expiry"; issued_at: string; reason: string }
+  | { status: "unknown"; reason: string };
+export type ClaimRetention = { status: "review_after"; review_after: string; policy_ref: string }
+  | { status: "policy"; policy_ref: string } | { status: "unknown"; reason: string };
+export interface ListeningClaimLifetime {
+  claim_ref: string; listening_ref: string; validity: ClaimValidity; retention: ClaimRetention;
+}
+export interface ListeningRendering {
+  rendering_id: string; source_ref: string; output_ref: string; transformation_ref: string;
+  author_ref: string; kind: "transformation" | "interpretation"; media_type: string;
+  access: QualifiedDeclaration<{ value: "public" | "restricted" | "private" }>;
+}
+export interface ListeningContext {
+  contract: typeof LISTENING_CONTEXT_CONTRACT;
+  access_declarations?: ListeningAccess[];
+  contexts: {
+    listening_ref: string; subject_ref: string;
+    recipients: { id: string; type: AuditumListening["listener_type"] }[];
+    access_declaration_ref: string;
+    report: {
+      ref: string; contract: string; format: string;
+      readability: QualifiedDeclaration<{ value: "machine_readable" | "human_readable" | "both" }>;
+      human_rendering: { status: "available"; rendering_refs: string[] }
+        | { status: "none" | "unknown" | "withheld" | "unavailable"; reason: string };
+    };
+    renderings: ListeningRendering[];
+  }[];
+  claims: ListeningClaimLifetime[];
+}
+export function listeningContextErrors(value: unknown, record: unknown): string[];
+export function claimValidityAt(claim: ListeningClaimLifetime, now: string): "current" | "expired" | "not_yet_valid" | "unknown";
+export function claimRetentionAt(claim: ListeningClaimLifetime, now: string): "policy_required" | "review_due" | "review_not_due";
+
+export const NEXT_AKOUSMA_SCHEMA_VERSION: "1.7.0";
+export const NEXT_AUDITUM_CONTRACT: "earworm/auditum/v3";
+export const RECORD_EVOLUTION_CONTRACT: "earworm/akousma/v1.7";
+export type RelationReview = { status: "unreviewed" }
+  | { status: "accepted" | "rejected" | "contested"; actor_ref: string; reason: string };
+export interface SimilarityCriterion {
+  descriptor_refs?: {record_ref: string; descriptor_ref: string}[];
+  criterion_id: string; feature: string; unit: string; method_ref: string; method_revision: string;
+  input_refs: string[]; normalization: string;
+  score: { status: "known"; value: number; policy: string }
+    | { status: "unknown" | "unavailable" | "not_applicable"; reason: string };
+}
+export interface EvolutionRelation {
+  contract: "earworm/relations/v1"; relation_id: string;
+  type: "report_of" | "research_for" | "decision_on" | "observed_from" | "mapped_from" | "similar_by";
+  target_akousma_id: string; declared_by: string; evidence_refs: string[];
+  epistemic_status: "reported" | "measured" | "inferred" | "interpreted" | "undetermined";
+  review: RelationReview; criterion?: SimilarityCriterion;
+}
+export interface AuditumAppeal {
+  contract: "earworm/appeal/v1"; appeal_id: string; recorded_by: string; subject_refs: string[];
+  reason: string; status: "unreviewed" | "open" | "under_review" | "resolved" | "withdrawn";
+  evidence_refs: string[]; resolution?: { decision_ref: string; reason: string };
+  legacy_source?: { record_ref: string; path: "/extensions/oida/appeal"; payload: unknown };
+}
+export type NextAuditum = Omit<Auditum, "contract"> & { contract: "earworm/auditum/v3"; appeal?: AuditumAppeal };
+export type NextAkousma = Omit<Akousma, "schema_version" | "auditum" | "lineage"> & {
+  schema_version: "1.7.0"; auditum?: NextAuditum;
+  record_kind?: "research_proposal" | "generation_decision" | "observation_account" | "transformation_graph";
+  lineage: Omit<AkousmaLineage, "relations"> & { relations?: (AkousmaRelation | EvolutionRelation)[] };
+};
+export interface AppealPromotionOptions {
+  supported_contracts: string[]; akousma_id: string; revision_id: string; created_at: string;
+  appeal_id: string; recorded_by: string; reason: string; subject_refs: string[];
+}
+export function nextRecordErrors(record: unknown): string[];
+export function nextRecordReferenceErrors(record: unknown, records: unknown[]): string[];
+export function promoteLegacyAppeal(record: Akousma | NextAkousma, options: AppealPromotionOptions): NextAkousma;
+
+export const OBSERVATION_ACCOUNT_CONTRACT: "earworm/observation-account/v1";
+export const MATTER_CONTEXT_CONTRACT: "earworm/matter-context/v1";
+export interface MatterContext {
+  contract: "earworm/matter-context/v1"; context_id: string; vocabulary: "masa/0.2.0";
+  source_record_ref: string; subject_ref: string; registers: string[]; scales: string[];
+  source_modality: QualifiedDeclaration<{value: "acoustic" | "non_acoustic" | "mixed"; evidence_refs: string[]}>;
+  representation: QualifiedDeclaration<{kind: "structured_observation"; observation_ref: string}>;
+  access_declaration_ref: string;
+  temporal_scope: QualifiedDeclaration<{
+    domain: "reported_scope" | "mathematical_construction" | "sampled_representation" | "physical_observation";
+    window_s: {start: number; end: number}; resolution_s: number;
+    sample_rate_hz: QualifiedDeclaration<{value: number}>; evidence_refs: string[];
+  }>;
+}
+export interface ObservationAccountOptions {
+  supported_contracts: string[]; akousma_id: string; created_at: string; originating_app: string;
+  listening_id: string; matter_context_id: string; route_decision: AuditumRouteDecision;
+  access: ListeningAccess; source_modality: MatterContext["source_modality"];
+  representation: MatterContext["representation"]; temporal_scope: MatterContext["temporal_scope"];
+}
+export function matterContextErrors(value: unknown, source: unknown, access: unknown): string[];
+export function observationAccountErrors(record: unknown, validateMapping: (mapping: unknown) => string[]): string[];
+export function createObservationAccount(mapping: unknown, options: ObservationAccountOptions, validateMapping: (mapping: unknown) => string[]): NextAkousma;
+
+export const MEASUREMENT_SET_CONTRACT: "earworm/measurement-set/v1";
+export const AGENT_SECTOR_CONTRACT: "earworm/agent-sector/v1";
+export interface MeasurementDescriptor {
+  descriptor_id: string; source_record_ref: string; measurement_ref: string;
+  feature: "spectral_centroid" | "band_energy" | "level" | "duration";
+  reference_basis: "frequency" | "digital_energy" | "digital_full_scale" | "perceptual_loudness" | "sound_pressure" | "time";
+  band_hz: {status: "known"; lower: number; upper: number} | {status: "unknown" | "not_applicable"; reason: string};
+  declared_by: string; mapping_reason: string;
+}
+export interface MeasurementSet {
+  contract: "earworm/measurement-set/v1";
+  sources: {record_ref: string; record: Record<string, unknown>}[];
+  descriptors: MeasurementDescriptor[];
+}
+export interface AgentSectorEntry {
+  sector_id: string; listening_ref: string; subject_ref: string; access_declaration_ref: string;
+  source_kind: "acoustic_signal" | "non_acoustic_observation" | "structured_report";
+  basis: "retained_measurement" | "retained_observation" | "interpretation";
+  measurement_refs: string[]; claim_refs: string[]; renderings: string[];
+}
+export function measurementSetErrors(value: unknown, validateMasa: (record: unknown) => string[]): string[];
+export function createMeasurementSet(sources: Record<string, unknown>[], descriptors: MeasurementDescriptor[], validateMasa: (record: unknown) => string[], supportedContracts: string[]): MeasurementSet;
+export function agentSectorView(record: NextAkousma, sectorId: string): {entry: AgentSectorEntry; access: ListeningAccess; renderings: ListeningRendering[]; measurements: {descriptor: MeasurementDescriptor; measurement: Record<string, unknown>}[]};
+export interface DescriptorComparisonOptions {
+  supported_contracts: string[]; relation_id: string; criterion_id: string; declared_by: string;
+  source_descriptor_ref: string; target_descriptor_ref: string;
+}
+export function compareMeasurementDescriptors(source: NextAkousma, target: NextAkousma, options: DescriptorComparisonOptions): EvolutionRelation;
+
+/** Unreleased local views require host permission; they grant no disclosure rights. */
+export const AUDITUM_VIEW_CONTRACT: "earworm/auditum-view/v1";
+export const FORGETTING_RECEIPT_CONTRACT: "earworm/forgetting-receipt/v1";
+export interface ForgettingReceiptView {
+  contract: typeof FORGETTING_RECEIPT_CONTRACT;
+  receipt_id: string;
+  akousma_id: string;
+  created_at: string;
+  record_deleted: true;
+  audio_deletion_requested: boolean;
+  audio_deleted: boolean;
+  shared_audio_preserved: boolean;
+}
+export type AuditumReferenceView = { record_ref: string } & (
+  { state: "available" | "unavailable" | "withheld" } |
+  { state: "forgotten"; receipt: ForgettingReceiptView }
+);
+export type AuditumView = AuditumReferenceView & {
+  contract: typeof AUDITUM_VIEW_CONTRACT;
+  auditum?: Record<string, unknown> | null;
+  references?: AuditumReferenceView[];
+};
+export function forgettingReceiptView(receipt: unknown, recordId: string): ForgettingReceiptView;
+export function auditumView(recordId: string, options: {
+  readRecord: (id: string) => unknown | null;
+  readReceipt: (id: string) => unknown | null;
+  canRead: (id: string) => boolean;
+  supported_contracts: string[];
+}): AuditumView;
+
+export const TRANSFORMATION_GRAPH_CONTRACT: "earworm/transformation-graph/v1";
+export interface TransformationPatchNode { node_id: string; representation_ref: string }
+export interface TransformationGraph {
+  contract: typeof TRANSFORMATION_GRAPH_CONTRACT;
+  graph_id: string;
+  revision: number;
+  authored_by: string;
+  scope: "completed_representation_lineage";
+  source_record: Record<string, unknown>;
+  nodes: TransformationPatchNode[];
+  edges: { relation_ref: string; operation_ref: string; from_node: string; to_node: string }[];
+  operation_refs: string[];
+}
+/** Inject the actual MASA validator and exported versioned lineage direction registry. */
+export interface TransformationMasaAdapter {
+  validateMasa: (value: unknown) => string[];
+  lineageDirections: Readonly<Record<string, "subject-is-descendant" | "object-is-descendant">>;
+}
+export function createTransformationGraph(record: unknown, options: {
+  graph_id: string;
+  revision: number;
+  authored_by: string;
+  nodes: TransformationPatchNode[];
+  supported_contracts: string[];
+}, masa: TransformationMasaAdapter): TransformationGraph;
+export function transformationGraphErrors(graph: unknown, masa: TransformationMasaAdapter): string[];
+
+export const TRANSPOSITION_RECIPE_CONTRACT: "earworm/transposition-recipe/v1";
+export function transpositionRecipeErrors(source: unknown): string[];
+export function transformationGraphBindingErrors(graph: unknown): string[];
+export function graphRevisionErrors(record: NextAkousma, previous: NextAkousma): string[];
+export interface GraphRecordOptions { created_at: string; originating_app: string; supported_contracts: string[] }
+export function createGraphRecord(graph: TransformationGraph, options: GraphRecordOptions, masa: TransformationMasaAdapter): NextAkousma;
+export interface GraphRevisionOptions {
+  akousma_id: string; revision_id: string; created_at: string; reason: string;
+  authored_by: string; nodes: TransformationPatchNode[]; supported_contracts: string[];
+}
+export function reviseGraphRecord(record: NextAkousma, options: GraphRevisionOptions, masa: TransformationMasaAdapter): NextAkousma;
+
+export function bundleManifestErrors(manifest: unknown): string[];
+
+export declare function modelEcologyErrors(name: "embedding-space" | "analysis-evidence" | "model-deployment", value: unknown): string[];
+
+export function spectralBundleErrors(bundle: unknown, options?: {resolveObject?: (ref: string) => unknown}): string[];
+export function record18Errors(record: unknown, options?: {validateNative?: (value: unknown) => string[]; resolveObject?: (ref: string) => unknown}): string[];
+export function admitRecord18(record: unknown, options: {supportedVersions: string[]; validateNative?: (value: unknown) => string[]; resolveObject?: (ref: string) => unknown; resolveRepresentation?: (ref: string) => unknown}): unknown;

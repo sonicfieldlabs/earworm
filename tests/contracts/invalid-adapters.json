@@ -1,0 +1,1625 @@
+[
+  {
+    "name": "missing binding",
+    "input": {
+      "passes": [
+        {
+          "id": "pass:a",
+          "listener_id": "agent:fixture",
+          "route": [
+            "mode:fixture"
+          ],
+          "started_at": "2026-09-06T12:00:00Z",
+          "moment": {
+            "relation": "relisten",
+            "scales": [
+              "event"
+            ]
+          },
+          "source_refs": [
+            "source:fixture"
+          ],
+          "claim_refs": [
+            "claim:a"
+          ],
+          "decision_refs": [],
+          "influenced_by": [],
+          "revision_of": null,
+          "reorientation": null
+        },
+        {
+          "id": "pass:h",
+          "listener_id": "human:fixture",
+          "route": [
+            "mode:fixture"
+          ],
+          "started_at": "2026-09-06T12:00:00Z",
+          "moment": {
+            "relation": "relisten",
+            "scales": [
+              "event"
+            ]
+          },
+          "source_refs": [
+            "source:fixture"
+          ],
+          "claim_refs": [
+            "claim:h"
+          ],
+          "decision_refs": [],
+          "influenced_by": [
+            {
+              "pass_id": "pass:a",
+              "effect": "Changed the comparison window."
+            }
+          ],
+          "revision_of": null,
+          "reorientation": null
+        }
+      ],
+      "participants": [
+        {
+          "id": "agent:fixture",
+          "type": "agent",
+          "standing": "listener"
+        },
+        {
+          "id": "human:fixture",
+          "type": "human",
+          "standing": "listener"
+        }
+      ],
+      "bindings": [
+        {
+          "pass_id": "pass:a",
+          "listening_id": "stored:pass:a",
+          "report_namespace": "akouo.fixture",
+          "contract": "akouo/v0.9"
+        }
+      ],
+      "ensemble": {
+        "id": "ensemble:fixture",
+        "kind": "ear_swarm",
+        "participant_ids": [
+          "agent:fixture",
+          "human:fixture"
+        ],
+        "listening_pass_ids": [
+          "pass:a",
+          "pass:h"
+        ],
+        "influence_edges": [
+          {
+            "from_pass_id": "pass:a",
+            "to_pass_id": "pass:h",
+            "effect": "Changed the comparison window."
+          }
+        ],
+        "permissions_preserved": true,
+        "disagreements_preserved": true,
+        "dissolution_rule": "End after both participants review the comparison."
+      }
+    }
+  },
+  {
+    "name": "duplicate pass",
+    "input": {
+      "passes": [
+        {
+          "id": "pass:a",
+          "listener_id": "agent:fixture",
+          "route": [
+            "mode:fixture"
+          ],
+          "started_at": "2026-09-06T12:00:00Z",
+          "moment": {
+            "relation": "relisten",
+            "scales": [
+              "event"
+            ]
+          },
+          "source_refs": [
+            "source:fixture"
+          ],
+          "claim_refs": [
+            "claim:a"
+          ],
+          "decision_refs": [],
+          "influenced_by": [],
+          "revision_of": null,
+          "reorientation": null
+        },
+        {
+          "id": "pass:h",
+          "listener_id": "human:fixture",
+          "route": [
+            "mode:fixture"
+          ],
+          "started_at": "2026-09-06T12:00:00Z",
+          "moment": {
+            "relation": "relisten",
+            "scales": [
+              "event"
+            ]
+          },
+          "source_refs": [
+            "source:fixture"
+          ],
+          "claim_refs": [
+            "claim:h"
+          ],
+          "decision_refs": [],
+          "influenced_by": [
+            {
+              "pass_id": "pass:a",
+              "effect": "Changed the comparison window."
+            }
+          ],
+          "revision_of": null,
+          "reorientation": null
+        },
+        {
+          "id": "pass:a",
+          "listener_id": "agent:fixture",
+          "route": [
+            "mode:fixture"
+          ],
+          "started_at": "2026-09-06T12:00:00Z",
+          "moment": {
+            "relation": "relisten",
+            "scales": [
+              "event"
+            ]
+          },
+          "source_refs": [
+            "source:fixture"
+          ],
+          "claim_refs": [
+            "claim:a"
+          ],
+          "decision_refs": [],
+          "influenced_by": [],
+          "revision_of": null,
+          "reorientation": null
+        }
+      ],
+      "participants": [
+        {
+          "id": "agent:fixture",
+          "type": "agent",
+          "standing": "listener"
+        },
+        {
+          "id": "human:fixture",
+          "type": "human",
+          "standing": "listener"
+        }
+      ],
+      "bindings": [
+        {
+          "pass_id": "pass:a",
+          "listening_id": "stored:pass:a",
+          "report_namespace": "akouo.fixture",
+          "contract": "akouo/v0.9"
+        },
+        {
+          "pass_id": "pass:h",
+          "listening_id": "stored:pass:h",
+          "report_namespace": "akouo.fixture",
+          "contract": "akouo/v0.9"
+        }
+      ],
+      "ensemble": {
+        "id": "ensemble:fixture",
+        "kind": "ear_swarm",
+        "participant_ids": [
+          "agent:fixture",
+          "human:fixture"
+        ],
+        "listening_pass_ids": [
+          "pass:a",
+          "pass:h"
+        ],
+        "influence_edges": [
+          {
+            "from_pass_id": "pass:a",
+            "to_pass_id": "pass:h",
+            "effect": "Changed the comparison window."
+          }
+        ],
+        "permissions_preserved": true,
+        "disagreements_preserved": true,
+        "dissolution_rule": "End after both participants review the comparison."
+      }
+    }
+  },
+  {
+    "name": "duplicate listening id",
+    "input": {
+      "passes": [
+        {
+          "id": "pass:a",
+          "listener_id": "agent:fixture",
+          "route": [
+            "mode:fixture"
+          ],
+          "started_at": "2026-09-06T12:00:00Z",
+          "moment": {
+            "relation": "relisten",
+            "scales": [
+              "event"
+            ]
+          },
+          "source_refs": [
+            "source:fixture"
+          ],
+          "claim_refs": [
+            "claim:a"
+          ],
+          "decision_refs": [],
+          "influenced_by": [],
+          "revision_of": null,
+          "reorientation": null
+        },
+        {
+          "id": "pass:h",
+          "listener_id": "human:fixture",
+          "route": [
+            "mode:fixture"
+          ],
+          "started_at": "2026-09-06T12:00:00Z",
+          "moment": {
+            "relation": "relisten",
+            "scales": [
+              "event"
+            ]
+          },
+          "source_refs": [
+            "source:fixture"
+          ],
+          "claim_refs": [
+            "claim:h"
+          ],
+          "decision_refs": [],
+          "influenced_by": [
+            {
+              "pass_id": "pass:a",
+              "effect": "Changed the comparison window."
+            }
+          ],
+          "revision_of": null,
+          "reorientation": null
+        }
+      ],
+      "participants": [
+        {
+          "id": "agent:fixture",
+          "type": "agent",
+          "standing": "listener"
+        },
+        {
+          "id": "human:fixture",
+          "type": "human",
+          "standing": "listener"
+        }
+      ],
+      "bindings": [
+        {
+          "pass_id": "pass:a",
+          "listening_id": "stored:pass:a",
+          "report_namespace": "akouo.fixture",
+          "contract": "akouo/v0.9"
+        },
+        {
+          "pass_id": "pass:h",
+          "listening_id": "stored:pass:a",
+          "report_namespace": "akouo.fixture",
+          "contract": "akouo/v0.9"
+        }
+      ],
+      "ensemble": {
+        "id": "ensemble:fixture",
+        "kind": "ear_swarm",
+        "participant_ids": [
+          "agent:fixture",
+          "human:fixture"
+        ],
+        "listening_pass_ids": [
+          "pass:a",
+          "pass:h"
+        ],
+        "influence_edges": [
+          {
+            "from_pass_id": "pass:a",
+            "to_pass_id": "pass:h",
+            "effect": "Changed the comparison window."
+          }
+        ],
+        "permissions_preserved": true,
+        "disagreements_preserved": true,
+        "dissolution_rule": "End after both participants review the comparison."
+      }
+    }
+  },
+  {
+    "name": "unknown participant",
+    "input": {
+      "passes": [
+        {
+          "id": "pass:a",
+          "listener_id": "missing",
+          "route": [
+            "mode:fixture"
+          ],
+          "started_at": "2026-09-06T12:00:00Z",
+          "moment": {
+            "relation": "relisten",
+            "scales": [
+              "event"
+            ]
+          },
+          "source_refs": [
+            "source:fixture"
+          ],
+          "claim_refs": [
+            "claim:a"
+          ],
+          "decision_refs": [],
+          "influenced_by": [],
+          "revision_of": null,
+          "reorientation": null
+        },
+        {
+          "id": "pass:h",
+          "listener_id": "human:fixture",
+          "route": [
+            "mode:fixture"
+          ],
+          "started_at": "2026-09-06T12:00:00Z",
+          "moment": {
+            "relation": "relisten",
+            "scales": [
+              "event"
+            ]
+          },
+          "source_refs": [
+            "source:fixture"
+          ],
+          "claim_refs": [
+            "claim:h"
+          ],
+          "decision_refs": [],
+          "influenced_by": [
+            {
+              "pass_id": "pass:a",
+              "effect": "Changed the comparison window."
+            }
+          ],
+          "revision_of": null,
+          "reorientation": null
+        }
+      ],
+      "participants": [
+        {
+          "id": "agent:fixture",
+          "type": "agent",
+          "standing": "listener"
+        },
+        {
+          "id": "human:fixture",
+          "type": "human",
+          "standing": "listener"
+        }
+      ],
+      "bindings": [
+        {
+          "pass_id": "pass:a",
+          "listening_id": "stored:pass:a",
+          "report_namespace": "akouo.fixture",
+          "contract": "akouo/v0.9"
+        },
+        {
+          "pass_id": "pass:h",
+          "listening_id": "stored:pass:h",
+          "report_namespace": "akouo.fixture",
+          "contract": "akouo/v0.9"
+        }
+      ],
+      "ensemble": {
+        "id": "ensemble:fixture",
+        "kind": "ear_swarm",
+        "participant_ids": [
+          "agent:fixture",
+          "human:fixture"
+        ],
+        "listening_pass_ids": [
+          "pass:a",
+          "pass:h"
+        ],
+        "influence_edges": [
+          {
+            "from_pass_id": "pass:a",
+            "to_pass_id": "pass:h",
+            "effect": "Changed the comparison window."
+          }
+        ],
+        "permissions_preserved": true,
+        "disagreements_preserved": true,
+        "dissolution_rule": "End after both participants review the comparison."
+      }
+    }
+  },
+  {
+    "name": "unknown influence",
+    "input": {
+      "passes": [
+        {
+          "id": "pass:a",
+          "listener_id": "agent:fixture",
+          "route": [
+            "mode:fixture"
+          ],
+          "started_at": "2026-09-06T12:00:00Z",
+          "moment": {
+            "relation": "relisten",
+            "scales": [
+              "event"
+            ]
+          },
+          "source_refs": [
+            "source:fixture"
+          ],
+          "claim_refs": [
+            "claim:a"
+          ],
+          "decision_refs": [],
+          "influenced_by": [],
+          "revision_of": null,
+          "reorientation": null
+        },
+        {
+          "id": "pass:h",
+          "listener_id": "human:fixture",
+          "route": [
+            "mode:fixture"
+          ],
+          "started_at": "2026-09-06T12:00:00Z",
+          "moment": {
+            "relation": "relisten",
+            "scales": [
+              "event"
+            ]
+          },
+          "source_refs": [
+            "source:fixture"
+          ],
+          "claim_refs": [
+            "claim:h"
+          ],
+          "decision_refs": [],
+          "influenced_by": [
+            {
+              "pass_id": "missing",
+              "effect": "Changed the comparison window."
+            }
+          ],
+          "revision_of": null,
+          "reorientation": null
+        }
+      ],
+      "participants": [
+        {
+          "id": "agent:fixture",
+          "type": "agent",
+          "standing": "listener"
+        },
+        {
+          "id": "human:fixture",
+          "type": "human",
+          "standing": "listener"
+        }
+      ],
+      "bindings": [
+        {
+          "pass_id": "pass:a",
+          "listening_id": "stored:pass:a",
+          "report_namespace": "akouo.fixture",
+          "contract": "akouo/v0.9"
+        },
+        {
+          "pass_id": "pass:h",
+          "listening_id": "stored:pass:h",
+          "report_namespace": "akouo.fixture",
+          "contract": "akouo/v0.9"
+        }
+      ],
+      "ensemble": {
+        "id": "ensemble:fixture",
+        "kind": "ear_swarm",
+        "participant_ids": [
+          "agent:fixture",
+          "human:fixture"
+        ],
+        "listening_pass_ids": [
+          "pass:a",
+          "pass:h"
+        ],
+        "influence_edges": [
+          {
+            "from_pass_id": "pass:a",
+            "to_pass_id": "pass:h",
+            "effect": "Changed the comparison window."
+          }
+        ],
+        "permissions_preserved": true,
+        "disagreements_preserved": true,
+        "dissolution_rule": "End after both participants review the comparison."
+      }
+    }
+  },
+  {
+    "name": "self influence",
+    "input": {
+      "passes": [
+        {
+          "id": "pass:a",
+          "listener_id": "agent:fixture",
+          "route": [
+            "mode:fixture"
+          ],
+          "started_at": "2026-09-06T12:00:00Z",
+          "moment": {
+            "relation": "relisten",
+            "scales": [
+              "event"
+            ]
+          },
+          "source_refs": [
+            "source:fixture"
+          ],
+          "claim_refs": [
+            "claim:a"
+          ],
+          "decision_refs": [],
+          "influenced_by": [],
+          "revision_of": null,
+          "reorientation": null
+        },
+        {
+          "id": "pass:h",
+          "listener_id": "human:fixture",
+          "route": [
+            "mode:fixture"
+          ],
+          "started_at": "2026-09-06T12:00:00Z",
+          "moment": {
+            "relation": "relisten",
+            "scales": [
+              "event"
+            ]
+          },
+          "source_refs": [
+            "source:fixture"
+          ],
+          "claim_refs": [
+            "claim:h"
+          ],
+          "decision_refs": [],
+          "influenced_by": [
+            {
+              "pass_id": "pass:h",
+              "effect": "Changed the comparison window."
+            }
+          ],
+          "revision_of": null,
+          "reorientation": null
+        }
+      ],
+      "participants": [
+        {
+          "id": "agent:fixture",
+          "type": "agent",
+          "standing": "listener"
+        },
+        {
+          "id": "human:fixture",
+          "type": "human",
+          "standing": "listener"
+        }
+      ],
+      "bindings": [
+        {
+          "pass_id": "pass:a",
+          "listening_id": "stored:pass:a",
+          "report_namespace": "akouo.fixture",
+          "contract": "akouo/v0.9"
+        },
+        {
+          "pass_id": "pass:h",
+          "listening_id": "stored:pass:h",
+          "report_namespace": "akouo.fixture",
+          "contract": "akouo/v0.9"
+        }
+      ],
+      "ensemble": {
+        "id": "ensemble:fixture",
+        "kind": "ear_swarm",
+        "participant_ids": [
+          "agent:fixture",
+          "human:fixture"
+        ],
+        "listening_pass_ids": [
+          "pass:a",
+          "pass:h"
+        ],
+        "influence_edges": [
+          {
+            "from_pass_id": "pass:a",
+            "to_pass_id": "pass:h",
+            "effect": "Changed the comparison window."
+          }
+        ],
+        "permissions_preserved": true,
+        "disagreements_preserved": true,
+        "dissolution_rule": "End after both participants review the comparison."
+      }
+    }
+  },
+  {
+    "name": "inconsistent effect",
+    "input": {
+      "passes": [
+        {
+          "id": "pass:a",
+          "listener_id": "agent:fixture",
+          "route": [
+            "mode:fixture"
+          ],
+          "started_at": "2026-09-06T12:00:00Z",
+          "moment": {
+            "relation": "relisten",
+            "scales": [
+              "event"
+            ]
+          },
+          "source_refs": [
+            "source:fixture"
+          ],
+          "claim_refs": [
+            "claim:a"
+          ],
+          "decision_refs": [],
+          "influenced_by": [],
+          "revision_of": null,
+          "reorientation": null
+        },
+        {
+          "id": "pass:h",
+          "listener_id": "human:fixture",
+          "route": [
+            "mode:fixture"
+          ],
+          "started_at": "2026-09-06T12:00:00Z",
+          "moment": {
+            "relation": "relisten",
+            "scales": [
+              "event"
+            ]
+          },
+          "source_refs": [
+            "source:fixture"
+          ],
+          "claim_refs": [
+            "claim:h"
+          ],
+          "decision_refs": [],
+          "influenced_by": [
+            {
+              "pass_id": "pass:a",
+              "effect": "Changed the comparison window."
+            }
+          ],
+          "revision_of": null,
+          "reorientation": null
+        }
+      ],
+      "participants": [
+        {
+          "id": "agent:fixture",
+          "type": "agent",
+          "standing": "listener"
+        },
+        {
+          "id": "human:fixture",
+          "type": "human",
+          "standing": "listener"
+        }
+      ],
+      "bindings": [
+        {
+          "pass_id": "pass:a",
+          "listening_id": "stored:pass:a",
+          "report_namespace": "akouo.fixture",
+          "contract": "akouo/v0.9"
+        },
+        {
+          "pass_id": "pass:h",
+          "listening_id": "stored:pass:h",
+          "report_namespace": "akouo.fixture",
+          "contract": "akouo/v0.9"
+        }
+      ],
+      "ensemble": {
+        "id": "ensemble:fixture",
+        "kind": "ear_swarm",
+        "participant_ids": [
+          "agent:fixture",
+          "human:fixture"
+        ],
+        "listening_pass_ids": [
+          "pass:a",
+          "pass:h"
+        ],
+        "influence_edges": [
+          {
+            "from_pass_id": "pass:a",
+            "to_pass_id": "pass:h",
+            "effect": "Invented effect."
+          }
+        ],
+        "permissions_preserved": true,
+        "disagreements_preserved": true,
+        "dissolution_rule": "End after both participants review the comparison."
+      }
+    }
+  },
+  {
+    "name": "unpreserved swarm permissions",
+    "input": {
+      "passes": [
+        {
+          "id": "pass:a",
+          "listener_id": "agent:fixture",
+          "route": [
+            "mode:fixture"
+          ],
+          "started_at": "2026-09-06T12:00:00Z",
+          "moment": {
+            "relation": "relisten",
+            "scales": [
+              "event"
+            ]
+          },
+          "source_refs": [
+            "source:fixture"
+          ],
+          "claim_refs": [
+            "claim:a"
+          ],
+          "decision_refs": [],
+          "influenced_by": [],
+          "revision_of": null,
+          "reorientation": null
+        },
+        {
+          "id": "pass:h",
+          "listener_id": "human:fixture",
+          "route": [
+            "mode:fixture"
+          ],
+          "started_at": "2026-09-06T12:00:00Z",
+          "moment": {
+            "relation": "relisten",
+            "scales": [
+              "event"
+            ]
+          },
+          "source_refs": [
+            "source:fixture"
+          ],
+          "claim_refs": [
+            "claim:h"
+          ],
+          "decision_refs": [],
+          "influenced_by": [
+            {
+              "pass_id": "pass:a",
+              "effect": "Changed the comparison window."
+            }
+          ],
+          "revision_of": null,
+          "reorientation": null
+        }
+      ],
+      "participants": [
+        {
+          "id": "agent:fixture",
+          "type": "agent",
+          "standing": "listener"
+        },
+        {
+          "id": "human:fixture",
+          "type": "human",
+          "standing": "listener"
+        }
+      ],
+      "bindings": [
+        {
+          "pass_id": "pass:a",
+          "listening_id": "stored:pass:a",
+          "report_namespace": "akouo.fixture",
+          "contract": "akouo/v0.9"
+        },
+        {
+          "pass_id": "pass:h",
+          "listening_id": "stored:pass:h",
+          "report_namespace": "akouo.fixture",
+          "contract": "akouo/v0.9"
+        }
+      ],
+      "ensemble": {
+        "id": "ensemble:fixture",
+        "kind": "ear_swarm",
+        "participant_ids": [
+          "agent:fixture",
+          "human:fixture"
+        ],
+        "listening_pass_ids": [
+          "pass:a",
+          "pass:h"
+        ],
+        "influence_edges": [
+          {
+            "from_pass_id": "pass:a",
+            "to_pass_id": "pass:h",
+            "effect": "Changed the comparison window."
+          }
+        ],
+        "permissions_preserved": false,
+        "disagreements_preserved": true,
+        "dissolution_rule": "End after both participants review the comparison."
+      }
+    }
+  },
+  {
+    "name": "lost participant",
+    "input": {
+      "passes": [
+        {
+          "id": "pass:a",
+          "listener_id": "agent:fixture",
+          "route": [
+            "mode:fixture"
+          ],
+          "started_at": "2026-09-06T12:00:00Z",
+          "moment": {
+            "relation": "relisten",
+            "scales": [
+              "event"
+            ]
+          },
+          "source_refs": [
+            "source:fixture"
+          ],
+          "claim_refs": [
+            "claim:a"
+          ],
+          "decision_refs": [],
+          "influenced_by": [],
+          "revision_of": null,
+          "reorientation": null
+        },
+        {
+          "id": "pass:h",
+          "listener_id": "human:fixture",
+          "route": [
+            "mode:fixture"
+          ],
+          "started_at": "2026-09-06T12:00:00Z",
+          "moment": {
+            "relation": "relisten",
+            "scales": [
+              "event"
+            ]
+          },
+          "source_refs": [
+            "source:fixture"
+          ],
+          "claim_refs": [
+            "claim:h"
+          ],
+          "decision_refs": [],
+          "influenced_by": [
+            {
+              "pass_id": "pass:a",
+              "effect": "Changed the comparison window."
+            }
+          ],
+          "revision_of": null,
+          "reorientation": null
+        }
+      ],
+      "participants": [
+        {
+          "id": "agent:fixture",
+          "type": "agent",
+          "standing": "listener"
+        },
+        {
+          "id": "human:fixture",
+          "type": "human",
+          "standing": "listener"
+        }
+      ],
+      "bindings": [
+        {
+          "pass_id": "pass:a",
+          "listening_id": "stored:pass:a",
+          "report_namespace": "akouo.fixture",
+          "contract": "akouo/v0.9"
+        },
+        {
+          "pass_id": "pass:h",
+          "listening_id": "stored:pass:h",
+          "report_namespace": "akouo.fixture",
+          "contract": "akouo/v0.9"
+        }
+      ],
+      "ensemble": {
+        "id": "ensemble:fixture",
+        "kind": "ear_swarm",
+        "participant_ids": [
+          "agent:fixture"
+        ],
+        "listening_pass_ids": [
+          "pass:a",
+          "pass:h"
+        ],
+        "influence_edges": [
+          {
+            "from_pass_id": "pass:a",
+            "to_pass_id": "pass:h",
+            "effect": "Changed the comparison window."
+          }
+        ],
+        "permissions_preserved": true,
+        "disagreements_preserved": true,
+        "dissolution_rule": "End after both participants review the comparison."
+      }
+    }
+  },
+  {
+    "name": "unknown revision",
+    "input": {
+      "passes": [
+        {
+          "id": "pass:a",
+          "listener_id": "agent:fixture",
+          "route": [
+            "mode:fixture"
+          ],
+          "started_at": "2026-09-06T12:00:00Z",
+          "moment": {
+            "relation": "relisten",
+            "scales": [
+              "event"
+            ]
+          },
+          "source_refs": [
+            "source:fixture"
+          ],
+          "claim_refs": [
+            "claim:a"
+          ],
+          "decision_refs": [],
+          "influenced_by": [],
+          "revision_of": null,
+          "reorientation": null
+        },
+        {
+          "id": "pass:h",
+          "listener_id": "human:fixture",
+          "route": [
+            "mode:fixture"
+          ],
+          "started_at": "2026-09-06T12:00:00Z",
+          "moment": {
+            "relation": "relisten",
+            "scales": [
+              "event"
+            ]
+          },
+          "source_refs": [
+            "source:fixture"
+          ],
+          "claim_refs": [
+            "claim:h"
+          ],
+          "decision_refs": [],
+          "influenced_by": [
+            {
+              "pass_id": "pass:a",
+              "effect": "Changed the comparison window."
+            }
+          ],
+          "revision_of": "missing",
+          "reorientation": null
+        }
+      ],
+      "participants": [
+        {
+          "id": "agent:fixture",
+          "type": "agent",
+          "standing": "listener"
+        },
+        {
+          "id": "human:fixture",
+          "type": "human",
+          "standing": "listener"
+        }
+      ],
+      "bindings": [
+        {
+          "pass_id": "pass:a",
+          "listening_id": "stored:pass:a",
+          "report_namespace": "akouo.fixture",
+          "contract": "akouo/v0.9"
+        },
+        {
+          "pass_id": "pass:h",
+          "listening_id": "stored:pass:h",
+          "report_namespace": "akouo.fixture",
+          "contract": "akouo/v0.9"
+        }
+      ],
+      "ensemble": {
+        "id": "ensemble:fixture",
+        "kind": "ear_swarm",
+        "participant_ids": [
+          "agent:fixture",
+          "human:fixture"
+        ],
+        "listening_pass_ids": [
+          "pass:a",
+          "pass:h"
+        ],
+        "influence_edges": [
+          {
+            "from_pass_id": "pass:a",
+            "to_pass_id": "pass:h",
+            "effect": "Changed the comparison window."
+          }
+        ],
+        "permissions_preserved": true,
+        "disagreements_preserved": true,
+        "dissolution_rule": "End after both participants review the comparison."
+      }
+    }
+  },
+  {
+    "name": "unsupported listener type",
+    "input": {
+      "passes": [
+        {
+          "id": "pass:a",
+          "listener_id": "agent:fixture",
+          "route": [
+            "mode:fixture"
+          ],
+          "started_at": "2026-09-06T12:00:00Z",
+          "moment": {
+            "relation": "relisten",
+            "scales": [
+              "event"
+            ]
+          },
+          "source_refs": [
+            "source:fixture"
+          ],
+          "claim_refs": [
+            "claim:a"
+          ],
+          "decision_refs": [],
+          "influenced_by": [],
+          "revision_of": null,
+          "reorientation": null
+        },
+        {
+          "id": "pass:h",
+          "listener_id": "human:fixture",
+          "route": [
+            "mode:fixture"
+          ],
+          "started_at": "2026-09-06T12:00:00Z",
+          "moment": {
+            "relation": "relisten",
+            "scales": [
+              "event"
+            ]
+          },
+          "source_refs": [
+            "source:fixture"
+          ],
+          "claim_refs": [
+            "claim:h"
+          ],
+          "decision_refs": [],
+          "influenced_by": [
+            {
+              "pass_id": "pass:a",
+              "effect": "Changed the comparison window."
+            }
+          ],
+          "revision_of": null,
+          "reorientation": null
+        }
+      ],
+      "participants": [
+        {
+          "id": "agent:fixture",
+          "type": "machine",
+          "standing": "listener"
+        },
+        {
+          "id": "human:fixture",
+          "type": "human",
+          "standing": "listener"
+        }
+      ],
+      "bindings": [
+        {
+          "pass_id": "pass:a",
+          "listening_id": "stored:pass:a",
+          "report_namespace": "akouo.fixture",
+          "contract": "akouo/v0.9"
+        },
+        {
+          "pass_id": "pass:h",
+          "listening_id": "stored:pass:h",
+          "report_namespace": "akouo.fixture",
+          "contract": "akouo/v0.9"
+        }
+      ],
+      "ensemble": {
+        "id": "ensemble:fixture",
+        "kind": "ear_swarm",
+        "participant_ids": [
+          "agent:fixture",
+          "human:fixture"
+        ],
+        "listening_pass_ids": [
+          "pass:a",
+          "pass:h"
+        ],
+        "influence_edges": [
+          {
+            "from_pass_id": "pass:a",
+            "to_pass_id": "pass:h",
+            "effect": "Changed the comparison window."
+          }
+        ],
+        "permissions_preserved": true,
+        "disagreements_preserved": true,
+        "dissolution_rule": "End after both participants review the comparison."
+      }
+    }
+  },
+  {
+    "name": "empty swarm edges",
+    "input": {
+      "passes": [
+        {
+          "id": "pass:a",
+          "listener_id": "agent:fixture",
+          "route": [
+            "mode:fixture"
+          ],
+          "started_at": "2026-09-06T12:00:00Z",
+          "moment": {
+            "relation": "relisten",
+            "scales": [
+              "event"
+            ]
+          },
+          "source_refs": [
+            "source:fixture"
+          ],
+          "claim_refs": [
+            "claim:a"
+          ],
+          "decision_refs": [],
+          "influenced_by": [],
+          "revision_of": null,
+          "reorientation": null
+        },
+        {
+          "id": "pass:h",
+          "listener_id": "human:fixture",
+          "route": [
+            "mode:fixture"
+          ],
+          "started_at": "2026-09-06T12:00:00Z",
+          "moment": {
+            "relation": "relisten",
+            "scales": [
+              "event"
+            ]
+          },
+          "source_refs": [
+            "source:fixture"
+          ],
+          "claim_refs": [
+            "claim:h"
+          ],
+          "decision_refs": [],
+          "influenced_by": [
+            {
+              "pass_id": "pass:a",
+              "effect": "Changed the comparison window."
+            }
+          ],
+          "revision_of": null,
+          "reorientation": null
+        }
+      ],
+      "participants": [
+        {
+          "id": "agent:fixture",
+          "type": "agent",
+          "standing": "listener"
+        },
+        {
+          "id": "human:fixture",
+          "type": "human",
+          "standing": "listener"
+        }
+      ],
+      "bindings": [
+        {
+          "pass_id": "pass:a",
+          "listening_id": "stored:pass:a",
+          "report_namespace": "akouo.fixture",
+          "contract": "akouo/v0.9"
+        },
+        {
+          "pass_id": "pass:h",
+          "listening_id": "stored:pass:h",
+          "report_namespace": "akouo.fixture",
+          "contract": "akouo/v0.9"
+        }
+      ],
+      "ensemble": {
+        "id": "ensemble:fixture",
+        "kind": "ear_swarm",
+        "participant_ids": [
+          "agent:fixture",
+          "human:fixture"
+        ],
+        "listening_pass_ids": [
+          "pass:a",
+          "pass:h"
+        ],
+        "influence_edges": [],
+        "permissions_preserved": true,
+        "disagreements_preserved": true,
+        "dissolution_rule": "End after both participants review the comparison."
+      }
+    }
+  },
+  {
+    "name": "unknown edge target",
+    "input": {
+      "passes": [
+        {
+          "id": "pass:a",
+          "listener_id": "agent:fixture",
+          "route": [
+            "mode:fixture"
+          ],
+          "started_at": "2026-09-06T12:00:00Z",
+          "moment": {
+            "relation": "relisten",
+            "scales": [
+              "event"
+            ]
+          },
+          "source_refs": [
+            "source:fixture"
+          ],
+          "claim_refs": [
+            "claim:a"
+          ],
+          "decision_refs": [],
+          "influenced_by": [],
+          "revision_of": null,
+          "reorientation": null
+        },
+        {
+          "id": "pass:h",
+          "listener_id": "human:fixture",
+          "route": [
+            "mode:fixture"
+          ],
+          "started_at": "2026-09-06T12:00:00Z",
+          "moment": {
+            "relation": "relisten",
+            "scales": [
+              "event"
+            ]
+          },
+          "source_refs": [
+            "source:fixture"
+          ],
+          "claim_refs": [
+            "claim:h"
+          ],
+          "decision_refs": [],
+          "influenced_by": [
+            {
+              "pass_id": "pass:a",
+              "effect": "Changed the comparison window."
+            }
+          ],
+          "revision_of": null,
+          "reorientation": null
+        }
+      ],
+      "participants": [
+        {
+          "id": "agent:fixture",
+          "type": "agent",
+          "standing": "listener"
+        },
+        {
+          "id": "human:fixture",
+          "type": "human",
+          "standing": "listener"
+        }
+      ],
+      "bindings": [
+        {
+          "pass_id": "pass:a",
+          "listening_id": "stored:pass:a",
+          "report_namespace": "akouo.fixture",
+          "contract": "akouo/v0.9"
+        },
+        {
+          "pass_id": "pass:h",
+          "listening_id": "stored:pass:h",
+          "report_namespace": "akouo.fixture",
+          "contract": "akouo/v0.9"
+        }
+      ],
+      "ensemble": {
+        "id": "ensemble:fixture",
+        "kind": "ear_swarm",
+        "participant_ids": [
+          "agent:fixture",
+          "human:fixture"
+        ],
+        "listening_pass_ids": [
+          "pass:a",
+          "pass:h"
+        ],
+        "influence_edges": [
+          {
+            "from_pass_id": "pass:a",
+            "to_pass_id": "missing",
+            "effect": "Changed the comparison window."
+          }
+        ],
+        "permissions_preserved": true,
+        "disagreements_preserved": true,
+        "dissolution_rule": "End after both participants review the comparison."
+      }
+    }
+  },
+  {
+    "name": "missing route",
+    "input": {
+      "passes": [
+        {
+          "id": "pass:a",
+          "listener_id": "agent:fixture",
+          "route": null,
+          "started_at": "2026-09-06T12:00:00Z",
+          "moment": {
+            "relation": "relisten",
+            "scales": [
+              "event"
+            ]
+          },
+          "source_refs": [
+            "source:fixture"
+          ],
+          "claim_refs": [
+            "claim:a"
+          ],
+          "decision_refs": [],
+          "influenced_by": [],
+          "revision_of": null,
+          "reorientation": null
+        },
+        {
+          "id": "pass:h",
+          "listener_id": "human:fixture",
+          "route": [
+            "mode:fixture"
+          ],
+          "started_at": "2026-09-06T12:00:00Z",
+          "moment": {
+            "relation": "relisten",
+            "scales": [
+              "event"
+            ]
+          },
+          "source_refs": [
+            "source:fixture"
+          ],
+          "claim_refs": [
+            "claim:h"
+          ],
+          "decision_refs": [],
+          "influenced_by": [
+            {
+              "pass_id": "pass:a",
+              "effect": "Changed the comparison window."
+            }
+          ],
+          "revision_of": null,
+          "reorientation": null
+        }
+      ],
+      "participants": [
+        {
+          "id": "agent:fixture",
+          "type": "agent",
+          "standing": "listener"
+        },
+        {
+          "id": "human:fixture",
+          "type": "human",
+          "standing": "listener"
+        }
+      ],
+      "bindings": [
+        {
+          "pass_id": "pass:a",
+          "listening_id": "stored:pass:a",
+          "report_namespace": "akouo.fixture",
+          "contract": "akouo/v0.9"
+        },
+        {
+          "pass_id": "pass:h",
+          "listening_id": "stored:pass:h",
+          "report_namespace": "akouo.fixture",
+          "contract": "akouo/v0.9"
+        }
+      ],
+      "ensemble": {
+        "id": "ensemble:fixture",
+        "kind": "ear_swarm",
+        "participant_ids": [
+          "agent:fixture",
+          "human:fixture"
+        ],
+        "listening_pass_ids": [
+          "pass:a",
+          "pass:h"
+        ],
+        "influence_edges": [
+          {
+            "from_pass_id": "pass:a",
+            "to_pass_id": "pass:h",
+            "effect": "Changed the comparison window."
+          }
+        ],
+        "permissions_preserved": true,
+        "disagreements_preserved": true,
+        "dissolution_rule": "End after both participants review the comparison."
+      }
+    }
+  },
+  {
+    "name": "lost member influence in plural ensemble",
+    "input": {
+      "passes": [
+        {
+          "id": "pass:a",
+          "listener_id": "agent:fixture",
+          "route": [
+            "mode:fixture"
+          ],
+          "started_at": "2026-09-06T12:00:00Z",
+          "moment": {
+            "relation": "relisten",
+            "scales": [
+              "event"
+            ]
+          },
+          "source_refs": [
+            "source:fixture"
+          ],
+          "claim_refs": [
+            "claim:a"
+          ],
+          "decision_refs": [],
+          "influenced_by": [],
+          "revision_of": null,
+          "reorientation": null
+        },
+        {
+          "id": "pass:h",
+          "listener_id": "human:fixture",
+          "route": [
+            "mode:fixture"
+          ],
+          "started_at": "2026-09-06T12:00:00Z",
+          "moment": {
+            "relation": "relisten",
+            "scales": [
+              "event"
+            ]
+          },
+          "source_refs": [
+            "source:fixture"
+          ],
+          "claim_refs": [
+            "claim:h"
+          ],
+          "decision_refs": [],
+          "influenced_by": [
+            {
+              "pass_id": "pass:a",
+              "effect": "Changed the comparison window."
+            }
+          ],
+          "revision_of": null,
+          "reorientation": null
+        }
+      ],
+      "participants": [
+        {
+          "id": "agent:fixture",
+          "type": "agent",
+          "standing": "listener"
+        },
+        {
+          "id": "human:fixture",
+          "type": "human",
+          "standing": "listener"
+        }
+      ],
+      "bindings": [
+        {
+          "pass_id": "pass:a",
+          "listening_id": "stored:pass:a",
+          "report_namespace": "akouo.fixture",
+          "contract": "akouo/v0.9"
+        },
+        {
+          "pass_id": "pass:h",
+          "listening_id": "stored:pass:h",
+          "report_namespace": "akouo.fixture",
+          "contract": "akouo/v0.9"
+        }
+      ],
+      "ensemble": {
+        "id": "ensemble:fixture",
+        "kind": "plural_listening",
+        "participant_ids": [
+          "agent:fixture",
+          "human:fixture"
+        ],
+        "listening_pass_ids": [
+          "pass:a",
+          "pass:h"
+        ],
+        "influence_edges": [],
+        "permissions_preserved": true,
+        "disagreements_preserved": true,
+        "dissolution_rule": "End after both participants review the comparison."
+      }
+    }
+  }
+]

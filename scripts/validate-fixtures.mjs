@@ -47,11 +47,13 @@ function assertSupportedSchema(schema, label, path = "$") {
     "contains",
     "enum",
     "minLength",
+    "maxLength",
     "pattern",
     "minItems",
     "maxItems",
     "uniqueItems",
     "minimum",
+    "exclusiveMinimum",
     "maximum"
   ]);
 
@@ -153,6 +155,9 @@ function validate(schema, value, schemas, path = "$", rootSchema = schema) {
   }
 
   if (typeof value === "number") {
+    if (typeof schema.exclusiveMinimum === "number" && value <= schema.exclusiveMinimum) {
+      errors.push(`${path}: expected > ${schema.exclusiveMinimum}, got ${value}`);
+    }
     if (typeof schema.minimum === "number" && value < schema.minimum) {
       errors.push(`${path}: expected >= ${schema.minimum}, got ${value}`);
     }
@@ -164,6 +169,7 @@ function validate(schema, value, schemas, path = "$", rootSchema = schema) {
   if (typeof value === "string" && typeof schema.minLength === "number" && value.length < schema.minLength) {
     errors.push(`${path}: expected at least ${schema.minLength} characters`);
   }
+  if (typeof value === "string" && schema.maxLength !== undefined && [...value].length > schema.maxLength) errors.push(`${path}: exceeds maximum string length`);
   if (typeof value === "string" && typeof schema.pattern === "string" && !new RegExp(schema.pattern).test(value)) {
     errors.push(`${path}: expected to match ${schema.pattern}`);
   }
@@ -265,6 +271,9 @@ function assertSessionIntegrity(label, session) {
 
 const schemas = await loadSchemas();
 const schemaBySuffix = {
+  ".next-akousma.json": "akousma-1.7.schema.json",
+  ".listening-context.json": "listening-context.schema.json",
+  ".listening-access.json": "listening-access.schema.json",
   ".session.json": "earworm-session.schema.json",
   ".signal-packet.json": "signal-packet.schema.json",
   ".feature-stream-ref.json": "feature-stream-ref.schema.json",

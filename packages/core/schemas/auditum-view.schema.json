@@ -1,0 +1,189 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://earworm.dev/schemas/auditum-view.schema.json",
+  "title": "Unreleased permission-aware local auditum view v1",
+  "anyOf": [
+    {
+      "type": "object",
+      "properties": {
+        "contract": {
+          "const": "earworm/auditum-view/v1"
+        },
+        "record_ref": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "\\S"
+        },
+        "state": {
+          "const": "available"
+        },
+        "auditum": {
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "references": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/reference"
+          }
+        }
+      },
+      "required": [
+        "contract",
+        "record_ref",
+        "state",
+        "auditum",
+        "references"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "contract": {
+          "const": "earworm/auditum-view/v1"
+        },
+        "record_ref": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "\\S"
+        },
+        "state": {
+          "enum": [
+            "unavailable",
+            "withheld"
+          ]
+        }
+      },
+      "required": [
+        "contract",
+        "record_ref",
+        "state"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "contract": {
+          "const": "earworm/auditum-view/v1"
+        },
+        "record_ref": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "\\S"
+        },
+        "state": {
+          "const": "forgotten"
+        },
+        "receipt": {
+          "$ref": "#/$defs/receipt"
+        }
+      },
+      "required": [
+        "contract",
+        "record_ref",
+        "state",
+        "receipt"
+      ],
+      "additionalProperties": false
+    }
+  ],
+  "$defs": {
+    "receipt": {
+      "type": "object",
+      "properties": {
+        "contract": {
+          "const": "earworm/forgetting-receipt/v1"
+        },
+        "receipt_id": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "\\S"
+        },
+        "akousma_id": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "\\S"
+        },
+        "created_at": {
+          "type": "string",
+          "pattern": "^[1-9][0-9]{3}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]{3})?Z$"
+        },
+        "record_deleted": {
+          "const": true
+        },
+        "audio_deletion_requested": {
+          "type": "boolean"
+        },
+        "audio_deleted": {
+          "type": "boolean"
+        },
+        "shared_audio_preserved": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "contract",
+        "receipt_id",
+        "akousma_id",
+        "created_at",
+        "record_deleted",
+        "audio_deletion_requested",
+        "audio_deleted",
+        "shared_audio_preserved"
+      ],
+      "additionalProperties": false
+    },
+    "reference": {
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "record_ref": {
+              "type": "string",
+              "minLength": 1,
+              "pattern": "\\S"
+            },
+            "state": {
+              "enum": [
+                "available",
+                "unavailable",
+                "withheld"
+              ]
+            }
+          },
+          "required": [
+            "record_ref",
+            "state"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "record_ref": {
+              "type": "string",
+              "minLength": 1,
+              "pattern": "\\S"
+            },
+            "state": {
+              "const": "forgotten"
+            },
+            "receipt": {
+              "$ref": "#/$defs/receipt"
+            }
+          },
+          "required": [
+            "record_ref",
+            "state",
+            "receipt"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    }
+  }
+}
