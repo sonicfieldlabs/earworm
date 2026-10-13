@@ -43,5 +43,10 @@
   "devDependencies": {
     "@types/node": "^24.0.0",
     "typescript": "^5.8.0"
+  },
+  "pnpm": {
+    "overrides": {
+      "fast-uri@3": "3.1.8"
+    }
   }
 }

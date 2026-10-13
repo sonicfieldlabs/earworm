@@ -23,7 +23,7 @@ Akousma 1.9 records are readable through `validation_errors`; the current
 default store refuses their persistence without a representation-aware adapter.
 See the [representation specification](../../spec/representation-records.md).
 
-Source candidate 0.10.0 adds opt-in `RepresentationStore` custody and shared
+Source 0.10.1 adds opt-in `RepresentationStore` custody and shared
 `MaterialTerms`. Exact artifact bytes, immutable records, current uses and
 return lineage are admitted together. See [Representation custody](../../docs/representation-custody.md).
 

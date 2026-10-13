@@ -1,6 +1,6 @@
 # Representation custody
 
-The unpublished Akousma 0.10.0 candidate adds `RepresentationStore` and
+Akousma 0.10.1 adds `RepresentationStore` and
 `MaterialTerms` beside the existing shared-store interfaces. The adapter
 explicitly admits the Phase 3 Akousma 1.9 family. Default `AkousmataStore.put`
 continues to refuse it without a representation-aware owner adapter. Existing

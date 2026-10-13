@@ -5,9 +5,10 @@ agentic signal chains. It keeps audio events, intent, generation metadata,
 analysis, user edits, agent actions, modulation, provenance, retention, and
 render history in one queryable context chain.
 
-This source candidate adds opt-in Akousma 1.9 representation contracts,
-JavaScript packages 0.8.0, and Python `akousma` 0.9.0. Producer defaults remain
-1.6. Publication and consumer activation are separate from source support.
+Current public release: JavaScript `0.7.0` and Python `akousma` 0.8.4 (atomic
+audio publication). This source adds opt-in Akousma 1.9 representation
+contracts and representation custody: JavaScript packages 0.8.0 and Python
+`akousma` 0.10.1. Producer defaults remain 1.6.
 
 ## Packages
 
@@ -15,7 +16,7 @@ JavaScript packages 0.8.0, and Python `akousma` 0.9.0. Producer defaults remain
 | --- | --- | --- |
 | `@earworm/core` | 0.8.0 source | Canonical TypeScript event/session and representation types, schemas, event stores, state reconstruction, context queries, and consent-gated manifest export. |
 | `@earworm/sdk-js` | 0.8.0 source | JavaScript client, existing akousma helpers, and opt-in representation, output, lineage, and byte-admission validators. |
-| `akousma` | 0.9.0 source | Python reference store, existing 1.7/1.8 admission, and opt-in representation/1.9 validation; representation-aware persistence remains downstream. |
+| `akousma` | 0.10.1 source | Python reference store with atomic audio publication, existing 1.7/1.8 admission, opt-in representation/1.9 validation and opt-in `RepresentationStore` custody. |
 | `earworm-sdk-python` | 0.7.0 | Read-only Python helpers for Earworm fixtures and sessions. |
 
 ## Protocol capabilities
