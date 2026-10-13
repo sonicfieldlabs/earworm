@@ -220,8 +220,11 @@ def _fallback_validation_errors(record: dict[str, Any]) -> list[str]:
 def validation_errors(record: dict[str, Any], *, validate_native=None, resolve_object=None) -> list[str]:
     """Return human-readable validation errors ([] if valid). Uses jsonschema if
     available, else a minimal built-in check of required blocks."""
-    if not isinstance(record, dict) or record.get("schema_version") not in {"1.0.0", "1.1.0", "1.2.0", "1.3.0", "1.4.0", "1.5.0", "1.6.0", "1.7.0", "1.8.0"}:
+    if not isinstance(record, dict) or record.get("schema_version") not in {"1.0.0", "1.1.0", "1.2.0", "1.3.0", "1.4.0", "1.5.0", "1.6.0", "1.7.0", "1.8.0", "1.9.0"}:
         return ["Unsupported record schema version"]
+    if record.get("schema_version") == "1.9.0":
+        from .representations import record_19_errors
+        return record_19_errors(record, validate_native=validate_native, resolve_object=resolve_object)
     if record.get("schema_version") == "1.8.0":
         from .spectral import record_18_errors
         return record_18_errors(record, validate_native=validate_native, resolve_object=resolve_object)
@@ -1014,7 +1017,13 @@ class AkousmataStore:
             return None
 
     # --- records ----------------------------------------------------------
-    def put(self, record: dict[str, Any], *, validate_masa=None, lineage_directions=None, supported_versions=None, validate_native=None, resolve_object=None, resolve_representation=None, commit=True) -> str:
+    def put(self, record: dict[str, Any], *, validate_masa=None, lineage_directions=None, supported_versions=None, validate_native=None, resolve_object=None, resolve_representation=None, representation_adapter=None, supported_contracts=None, resolve_artifact=None, validate_binding=None, commit=True) -> str:
+        if record.get("schema_version") == "1.9.0":
+            from .representation_store import RepresentationStore
+            if isinstance(representation_adapter, RepresentationStore) and representation_adapter.store is self and commit:
+                return representation_adapter.put(record, supported_contracts=supported_contracts or (),
+                                                  resolve_artifact=resolve_artifact, validate_binding=validate_binding)
+            raise ValueError("Spec 1.9 persistence requires a representation-aware store adapter; this store has not admitted it")
         if record.get("schema_version") == "1.8.0":
             from .spectral import admit_record
             admit_record(record, supported_versions=supported_versions or (), validate_native=validate_native, resolve_object=resolve_object, resolve_representation=resolve_representation)

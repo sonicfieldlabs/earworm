@@ -1,0 +1,73 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://earworm.dev/schemas/representation-output.schema.json",
+  "title": "Representation output v1: completed work distinct from account",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "contract": {
+      "const": "earworm/representation-output/v1"
+    },
+    "output_id": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "\\S"
+    },
+    "operation_ref": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "\\S"
+    },
+    "kind": {
+      "type": "string",
+      "enum": [
+        "account",
+        "work",
+        "prompt",
+        "event_log"
+      ]
+    },
+    "representation_ref": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "\\S"
+    },
+    "completion": {
+      "type": "string",
+      "enum": [
+        "complete",
+        "partial"
+      ]
+    },
+    "authored_by": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "pattern": "\\S"
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "input_access_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "pattern": "\\S"
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    }
+  },
+  "required": [
+    "contract",
+    "output_id",
+    "operation_ref",
+    "kind",
+    "representation_ref",
+    "completion",
+    "authored_by",
+    "input_access_refs"
+  ]
+}

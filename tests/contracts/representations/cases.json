@@ -1,0 +1,529 @@
+[
+  {
+    "name": "primary_text_needs_no_audio",
+    "base": "listen",
+    "path": [],
+    "action": "none",
+    "value": null,
+    "valid": true
+  },
+  {
+    "name": "completed_text_work",
+    "base": "work",
+    "path": [],
+    "action": "none",
+    "value": null,
+    "valid": true
+  },
+  {
+    "name": "partial_large_document",
+    "base": "partial",
+    "path": [],
+    "action": "none",
+    "value": null,
+    "valid": true
+  },
+  {
+    "name": "source_file_does_not_activate",
+    "base": "read-file",
+    "path": [],
+    "action": "none",
+    "value": null,
+    "valid": true
+  },
+  {
+    "name": "null_is_explicit",
+    "base": "no-response",
+    "path": [],
+    "action": "none",
+    "value": null,
+    "valid": true
+  },
+  {
+    "name": "refusal_has_no_received_bytes",
+    "base": "refused",
+    "path": [],
+    "action": "none",
+    "value": null,
+    "valid": true
+  },
+  {
+    "name": "wrong_inline_digest",
+    "base": "listen",
+    "path": [
+      "representations",
+      0,
+      "artifact",
+      "sha256"
+    ],
+    "action": "set",
+    "value": "0000000000000000000000000000000000000000000000000000000000000000",
+    "valid": false
+  },
+  {
+    "name": "characters_are_not_bytes",
+    "base": "listen",
+    "path": [
+      "representations",
+      0,
+      "artifact",
+      "byte_count"
+    ],
+    "action": "set",
+    "value": 40,
+    "valid": false
+  },
+  {
+    "name": "lost_line_breaks",
+    "base": "listen",
+    "path": [
+      "representations",
+      0,
+      "artifact",
+      "inline_text"
+    ],
+    "action": "set",
+    "value": "hum  hum, again. No sound was played. \u2736 ",
+    "valid": false
+  },
+  {
+    "name": "text_requires_encoding",
+    "base": "listen",
+    "path": [
+      "representations",
+      0,
+      "encoding"
+    ],
+    "action": "delete",
+    "value": null,
+    "valid": false
+  },
+  {
+    "name": "inline_text_cannot_be_audio",
+    "base": "listen",
+    "path": [
+      "representations",
+      0,
+      "form"
+    ],
+    "action": "set",
+    "value": "audio",
+    "valid": false
+  },
+  {
+    "name": "inline_surrogate_is_invalid",
+    "base": "listen",
+    "path": [
+      "representations",
+      0,
+      "artifact",
+      "inline_text"
+    ],
+    "action": "set",
+    "value": "\ud800",
+    "valid": false
+  },
+  {
+    "name": "available_requires_actual_input",
+    "base": "listen",
+    "path": [
+      "accesses",
+      0,
+      "received_representation_ref"
+    ],
+    "action": "delete",
+    "value": null,
+    "valid": false
+  },
+  {
+    "name": "instruction_requires_binding",
+    "base": "read-file",
+    "path": [
+      "accesses",
+      0,
+      "role"
+    ],
+    "action": "set",
+    "value": "instruction",
+    "valid": false
+  },
+  {
+    "name": "source_cannot_activate_binding",
+    "base": "instruction",
+    "path": [
+      "accesses",
+      0,
+      "role"
+    ],
+    "action": "set",
+    "value": "subject",
+    "valid": false
+  },
+  {
+    "name": "binding_complete_digest",
+    "base": "instruction",
+    "path": [
+      "binding_refs",
+      0,
+      "document_sha256"
+    ],
+    "action": "set",
+    "value": "0000000000000000000000000000000000000000000000000000000000000000",
+    "valid": false
+  },
+  {
+    "name": "binding_other_invocation",
+    "base": "instruction",
+    "path": [
+      "binding_refs",
+      0,
+      "scope",
+      "ref"
+    ],
+    "action": "set",
+    "value": "other:operation",
+    "valid": false
+  },
+  {
+    "name": "work_needs_new_identity",
+    "base": "work",
+    "path": [
+      "outputs",
+      0,
+      "representation_ref"
+    ],
+    "action": "set",
+    "value": "fixture:source",
+    "valid": false
+  },
+  {
+    "name": "work_needs_source_lineage",
+    "base": "work",
+    "path": [
+      "relations",
+      1
+    ],
+    "action": "delete",
+    "value": null,
+    "valid": false
+  },
+  {
+    "name": "work_does_not_use_unavailable_account",
+    "base": "work",
+    "path": [
+      "accesses",
+      1,
+      "status"
+    ],
+    "action": "set",
+    "value": "withheld",
+    "valid": false
+  },
+  {
+    "name": "output_cannot_change_operation",
+    "base": "work",
+    "path": [
+      "outputs",
+      0,
+      "operation_ref"
+    ],
+    "action": "set",
+    "value": "other:operation",
+    "valid": false
+  },
+  {
+    "name": "complete_work_cannot_be_partial",
+    "base": "work",
+    "path": [
+      "outputs",
+      0,
+      "completion"
+    ],
+    "action": "set",
+    "value": "partial",
+    "valid": false
+  },
+  {
+    "name": "complete_work_is_retained",
+    "base": "work",
+    "path": [
+      "representations",
+      2,
+      "artifact",
+      "state"
+    ],
+    "action": "set",
+    "value": "reference_only",
+    "valid": false
+  },
+  {
+    "name": "duplicate_access_identity",
+    "base": "sound",
+    "path": [
+      "accesses",
+      1,
+      "access_id"
+    ],
+    "action": "set",
+    "value": "fixture:access:sound-source",
+    "valid": false
+  },
+  {
+    "name": "partial_cannot_claim_full",
+    "base": "partial",
+    "path": [
+      "accesses",
+      0,
+      "coverage",
+      "kind"
+    ],
+    "action": "set",
+    "value": "full",
+    "valid": false
+  },
+  {
+    "name": "partial_exceeds_source",
+    "base": "partial",
+    "path": [
+      "accesses",
+      0,
+      "coverage",
+      "ranges",
+      0,
+      "end"
+    ],
+    "action": "set",
+    "value": 999999,
+    "valid": false
+  },
+  {
+    "name": "partial_needs_method",
+    "base": "partial",
+    "path": [
+      "relations",
+      0,
+      "method_ref"
+    ],
+    "action": "delete",
+    "value": null,
+    "valid": false
+  },
+  {
+    "name": "partial_needs_losses",
+    "base": "partial",
+    "path": [
+      "relations",
+      0,
+      "losses"
+    ],
+    "action": "delete",
+    "value": null,
+    "valid": false
+  },
+  {
+    "name": "partial_needs_lineage",
+    "base": "partial",
+    "path": [
+      "relations",
+      0
+    ],
+    "action": "delete",
+    "value": null,
+    "valid": false
+  },
+  {
+    "name": "lineage_cannot_self_reference",
+    "base": "work",
+    "path": [
+      "relations",
+      1,
+      "to_ref"
+    ],
+    "action": "set",
+    "value": "fixture:work",
+    "valid": false
+  },
+  {
+    "name": "lineage_cycle",
+    "base": "work",
+    "path": [
+      "relations"
+    ],
+    "action": "append",
+    "value": {
+      "relation_id": "fixture:relation:cycle",
+      "kind": "response_to",
+      "from_ref": "fixture:source",
+      "to_ref": "fixture:work",
+      "declared_by": "fixture-author"
+    },
+    "valid": false
+  },
+  {
+    "name": "null_is_not_missing_history",
+    "base": "no-response",
+    "path": [
+      "accesses"
+    ],
+    "action": "set",
+    "value": [],
+    "valid": false
+  },
+  {
+    "name": "refusal_cannot_claim_supply",
+    "base": "listen",
+    "path": [
+      "outcome",
+      "status"
+    ],
+    "action": "set",
+    "value": "refused",
+    "valid": false
+  },
+  {
+    "name": "pending_cannot_hold_completed_work",
+    "base": "work",
+    "path": [
+      "outcome",
+      "status"
+    ],
+    "action": "set",
+    "value": "pending",
+    "valid": false
+  },
+  {
+    "name": "return_needs_other_operation",
+    "base": "return",
+    "path": [
+      "return",
+      "previous_operation_ref"
+    ],
+    "action": "set",
+    "value": "fixture:operation:return",
+    "valid": false
+  },
+  {
+    "name": "return_requires_primary_input",
+    "base": "return",
+    "path": [
+      "return",
+      "representation_ref"
+    ],
+    "action": "set",
+    "value": "fixture:source",
+    "valid": false
+  },
+  {
+    "name": "informed_requires_context",
+    "base": "return",
+    "path": [
+      "return",
+      "context_basis"
+    ],
+    "action": "set",
+    "value": "informed",
+    "valid": false
+  },
+  {
+    "name": "unknown_time_requires_reason",
+    "base": "listen",
+    "path": [
+      "representations",
+      0,
+      "time_basis"
+    ],
+    "action": "set",
+    "value": [
+      {
+        "kind": "unknown"
+      }
+    ],
+    "valid": false
+  },
+  {
+    "name": "authored_time_without_frequency",
+    "base": "listen",
+    "path": [
+      "representations",
+      0,
+      "time_basis"
+    ],
+    "action": "set",
+    "value": [
+      {
+        "kind": "authored",
+        "unit": "second",
+        "extent": {
+          "start": 0,
+          "end": 20
+        }
+      }
+    ],
+    "valid": true
+  },
+  {
+    "name": "reported_event_needs_clock",
+    "base": "listen",
+    "path": [
+      "representations",
+      0,
+      "time_basis"
+    ],
+    "action": "set",
+    "value": [
+      {
+        "kind": "source_event",
+        "unit": "second"
+      }
+    ],
+    "valid": false
+  },
+  {
+    "name": "reverse_time_bounds",
+    "base": "listen",
+    "path": [
+      "representations",
+      0,
+      "time_basis"
+    ],
+    "action": "set",
+    "value": [
+      {
+        "kind": "authored",
+        "unit": "second",
+        "extent": {
+          "start": 20,
+          "end": 0
+        }
+      }
+    ],
+    "valid": false
+  },
+  {
+    "name": "noncochlear_form_morse",
+    "base": "listen",
+    "path": [
+      "representations",
+      0,
+      "form"
+    ],
+    "action": "set",
+    "value": "morse",
+    "valid": true
+  },
+  {
+    "name": "known_form_with_unknown_convention_is_preserved",
+    "base": "listen",
+    "path": [
+      "representations",
+      0,
+      "convention"
+    ],
+    "action": "set",
+    "value": {
+      "status": "unknown",
+      "reason": "Convention was not supplied."
+    },
+    "valid": true
+  }
+]

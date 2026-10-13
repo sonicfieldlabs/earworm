@@ -89,3 +89,14 @@ receipt-backed edges. Both SDKs require the host's actual MASA validator and
 versioned direction registry. Graph accounts now use protected storage and explicit patch revisions. Typed
 transposition receipts preserve separate rate/duration/band/hash declarations;
 external engine execution remains downstream.
+
+## Primary representations (opt-in)
+
+Source candidate 0.8.0 exports `representationErrors`,
+`representationRecordErrors`, `representationMeasurementErrors`,
+`record19Errors`, and `admitRepresentationRecord`. Admission checks explicit
+consumer contracts and exact bytes through inline UTF-8 material or a host
+resolver. Instructions and return references require their owner callbacks.
+Completed works, accounts, and prompts have different output kinds. TypeScript
+declarations reuse the canonical core types. See the
+[representation specification](../../spec/representation-records.md).

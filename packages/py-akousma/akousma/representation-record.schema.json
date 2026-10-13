@@ -1,0 +1,267 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://earworm.dev/schemas/representation-record.schema.json",
+  "title": "Representation record v1: sources, access, outputs and lineage",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "contract": {
+      "const": "earworm/representation-record/v1"
+    },
+    "record_ref": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "\\S"
+    },
+    "operation_ref": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "\\S"
+    },
+    "representations": {
+      "type": "array",
+      "items": {
+        "$ref": "https://earworm.dev/schemas/representation.schema.json"
+      },
+      "minItems": 1
+    },
+    "accesses": {
+      "type": "array",
+      "items": {
+        "$ref": "https://earworm.dev/schemas/representation-access.schema.json"
+      },
+      "minItems": 0
+    },
+    "relations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "relation_id": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "\\S"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "transformed_from",
+              "account_of",
+              "response_to",
+              "performance_of"
+            ]
+          },
+          "from_ref": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "\\S"
+          },
+          "to_ref": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "\\S"
+          },
+          "declared_by": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "\\S"
+          },
+          "method_ref": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "\\S"
+          },
+          "losses": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "pattern": "\\S"
+            },
+            "minItems": 0
+          }
+        },
+        "required": [
+          "relation_id",
+          "kind",
+          "from_ref",
+          "to_ref",
+          "declared_by"
+        ]
+      },
+      "minItems": 0
+    },
+    "outputs": {
+      "type": "array",
+      "items": {
+        "$ref": "https://earworm.dev/schemas/representation-output.schema.json"
+      },
+      "minItems": 0
+    },
+    "binding_refs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "binding_id": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "\\S"
+          },
+          "document_representation_ref": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "\\S"
+          },
+          "document_sha256": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "adoption_ref": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "\\S"
+          },
+          "application_ref": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "\\S"
+          },
+          "scope": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "kind": {
+                "type": "string",
+                "enum": [
+                  "workspace",
+                  "workflow",
+                  "swarm",
+                  "run",
+                  "invocation"
+                ]
+              },
+              "ref": {
+                "type": "string",
+                "minLength": 1,
+                "pattern": "\\S"
+              }
+            },
+            "required": [
+              "kind",
+              "ref"
+            ]
+          },
+          "effective_at": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "\\S"
+          }
+        },
+        "required": [
+          "binding_id",
+          "document_representation_ref",
+          "document_sha256",
+          "adoption_ref",
+          "application_ref",
+          "scope",
+          "effective_at"
+        ]
+      },
+      "minItems": 0
+    },
+    "outcome": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": [
+            "pending",
+            "completed",
+            "no_response",
+            "refused",
+            "withheld",
+            "failed",
+            "missing",
+            "source_only"
+          ]
+        },
+        "recorded_by": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "\\S"
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "\\S"
+        }
+      },
+      "required": [
+        "status",
+        "recorded_by",
+        "reason"
+      ]
+    },
+    "return": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "previous_operation_ref",
+        "representation_ref",
+        "kind",
+        "context_basis",
+        "context_access_refs"
+      ],
+      "properties": {
+        "previous_operation_ref": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "\\S"
+        },
+        "representation_ref": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "\\S"
+        },
+        "kind": {
+          "enum": [
+            "original",
+            "descendant"
+          ]
+        },
+        "context_basis": {
+          "enum": [
+            "independent",
+            "informed",
+            "shared_analysis",
+            "unknown"
+          ]
+        },
+        "context_access_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "\\S"
+          },
+          "uniqueItems": true
+        }
+      }
+    }
+  },
+  "required": [
+    "contract",
+    "record_ref",
+    "operation_ref",
+    "representations",
+    "accesses",
+    "relations",
+    "outputs",
+    "binding_refs",
+    "outcome"
+  ]
+}

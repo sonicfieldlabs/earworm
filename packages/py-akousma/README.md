@@ -17,6 +17,16 @@ projection for retained, untyped listening prose. Restrictions found at the top
 level, in the auditum, in a native-policy extension or in a listening context are
 combined, so moving a covenant never grants permission to text it restricted.
 
+Source candidate 0.9.0 adds `akousma.representations`, with opt-in primary
+material, actual access, completed output and return-lineage validation.
+Akousma 1.9 records are readable through `validation_errors`; the current
+default store refuses their persistence without a representation-aware adapter.
+See the [representation specification](../../spec/representation-records.md).
+
+Source candidate 0.10.0 adds opt-in `RepresentationStore` custody and shared
+`MaterialTerms`. Exact artifact bytes, immutable records, current uses and
+return lineage are admitted together. See [Representation custody](../../docs/representation-custody.md).
+
 ## Install
 
 ```sh

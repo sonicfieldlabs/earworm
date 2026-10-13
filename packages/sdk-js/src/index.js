@@ -167,3 +167,4 @@ export { bundleManifestErrors } from "./bundles.js";
 export { modelEcologyErrors } from "./model-ecology.js";
 
 export {spectralBundleErrors, record18Errors, admitRecord18} from './spectral.js';
+export { REPRESENTATION_SCHEMA_VERSION, REPRESENTATION_CONTRACTS, representationErrors, representationRecordErrors, representationMeasurementErrors, record19Errors, admitRepresentationRecord } from "./representations.js";

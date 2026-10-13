@@ -322,6 +322,20 @@ export interface Akousma {
   [key: string]: unknown;
 }
 
+export type { RepresentationForm, RepresentationRole, Representation, RepresentationAccess, RepresentationOutput, RepresentationRecord, RepresentationMeasurement } from "@earworm/core";
+export const REPRESENTATION_SCHEMA_VERSION: "1.9.0";
+export const REPRESENTATION_CONTRACTS: readonly string[];
+export function representationErrors(value: unknown): string[];
+export function representationRecordErrors(value: unknown): string[];
+export function representationMeasurementErrors(value: unknown): string[];
+export function record19Errors(value: unknown, options?: { validateNative?: (value: unknown) => string[]; resolveObject?: (ref: string) => unknown }): string[];
+export function admitRepresentationRecord(value: import("@earworm/core").RepresentationRecord, options: {
+  supportedContracts: readonly string[];
+  resolveArtifact?: (value: import("@earworm/core").Representation) => Uint8Array | null;
+  validateBinding?: (binding: import("@earworm/core").RepresentationRecord["binding_refs"][number], access: import("@earworm/core").RepresentationAccess) => string[];
+  resolveOperation?: (ref: string) => { operation_ref: string; primary_representation_ref?: string; output_representation_refs?: string[]; account_representation_refs?: string[] } | null;
+}): import("@earworm/core").RepresentationRecord;
+
 export function newAkousmaId(prefix?: string): string;
 
 export function createAkousma(input: {

@@ -1,0 +1,10 @@
+{
+  "operation_ref": "fixture:operation:sound",
+  "primary_representation_ref": "fixture:source",
+  "output_representation_refs": [
+    "fixture:work"
+  ],
+  "account_representation_refs": [
+    "fixture:account"
+  ]
+}

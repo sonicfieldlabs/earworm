@@ -1716,3 +1716,4 @@ function removeUndefined(value: unknown): unknown {
 }
 
 export type { EmbeddingSpace, AnalysisEvidence, ModelDeployment } from "./modelEcology.js";
+export type { RepresentationForm, RepresentationRole, Representation, RepresentationAccess, RepresentationOutput, RepresentationRecord, RepresentationMeasurement } from "./representations.js";
