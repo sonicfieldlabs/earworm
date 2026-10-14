@@ -1,4 +1,5 @@
 import {record18Errors} from './spectral.js';
+import {record19Errors} from './representations.js';
 import { nextRecordErrors, NEXT_AUDITUM_CONTRACT } from "./record-evolution.js";
 
 /* This Source Code Form is subject to the terms of the Mozilla Public
@@ -503,7 +504,8 @@ export function addListening(record, namespace, payload, { contract = null, summ
 
 /** Minimal shape check (required blocks + enums). Returns [] when valid. */
 export function akousmaShapeErrors(record) {
-  if (!["1.0.0","1.1.0","1.2.0","1.3.0","1.4.0","1.5.0","1.6.0","1.7.0","1.8.0"].includes(record?.schema_version)) return ["Unsupported record schema version"];
+  if (!["1.0.0","1.1.0","1.2.0","1.3.0","1.4.0","1.5.0","1.6.0","1.7.0","1.8.0","1.9.0"].includes(record?.schema_version)) return ["Unsupported record schema version"];
+  if (record?.schema_version === "1.9.0") return record19Errors(record);
   if (record?.schema_version === "1.8.0") return record18Errors(record);
   if (record?.schema_version === "1.7.0") return nextRecordErrors(record);
   const errors = [];

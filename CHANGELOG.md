@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- py-akousma 0.10.1: joins the published 0.8.4 line (atomic audio publication,
+  fast-uri 3.1.8) with the representation work: opt-in Akousma 1.9 records,
+  representation validators in Python and JavaScript, and `RepresentationStore`
+  custody with shared `MaterialTerms`. JavaScript packages 0.8.0. Producer
+  defaults stay 1.6; no released schema changed.
+
 - Pin fast-uri 3.1.8 in JavaScript tooling to address the authority and host-normalization advisories.
 
 - Package py-akousma 0.8.4 with atomic audio publication; record schemas stay unchanged.

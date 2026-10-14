@@ -21,3 +21,8 @@ the event/session schemas, they include akousma spec v1.6 with attributable
 listening-only records, `earworm/auditum/v2` decision records, and the content-free
 `earworm/forgetting-receipt/v1` contract. Fixtures in `fixtures/` and the root
 `tests/fixtures/` directory are executable protocol examples.
+
+Source candidate 0.8.0 also exports representation, access, output, record, and
+measurement types. Their canonical schemas define an opt-in 1.9 route for
+primary text and completed textual works. See the
+[representation specification](../../spec/representation-records.md).

@@ -1,0 +1,49 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://earworm.dev/schemas/representation-measurement.schema.json",
+  "title": "Representation measurement v1: method and material scope",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "contract": {
+      "const": "earworm/representation-measurement/v1"
+    },
+    "measurement_id": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "\\S"
+    },
+    "representation_ref": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "\\S"
+    },
+    "method_ref": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "\\S"
+    },
+    "quantity": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "\\S"
+    },
+    "value": {
+      "type": "number"
+    },
+    "unit": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "\\S"
+    }
+  },
+  "required": [
+    "contract",
+    "measurement_id",
+    "representation_ref",
+    "method_ref",
+    "quantity",
+    "value",
+    "unit"
+  ]
+}
