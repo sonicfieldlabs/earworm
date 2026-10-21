@@ -159,7 +159,8 @@ synthetic conformance cases. Existing versioned schemas are retained.
   - transformation graphs.
 - **New versions by default.** Default constructors still write 1.6. Versions 1.7, 1.8 and 1.9
   require explicit consumer support. The existing store refuses 1.9 persistence until a
-  representation-aware owner adapter is implemented.
+  matching `RepresentationStore` adapter is explicitly supplied. That opt-in
+  adapter is implemented in this source; an unadapted store still refuses it.
 - **An engine.** Earworm has no DSP engine and runs no transformation graph. Its graphs and recipes
   are contracts, and executing them is the application's work.
 - **Writing from Python sessions.** `earworm-sdk-python` only reads.

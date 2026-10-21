@@ -147,7 +147,8 @@ restoring summary, tags, location, hashes, URIs, or forgotten content.
 The bundled `akousma/akousma.schema.json` is the canonical schema, kept in sync with
 `earworm/packages/core/schemas/akousma.schema.json`.
 
-Unreleased opt-in listening helpers are available from
+Opt-in listening helpers, included in `akousma 0.10.1` (GitHub release of
+14 October 2026; not on PyPI), are available from
 `akousma.listening_contracts`. See the repository's
 [listening contract guide](../../docs/listening-contracts.md) for offline
 validation, contract negotiation, and pass-to-listening adaptation.
