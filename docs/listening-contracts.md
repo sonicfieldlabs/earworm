@@ -1,6 +1,9 @@
 # Opt-in listening contracts
 
-These additions are unreleased. They preserve akousma 1.6 and `earworm/auditum/v2`.
+These additions are included in `akousma 0.10.1` (GitHub release of 14 October
+2026; not on PyPI); exact installed/loaded owner qualification remains separate. “Unreleased” below retains that delivery meaning; the 1.7
+specification is still an opt-in draft. Default constructors preserve akousma
+1.6 and `earworm/auditum/v2`.
 They do not imply that existing applications negotiate or enforce the new contract.
 
 The [shared scenario matrix](../tests/contracts/scenarios/README.md) exercises
