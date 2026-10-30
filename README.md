@@ -5,18 +5,19 @@ agentic signal chains. It keeps audio events, intent, generation metadata,
 analysis, user edits, agent actions, modulation, provenance, retention, and
 render history in one queryable context chain.
 
-Current public release: JavaScript `0.7.0` and Python `akousma` 0.8.4 (atomic
-audio publication). This source adds opt-in Akousma 1.9 representation
-contracts and representation custody: JavaScript packages 0.8.0 and Python
-`akousma` 0.10.1. Producer defaults remain 1.6.
+Current public release: JavaScript `0.8.0` and Python `akousma` 0.10.1 (GitHub,
+14 October 2026: opt-in Akousma 1.9 representation contracts and custody). This
+source adds listening circuits and run memory (`earworm/listening-circuit/v1`,
+`earworm/run-memory/v1`, [spec](spec/listening-circuit.md)): JavaScript packages
+0.9.0 and Python `akousma` 0.11.0. Producer defaults remain 1.6.
 
 ## Packages
 
 | Package | Version | Purpose |
 | --- | --- | --- |
-| `@earworm/core` | 0.8.0 source | Canonical TypeScript event/session and representation types, schemas, event stores, state reconstruction, context queries, and consent-gated manifest export. |
-| `@earworm/sdk-js` | 0.8.0 source | JavaScript client, existing akousma helpers, and opt-in representation, output, lineage, and byte-admission validators. |
-| `akousma` | 0.10.1 source | Python reference store with atomic audio publication, existing 1.7/1.8 admission, opt-in representation/1.9 validation and opt-in `RepresentationStore` custody. |
+| `@earworm/core` | 0.9.0 source | Canonical TypeScript event/session and representation types, schemas, event stores, state reconstruction, context queries, and consent-gated manifest export. |
+| `@earworm/sdk-js` | 0.9.0 source | JavaScript client, existing akousma helpers, opt-in representation, output, lineage and byte-admission validators, and listening circuits with run memory. |
+| `akousma` | 0.11.0 source | Python reference store with atomic audio publication, existing 1.7/1.8 admission, opt-in representation/1.9 validation, opt-in `RepresentationStore` custody, and listening circuits with run memory (`akousma.listening_circuit`). |
 | `earworm-sdk-python` | 0.7.0 | Read-only Python helpers for Earworm fixtures and sessions. |
 
 ## Protocol capabilities

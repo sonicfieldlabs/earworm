@@ -2,6 +2,20 @@
 
 ## Unreleased
 
+- Listening circuits and run memory (py-akousma 0.11.0, JavaScript packages
+  0.9.0). `earworm/listening-circuit/v1` records, on one record as
+  `extensions.earworm_listening_circuit`, the moves a listening loop made: each
+  step's move (re-listen the same fragment, a new fragment, another source, a
+  sounding, reason, retrieve, analyze, stop), the candidates it was offered and
+  the one chosen, the decider (router, rules, reasoner, operator or score, with
+  any fallback), the router's route and confidence, the reasoning and the
+  alternative reading kept beside it, layer, recursion depth, bounds and outcome.
+  `earworm/run-memory/v1` is folded from those circuits one window at a time:
+  visits, dwell, cooldown position, kinds and modes heard, declined and repeated
+  counts, soundings and last route per source, with no audio or account text.
+  Python and JavaScript share fixtures and fold to the same memory. Additive: no
+  released schema changed and producer defaults stay 1.6.
+
 - py-akousma 0.10.1: joins the published 0.8.4 line (atomic audio publication,
   fast-uri 3.1.8) with the representation work: opt-in Akousma 1.9 records,
   representation validators in Python and JavaScript, and `RepresentationStore`

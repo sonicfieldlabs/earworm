@@ -1,0 +1,206 @@
+[
+  {
+    "name": "valid as given",
+    "path": [
+      "steps",
+      0,
+      "layer"
+    ],
+    "value": "focused",
+    "valid": true
+  },
+  {
+    "name": "unknown move",
+    "path": [
+      "steps",
+      0,
+      "move"
+    ],
+    "value": "wander",
+    "valid": false
+  },
+  {
+    "name": "chosen not offered",
+    "path": [
+      "steps",
+      0,
+      "chosen"
+    ],
+    "value": "elsewhere",
+    "valid": false
+  },
+  {
+    "name": "chosen move differs",
+    "path": [
+      "steps",
+      0,
+      "chosen"
+    ],
+    "value": "fragment",
+    "valid": false
+  },
+  {
+    "name": "choosing nothing while executing",
+    "path": [
+      "steps",
+      0,
+      "chosen"
+    ],
+    "value": null,
+    "valid": false
+  },
+  {
+    "name": "sound without sounding layer",
+    "path": [
+      "steps",
+      2,
+      "layer"
+    ],
+    "value": "focused",
+    "valid": false
+  },
+  {
+    "name": "sounding layer on a relisten",
+    "path": [
+      "steps",
+      0,
+      "layer"
+    ],
+    "value": "sounding",
+    "valid": false
+  },
+  {
+    "name": "depth beyond max",
+    "path": [
+      "steps",
+      2,
+      "depth"
+    ],
+    "value": 3,
+    "valid": false
+  },
+  {
+    "name": "executed sound without its record",
+    "path": [
+      "steps",
+      2,
+      "to_akousma_id"
+    ],
+    "value": null,
+    "valid": false
+  },
+  {
+    "name": "executed relisten without its listening",
+    "path": [
+      "steps",
+      0,
+      "to_listening_id"
+    ],
+    "value": null,
+    "valid": false
+  },
+  {
+    "name": "switch landing in this auditum",
+    "path": [
+      "steps",
+      3,
+      "to_listening_id"
+    ],
+    "value": "lst_2",
+    "valid": false
+  },
+  {
+    "name": "unresolved listening",
+    "path": [
+      "steps",
+      1,
+      "from_listening_id"
+    ],
+    "value": "lst_9",
+    "valid": false
+  },
+  {
+    "name": "bad confidence",
+    "path": [
+      "steps",
+      0,
+      "route",
+      "confidence"
+    ],
+    "value": "sure",
+    "valid": false
+  },
+  {
+    "name": "refused step may choose nothing",
+    "path": [
+      "steps",
+      3,
+      "outcome",
+      "status"
+    ],
+    "value": "blocked",
+    "valid": true,
+    "also": [
+      {
+        "path": [
+          "steps",
+          3,
+          "chosen"
+        ],
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "extra field",
+    "path": [
+      "steps",
+      0,
+      "audio"
+    ],
+    "value": "raw.wav",
+    "valid": false
+  },
+  {
+    "name": "bad instant",
+    "path": [
+      "steps",
+      0,
+      "at"
+    ],
+    "value": "yesterday",
+    "valid": false
+  },
+  {
+    "name": "duplicate step id",
+    "path": [
+      "steps",
+      1,
+      "step_id"
+    ],
+    "value": "stp_1",
+    "valid": false
+  },
+  {
+    "name": "reasoner decider",
+    "path": [
+      "steps",
+      0,
+      "decider",
+      "kind"
+    ],
+    "value": "reasoner",
+    "valid": true
+  },
+  {
+    "name": "unknown decider kind",
+    "path": [
+      "steps",
+      0,
+      "decider",
+      "kind"
+    ],
+    "value": "oracle",
+    "valid": false
+  }
+]
