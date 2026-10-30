@@ -1,0 +1,162 @@
+{
+  "session_id": "ses_20261030T030000Z_ab12",
+  "started_at": "2026-10-30T03:00:00Z",
+  "inputs": [
+    {
+      "at": "2026-10-30T03:05:00Z",
+      "source_key": "locustream_1010",
+      "akousma_id": "akm_window_0004",
+      "heard_as": [
+        "music"
+      ],
+      "modes": [
+        "caption",
+        "music"
+      ],
+      "circuit": true
+    },
+    {
+      "at": "2026-10-30T03:10:00Z",
+      "source_key": "locustream_2020",
+      "akousma_id": "akm_window_0005",
+      "heard_as": [
+        "soundscape"
+      ],
+      "modes": [
+        "caption"
+      ],
+      "declined": true
+    },
+    {
+      "at": "2026-10-30T03:15:00Z",
+      "source_key": "locustream_1010",
+      "akousma_id": "akm_window_0006",
+      "heard_as": [
+        "music",
+        "soundscape"
+      ],
+      "modes": [
+        "caption"
+      ],
+      "repeated": true
+    }
+  ],
+  "expected": {
+    "contract": "earworm/run-memory/v1",
+    "session_id": "ses_20261030T030000Z_ab12",
+    "started_at": "2026-10-30T03:00:00Z",
+    "updated_at": "2026-10-30T03:15:00Z",
+    "revision": 3,
+    "current_source": "locustream_1010",
+    "sources": {
+      "locustream_1010": {
+        "first_heard_at": "2026-10-30T03:05:00Z",
+        "last_heard_at": "2026-10-30T03:15:00Z",
+        "windows": 2,
+        "visits": 2,
+        "dwell": 1,
+        "last_window": 3,
+        "heard_as": {
+          "music": 2,
+          "soundscape": 1
+        },
+        "modes": {
+          "caption": 2,
+          "music": 1
+        },
+        "declined": 0,
+        "repeated": 1,
+        "soundings": 1,
+        "last_route": {
+          "primary": "musical-aesthetic-listening",
+          "secondary": "acoulogical-object-listening",
+          "corrective": "signal-inspection-listening",
+          "confidence": "medium"
+        }
+      },
+      "locustream_2020": {
+        "first_heard_at": "2026-10-30T03:10:00Z",
+        "last_heard_at": "2026-10-30T03:10:00Z",
+        "windows": 1,
+        "visits": 1,
+        "dwell": 1,
+        "last_window": 2,
+        "heard_as": {
+          "soundscape": 1
+        },
+        "modes": {
+          "caption": 1
+        },
+        "declined": 1,
+        "repeated": 0,
+        "soundings": 0,
+        "last_route": null
+      }
+    },
+    "totals": {
+      "windows": 3,
+      "steps": 4,
+      "moves": {
+        "switch_source": 1,
+        "relisten_same": 2,
+        "sound": 1
+      },
+      "layers": {
+        "general": 1,
+        "focused": 1,
+        "corrective": 1,
+        "sounding": 1
+      }
+    },
+    "recent": [
+      {
+        "at": "2026-10-30T03:00:30Z",
+        "source_key": "locustream_1010",
+        "move": "switch_source",
+        "layer": "general",
+        "akousma_id": "akm_window_0004",
+        "primary": null
+      },
+      {
+        "at": "2026-10-30T03:01:00Z",
+        "source_key": "locustream_1010",
+        "move": "relisten_same",
+        "layer": "focused",
+        "akousma_id": "akm_window_0004",
+        "primary": "musical-aesthetic-listening"
+      },
+      {
+        "at": "2026-10-30T03:02:00Z",
+        "source_key": "locustream_1010",
+        "move": "relisten_same",
+        "layer": "corrective",
+        "akousma_id": "akm_window_0004",
+        "primary": "musical-aesthetic-listening"
+      },
+      {
+        "at": "2026-10-30T03:03:00Z",
+        "source_key": "locustream_1010",
+        "move": "sound",
+        "layer": "sounding",
+        "akousma_id": "akm_sounded_0001",
+        "primary": "musical-aesthetic-listening"
+      },
+      {
+        "at": "2026-10-30T03:10:00Z",
+        "source_key": "locustream_2020",
+        "move": "listen",
+        "layer": "general",
+        "akousma_id": "akm_window_0005",
+        "primary": null
+      },
+      {
+        "at": "2026-10-30T03:15:00Z",
+        "source_key": "locustream_1010",
+        "move": "listen",
+        "layer": "general",
+        "akousma_id": "akm_window_0006",
+        "primary": null
+      }
+    ]
+  }
+}

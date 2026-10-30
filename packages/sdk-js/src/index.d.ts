@@ -665,3 +665,52 @@ export declare function modelEcologyErrors(name: "embedding-space" | "analysis-e
 export function spectralBundleErrors(bundle: unknown, options?: {resolveObject?: (ref: string) => unknown}): string[];
 export function record18Errors(record: unknown, options?: {validateNative?: (value: unknown) => string[]; resolveObject?: (ref: string) => unknown}): string[];
 export function admitRecord18(record: unknown, options: {supportedVersions: string[]; validateNative?: (value: unknown) => string[]; resolveObject?: (ref: string) => unknown; resolveRepresentation?: (ref: string) => unknown}): unknown;
+
+export const LISTENING_CIRCUIT_CONTRACT: "earworm/listening-circuit/v1";
+export const RUN_MEMORY_CONTRACT: "earworm/run-memory/v1";
+export const CIRCUIT_EXTENSION: "earworm_listening_circuit";
+export type CircuitMove = "relisten_same" | "new_fragment" | "switch_source" | "sound" | "reason" | "retrieve" | "analyze" | "stop";
+export type CircuitLayer = "general" | "focused" | "corrective" | "sounding" | "recall" | "closing";
+export type RouteConfidence = "high" | "medium" | "low" | "undetermined";
+export interface CircuitCandidate { id: string; move: CircuitMove; action: string; label?: string }
+export interface CircuitRoute {
+  primary: string; secondary?: string | null; corrective?: string | null; confidence: RouteConfidence;
+  heard_as?: string[]; preset?: string | null; router?: string | null;
+}
+export interface CircuitDecider {
+  kind: "router" | "rules" | "reasoner" | "operator" | "score"; provider: string; model?: string | null;
+  fallback_from?: string | null; decision_ref?: string | null; rules_ref?: string | null;
+}
+export interface CircuitStep {
+  step_id: string; at: string; move: CircuitMove;
+  from_akousma_id?: string | null; from_listening_id?: string | null; to_listening_id?: string | null; to_akousma_id?: string | null;
+  offered: CircuitCandidate[]; chosen: string | null; decider: CircuitDecider; route?: CircuitRoute | null;
+  reasoning?: string | null; alternative_reading?: string | null; layer: CircuitLayer; depth: number;
+  bounds?: { remaining?: Record<string, number>; station_rule?: string | null; max_depth?: number | null };
+  outcome: { status: "proposed" | "executed" | "refused" | "blocked" | "failed"; reason?: string | null };
+}
+export interface ListeningCircuit {
+  contract: "earworm/listening-circuit/v1";
+  run: { session_id: string; loop_id?: string | null; source_key: string; window_index?: number | null; memory_ref?: string | null };
+  steps: CircuitStep[];
+}
+export interface RunMemorySource {
+  first_heard_at: string; last_heard_at: string; windows: number; visits: number; dwell: number; last_window: number;
+  heard_as: Record<string, number>; modes?: Record<string, number>; declined: number; repeated: number; soundings?: number;
+  last_route?: { primary: string; secondary?: string | null; corrective?: string | null; confidence: RouteConfidence } | null;
+}
+export interface RunMemory {
+  contract: "earworm/run-memory/v1"; session_id: string; started_at: string; updated_at: string; revision: number;
+  current_source?: string | null; sources: Record<string, RunMemorySource>;
+  totals: { windows: number; steps: number; moves: Record<string, number>; layers: Record<string, number> };
+  recent: { at: string; source_key: string; move: string; layer: string; akousma_id?: string | null; primary?: string | null }[];
+}
+export function listeningCircuitErrors(value: unknown, record?: unknown): string[];
+export function circuitRecordErrors(record: unknown): string[];
+export function runMemoryErrors(value: unknown): string[];
+export function emptyRunMemory(sessionId: string, startedAt: string): RunMemory;
+export function foldRunMemory(memory: RunMemory, input: {
+  at: string; source_key: string; akousma_id?: string | null; circuit?: ListeningCircuit | null;
+  heard_as?: string[]; modes?: string[]; declined?: boolean; repeated?: boolean;
+}): RunMemory;
+export function windowsSince(memory: RunMemory, sourceKey: string): number | null;

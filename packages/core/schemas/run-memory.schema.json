@@ -1,0 +1,250 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://earworm.dev/schemas/run-memory.schema.json",
+  "title": "Run memory v1",
+  "description": "What one listening run remembers of itself while it lasts: per source, when and how often it was heard, as what, by which last route, how often it declined or repeated, and its visit state. Folded from listening circuits; it holds no audio, account text or transcript.",
+  "type": "object",
+  "required": [
+    "contract",
+    "session_id",
+    "started_at",
+    "updated_at",
+    "revision",
+    "sources",
+    "totals",
+    "recent"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "contract": {
+      "const": "earworm/run-memory/v1"
+    },
+    "session_id": {
+      "$ref": "#/$defs/id"
+    },
+    "started_at": {
+      "$ref": "#/$defs/instant"
+    },
+    "updated_at": {
+      "$ref": "#/$defs/instant"
+    },
+    "revision": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "current_source": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1,
+      "maxLength": 255
+    },
+    "sources": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/$defs/source"
+      }
+    },
+    "totals": {
+      "type": "object",
+      "required": [
+        "windows",
+        "steps",
+        "moves",
+        "layers"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "windows": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "steps": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "moves": {
+          "$ref": "#/$defs/counts"
+        },
+        "layers": {
+          "$ref": "#/$defs/counts"
+        }
+      }
+    },
+    "recent": {
+      "type": "array",
+      "maxItems": 64,
+      "items": {
+        "type": "object",
+        "required": [
+          "at",
+          "source_key",
+          "move",
+          "layer"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "at": {
+            "$ref": "#/$defs/instant"
+          },
+          "source_key": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 255
+          },
+          "move": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 40
+          },
+          "layer": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 40
+          },
+          "akousma_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "primary": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "minLength": 1,
+            "maxLength": 80
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,119}$"
+    },
+    "instant": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?(Z|[+-]\\d{2}:\\d{2})$"
+    },
+    "counts": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "integer",
+        "minimum": 0
+      }
+    },
+    "source": {
+      "type": "object",
+      "required": [
+        "first_heard_at",
+        "last_heard_at",
+        "windows",
+        "visits",
+        "dwell",
+        "heard_as",
+        "declined",
+        "repeated",
+        "last_window"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "first_heard_at": {
+          "$ref": "#/$defs/instant"
+        },
+        "last_heard_at": {
+          "$ref": "#/$defs/instant"
+        },
+        "windows": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Windows heard from this source in the run."
+        },
+        "visits": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Separate stays: a return after another source counts as a new visit."
+        },
+        "dwell": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Windows in the current or last stay."
+        },
+        "last_window": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "The run's window count when this source was last heard (for cooldowns)."
+        },
+        "heard_as": {
+          "$ref": "#/$defs/counts"
+        },
+        "modes": {
+          "$ref": "#/$defs/counts"
+        },
+        "declined": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "repeated": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "soundings": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "last_route": {
+          "anyOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "object",
+              "required": [
+                "primary",
+                "confidence"
+              ],
+              "additionalProperties": false,
+              "properties": {
+                "primary": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 80
+                },
+                "secondary": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "minLength": 1,
+                  "maxLength": 80
+                },
+                "corrective": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "minLength": 1,
+                  "maxLength": 80
+                },
+                "confidence": {
+                  "enum": [
+                    "high",
+                    "medium",
+                    "low",
+                    "undetermined"
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      }
+    }
+  }
+}

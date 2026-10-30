@@ -168,3 +168,4 @@ export { modelEcologyErrors } from "./model-ecology.js";
 
 export {spectralBundleErrors, record18Errors, admitRecord18} from './spectral.js';
 export { REPRESENTATION_SCHEMA_VERSION, REPRESENTATION_CONTRACTS, representationErrors, representationRecordErrors, representationMeasurementErrors, record19Errors, admitRepresentationRecord } from "./representations.js";
+export { LISTENING_CIRCUIT_CONTRACT, RUN_MEMORY_CONTRACT, CIRCUIT_EXTENSION, listeningCircuitErrors, circuitRecordErrors, runMemoryErrors, emptyRunMemory, foldRunMemory, windowsSince } from "./listening-circuit.js";

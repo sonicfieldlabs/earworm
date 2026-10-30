@@ -1,0 +1,402 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://earworm.dev/schemas/listening-circuit.schema.json",
+  "title": "Listening circuit v1",
+  "description": "The moves of a listening loop that produced this record's listenings: which move was chosen among the offered ones, by whom, from what route, and with what result. Carried as extensions.earworm_listening_circuit, written with the record it describes. Moves that produced no listening (a stop, a refusal) belong to the run memory. It records decisions, never audio or transcripts.",
+  "type": "object",
+  "required": [
+    "contract",
+    "run",
+    "steps"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "contract": {
+      "const": "earworm/listening-circuit/v1"
+    },
+    "run": {
+      "$ref": "#/$defs/run"
+    },
+    "steps": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 64,
+      "items": {
+        "$ref": "#/$defs/step"
+      }
+    }
+  },
+  "$defs": {
+    "id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,119}$"
+    },
+    "nullableId": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/id"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "instant": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?(Z|[+-]\\d{2}:\\d{2})$"
+    },
+    "text": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 2000
+    },
+    "nullableText": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/text"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "move": {
+      "enum": [
+        "relisten_same",
+        "new_fragment",
+        "switch_source",
+        "sound",
+        "reason",
+        "retrieve",
+        "analyze",
+        "stop"
+      ],
+      "description": "relisten_same: the same retained fragment with another mode, model or question. new_fragment: a new window of the same source. switch_source: another source. sound: a generation from the listening. stop: the loop ends here."
+    },
+    "layer": {
+      "enum": [
+        "general",
+        "focused",
+        "corrective",
+        "sounding",
+        "recall",
+        "closing"
+      ],
+      "description": "The place of the move's listening in the circuit: a general first pass, a focused re-listening, a corrective ear, the listening of a sounded result, a recall from memory, or the close of the loop."
+    },
+    "confidence": {
+      "enum": [
+        "high",
+        "medium",
+        "low",
+        "undetermined"
+      ]
+    },
+    "run": {
+      "type": "object",
+      "required": [
+        "session_id",
+        "source_key"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "session_id": {
+          "$ref": "#/$defs/id"
+        },
+        "loop_id": {
+          "$ref": "#/$defs/nullableId"
+        },
+        "source_key": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 255
+        },
+        "window_index": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "memory_ref": {
+          "$ref": "#/$defs/nullableId"
+        }
+      }
+    },
+    "candidate": {
+      "type": "object",
+      "required": [
+        "id",
+        "move",
+        "action"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "move": {
+          "$ref": "#/$defs/move"
+        },
+        "action": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 40,
+          "description": "The producer's own action name (for example Oída's relisten, continue or generate)."
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 240
+        }
+      }
+    },
+    "route": {
+      "type": "object",
+      "required": [
+        "primary",
+        "confidence"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "primary": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "secondary": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "corrective": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "confidence": {
+          "$ref": "#/$defs/confidence"
+        },
+        "heard_as": {
+          "type": "array",
+          "maxItems": 8,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 40
+          },
+          "description": "Coarse kinds the router read in the account (music, soundscape, speech, material, signal, silence, generated, unknown). An attributed reading, not a measurement."
+        },
+        "preset": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "router": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1,
+          "maxLength": 120,
+          "description": "The router's identity and version, for example akouo-contract/router 0.13.0."
+        }
+      }
+    },
+    "decider": {
+      "type": "object",
+      "required": [
+        "kind",
+        "provider"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "enum": [
+            "router",
+            "rules",
+            "reasoner",
+            "operator",
+            "score"
+          ]
+        },
+        "provider": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "model": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1,
+          "maxLength": 255
+        },
+        "fallback_from": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1,
+          "maxLength": 120,
+          "description": "The decider that was asked first and did not decide."
+        },
+        "decision_ref": {
+          "$ref": "#/$defs/nullableId"
+        },
+        "rules_ref": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1,
+          "maxLength": 255
+        }
+      }
+    },
+    "bounds": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "remaining": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "station_rule": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1,
+          "maxLength": 240
+        },
+        "max_depth": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 8
+        }
+      }
+    },
+    "outcome": {
+      "type": "object",
+      "required": [
+        "status"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "status": {
+          "enum": [
+            "proposed",
+            "executed",
+            "refused",
+            "blocked",
+            "failed"
+          ]
+        },
+        "reason": {
+          "$ref": "#/$defs/nullableText"
+        }
+      }
+    },
+    "step": {
+      "type": "object",
+      "required": [
+        "step_id",
+        "at",
+        "move",
+        "offered",
+        "chosen",
+        "decider",
+        "layer",
+        "depth",
+        "outcome"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "step_id": {
+          "$ref": "#/$defs/id"
+        },
+        "at": {
+          "$ref": "#/$defs/instant"
+        },
+        "move": {
+          "$ref": "#/$defs/move"
+        },
+        "from_akousma_id": {
+          "$ref": "#/$defs/nullableId",
+          "description": "The record the move started from, when it is not this one."
+        },
+        "from_listening_id": {
+          "$ref": "#/$defs/nullableId"
+        },
+        "to_listening_id": {
+          "$ref": "#/$defs/nullableId"
+        },
+        "to_akousma_id": {
+          "$ref": "#/$defs/nullableId"
+        },
+        "offered": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 24,
+          "items": {
+            "$ref": "#/$defs/candidate"
+          }
+        },
+        "chosen": {
+          "$ref": "#/$defs/nullableId"
+        },
+        "decider": {
+          "$ref": "#/$defs/decider"
+        },
+        "route": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/route"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "reasoning": {
+          "$ref": "#/$defs/nullableText"
+        },
+        "alternative_reading": {
+          "$ref": "#/$defs/nullableText"
+        },
+        "layer": {
+          "$ref": "#/$defs/layer"
+        },
+        "depth": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 8
+        },
+        "bounds": {
+          "$ref": "#/$defs/bounds"
+        },
+        "outcome": {
+          "$ref": "#/$defs/outcome"
+        }
+      }
+    }
+  }
+}
