@@ -3,7 +3,7 @@
     "name": "valid as given",
     "path": [
       "steps",
-      0,
+      1,
       "layer"
     ],
     "value": "focused",
@@ -13,7 +13,7 @@
     "name": "unknown move",
     "path": [
       "steps",
-      0,
+      1,
       "move"
     ],
     "value": "wander",
@@ -23,7 +23,7 @@
     "name": "chosen not offered",
     "path": [
       "steps",
-      0,
+      1,
       "chosen"
     ],
     "value": "elsewhere",
@@ -33,7 +33,7 @@
     "name": "chosen move differs",
     "path": [
       "steps",
-      0,
+      1,
       "chosen"
     ],
     "value": "fragment",
@@ -43,7 +43,7 @@
     "name": "choosing nothing while executing",
     "path": [
       "steps",
-      0,
+      1,
       "chosen"
     ],
     "value": null,
@@ -53,7 +53,7 @@
     "name": "sound without sounding layer",
     "path": [
       "steps",
-      2,
+      3,
       "layer"
     ],
     "value": "focused",
@@ -63,7 +63,7 @@
     "name": "sounding layer on a relisten",
     "path": [
       "steps",
-      0,
+      1,
       "layer"
     ],
     "value": "sounding",
@@ -73,7 +73,7 @@
     "name": "depth beyond max",
     "path": [
       "steps",
-      2,
+      3,
       "depth"
     ],
     "value": 3,
@@ -83,7 +83,7 @@
     "name": "executed sound without its record",
     "path": [
       "steps",
-      2,
+      3,
       "to_akousma_id"
     ],
     "value": null,
@@ -93,6 +93,16 @@
     "name": "executed relisten without its listening",
     "path": [
       "steps",
+      1,
+      "to_listening_id"
+    ],
+    "value": null,
+    "valid": false
+  },
+  {
+    "name": "executed switch without destination",
+    "path": [
+      "steps",
       0,
       "to_listening_id"
     ],
@@ -100,20 +110,10 @@
     "valid": false
   },
   {
-    "name": "switch landing in this auditum",
-    "path": [
-      "steps",
-      3,
-      "to_listening_id"
-    ],
-    "value": "lst_2",
-    "valid": false
-  },
-  {
     "name": "unresolved listening",
     "path": [
       "steps",
-      1,
+      2,
       "from_listening_id"
     ],
     "value": "lst_9",
@@ -123,7 +123,7 @@
     "name": "bad confidence",
     "path": [
       "steps",
-      0,
+      1,
       "route",
       "confidence"
     ],
@@ -134,7 +134,7 @@
     "name": "refused step may choose nothing",
     "path": [
       "steps",
-      3,
+      0,
       "outcome",
       "status"
     ],
@@ -144,7 +144,7 @@
       {
         "path": [
           "steps",
-          3,
+          0,
           "chosen"
         ],
         "value": null
@@ -155,7 +155,7 @@
     "name": "extra field",
     "path": [
       "steps",
-      0,
+      1,
       "audio"
     ],
     "value": "raw.wav",
@@ -165,7 +165,7 @@
     "name": "bad instant",
     "path": [
       "steps",
-      0,
+      1,
       "at"
     ],
     "value": "yesterday",
@@ -175,7 +175,7 @@
     "name": "duplicate step id",
     "path": [
       "steps",
-      1,
+      2,
       "step_id"
     ],
     "value": "stp_1",
@@ -185,7 +185,7 @@
     "name": "reasoner decider",
     "path": [
       "steps",
-      0,
+      1,
       "decider",
       "kind"
     ],
@@ -196,11 +196,51 @@
     "name": "unknown decider kind",
     "path": [
       "steps",
-      0,
+      1,
       "decider",
       "kind"
     ],
     "value": "oracle",
+    "valid": false
+  },
+  {
+    "name": "relisten landing in a new record",
+    "path": [
+      "steps",
+      1,
+      "to_listening_id"
+    ],
+    "value": null,
+    "valid": true,
+    "also": [
+      {
+        "path": [
+          "steps",
+          1,
+          "to_akousma_id"
+        ],
+        "value": "akm_relisten_0001"
+      }
+    ]
+  },
+  {
+    "name": "origin listening in another record need not resolve here",
+    "path": [
+      "steps",
+      0,
+      "from_listening_id"
+    ],
+    "value": "lst_99",
+    "valid": true
+  },
+  {
+    "name": "origin listening in this record must resolve",
+    "path": [
+      "steps",
+      0,
+      "from_akousma_id"
+    ],
+    "value": null,
     "valid": false
   }
 ]

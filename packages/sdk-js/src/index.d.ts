@@ -683,7 +683,7 @@ export interface CircuitDecider {
 }
 export interface CircuitStep {
   step_id: string; at: string; move: CircuitMove;
-  from_listening_id?: string | null; to_listening_id?: string | null; to_akousma_id?: string | null;
+  from_akousma_id?: string | null; from_listening_id?: string | null; to_listening_id?: string | null; to_akousma_id?: string | null;
   offered: CircuitCandidate[]; chosen: string | null; decider: CircuitDecider; route?: CircuitRoute | null;
   reasoning?: string | null; alternative_reading?: string | null; layer: CircuitLayer; depth: number;
   bounds?: { remaining?: Record<string, number>; station_rule?: string | null; max_depth?: number | null };

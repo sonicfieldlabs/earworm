@@ -15,7 +15,7 @@ export const SOURCE_LIMIT = 256;
 
 const validateCircuit = compileContractSchema(circuitSchema);
 const validateMemory = compileContractSchema(memorySchema);
-const OTHER_RECORD_MOVES = new Set(['new_fragment', 'switch_source', 'sound']);
+const LISTENING_MOVES = new Set(['relisten_same', 'new_fragment', 'switch_source']);
 const finite = v => typeof v === 'number' ? Number.isFinite(v) : v && typeof v === 'object' ? Object.values(v).every(finite) : true;
 const instant = v => Date.parse(v);
 
@@ -53,13 +53,15 @@ export function listeningCircuitErrors(value, record) {
     const maxDepth = step.bounds?.max_depth;
     if (maxDepth !== undefined && maxDepth !== null && step.depth > maxDepth) errors.push(`${where}: depth exceeds the declared maximum`);
     if (status === 'executed') {
-      if (OTHER_RECORD_MOVES.has(move) && !step.to_akousma_id) errors.push(`${where}: an executed ${move} names the record it produced`);
-      if (move === 'relisten_same' && !step.to_listening_id) errors.push(`${where}: an executed re-listening names its new listening`);
+      if (move === 'sound' && !step.to_akousma_id) errors.push(`${where}: an executed sound names the record of what was sounded`);
+      if (LISTENING_MOVES.has(move) && !(step.to_listening_id || step.to_akousma_id)) errors.push(`${where}: an executed ${move} names the listening or record it produced`);
     }
-    if (OTHER_RECORD_MOVES.has(move) && step.to_listening_id) errors.push(`${where}: a ${move} lands in another record, not in this auditum`);
-    if (known) for (const key of ['from_listening_id', 'to_listening_id']) {
-      const ref = step[key];
-      if (ref !== undefined && ref !== null && !known.has(ref)) errors.push(`${where}: ${key} does not resolve to this record's listenings`);
+    if (known) {
+      const keys = step.from_akousma_id ? ['to_listening_id'] : ['to_listening_id', 'from_listening_id'];
+      for (const key of keys) {
+        const ref = step[key];
+        if (ref !== undefined && ref !== null && !known.has(ref)) errors.push(`${where}: ${key} does not resolve to this record's listenings`);
+      }
     }
   }
   return errors;

@@ -31,8 +31,6 @@ _MEMORY = Draft7Validator(json.loads((_ROOT / "run-memory.schema.json").read_tex
 
 #: Moves that, once executed, produce a listening the step must point to.
 _LISTENING_MOVES = {"relisten_same", "new_fragment", "switch_source"}
-#: Moves that end in another record rather than in this record's auditum.
-_OTHER_RECORD_MOVES = {"new_fragment", "switch_source", "sound"}
 
 
 def _listening_ids(record: Any) -> set[str] | None:
@@ -87,15 +85,15 @@ def listening_circuit_errors(value: Any, record: dict | None = None) -> list[str
         if bounds.get("max_depth") is not None and step["depth"] > bounds["max_depth"]:
             errors.append(f"{where}: depth exceeds the declared maximum")
         if status == "executed":
-            if move in _OTHER_RECORD_MOVES and not step.get("to_akousma_id"):
-                errors.append(f"{where}: an executed {move} names the record it produced")
-            if move == "relisten_same" and not step.get("to_listening_id"):
-                errors.append(f"{where}: an executed re-listening names its new listening")
-        if move in _OTHER_RECORD_MOVES and step.get("to_listening_id"):
-            errors.append(f"{where}: a {move} lands in another record, not in this auditum")
+            if move == "sound" and not step.get("to_akousma_id"):
+                errors.append(f"{where}: an executed sound names the record of what was sounded")
+            if move in _LISTENING_MOVES and not (step.get("to_listening_id") or step.get("to_akousma_id")):
+                errors.append(f"{where}: an executed {move} names the listening or record it produced")
         if known is not None:
-            for key in ("from_listening_id", "to_listening_id"):
-                ref = step.get(key)
+            refs = [("to_listening_id", step.get("to_listening_id"))]
+            if not step.get("from_akousma_id"):
+                refs.append(("from_listening_id", step.get("from_listening_id")))
+            for key, ref in refs:
                 if ref is not None and ref not in known:
                     errors.append(f"{where}: {key} does not resolve to this record's listenings")
     return errors

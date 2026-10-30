@@ -97,18 +97,26 @@
       "windows": 3,
       "steps": 4,
       "moves": {
+        "switch_source": 1,
         "relisten_same": 2,
-        "sound": 1,
-        "switch_source": 1
+        "sound": 1
       },
       "layers": {
+        "general": 1,
         "focused": 1,
         "corrective": 1,
-        "sounding": 1,
-        "general": 1
+        "sounding": 1
       }
     },
     "recent": [
+      {
+        "at": "2026-10-30T03:00:30Z",
+        "source_key": "locustream_1010",
+        "move": "switch_source",
+        "layer": "general",
+        "akousma_id": "akm_window_0004",
+        "primary": null
+      },
       {
         "at": "2026-10-30T03:01:00Z",
         "source_key": "locustream_1010",
@@ -132,14 +140,6 @@
         "layer": "sounding",
         "akousma_id": "akm_sounded_0001",
         "primary": "musical-aesthetic-listening"
-      },
-      {
-        "at": "2026-10-30T03:04:00Z",
-        "source_key": "locustream_1010",
-        "move": "switch_source",
-        "layer": "general",
-        "akousma_id": "akm_window_0005",
-        "primary": null
       },
       {
         "at": "2026-10-30T03:10:00Z",

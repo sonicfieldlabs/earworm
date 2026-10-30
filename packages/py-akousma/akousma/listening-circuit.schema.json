@@ -2,7 +2,7 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://earworm.dev/schemas/listening-circuit.schema.json",
   "title": "Listening circuit v1",
-  "description": "The moves a listening loop made around one record: which move was chosen among the offered ones, by whom, from what route, and with what result. Carried as extensions.earworm_listening_circuit. It records decisions, never audio or transcripts.",
+  "description": "The moves of a listening loop that produced this record's listenings: which move was chosen among the offered ones, by whom, from what route, and with what result. Carried as extensions.earworm_listening_circuit, written with the record it describes. Moves that produced no listening (a stop, a refusal) belong to the run memory. It records decisions, never audio or transcripts.",
   "type": "object",
   "required": [
     "contract",
@@ -338,6 +338,10 @@
         },
         "move": {
           "$ref": "#/$defs/move"
+        },
+        "from_akousma_id": {
+          "$ref": "#/$defs/nullableId",
+          "description": "The record the move started from, when it is not this one."
         },
         "from_listening_id": {
           "$ref": "#/$defs/nullableId"

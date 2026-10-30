@@ -13,7 +13,11 @@
   `earworm/run-memory/v1` is folded from those circuits one window at a time:
   visits, dwell, cooldown position, kinds and modes heard, declined and repeated
   counts, soundings and last route per source, with no audio or account text.
-  Python and JavaScript share fixtures and fold to the same memory. Additive: no
+  Python and JavaScript share fixtures and fold to the same memory.
+  `AkousmataStore` validates and indexes circuit steps on `put`
+  (`circuit_steps`), protects them like the auditum, drops them with a forgotten
+  record and rebuilds them on `reindex` or first open, and stores run memories
+  compare-and-set (`put_run_memory`, `run_memory`, `run_memories`). Additive: no
   released schema changed and producer defaults stay 1.6.
 
 - py-akousma 0.10.1: joins the published 0.8.4 line (atomic audio publication,
