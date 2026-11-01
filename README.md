@@ -80,7 +80,7 @@ revision heads, forget with content-free durable receipts, reindex, and verify.
 
 ## Quick start
 
-Requirements: Node.js 22+ and pnpm 10.32.1+.
+Requirements: Node.js 22.23.4+ and pnpm 10.34.7+.
 
 ```bash
 pnpm install --frozen-lockfile
