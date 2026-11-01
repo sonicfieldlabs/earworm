@@ -42,7 +42,7 @@
   "license": "MPL-2.0",
   "devDependencies": {
     "@types/node": "^26.6.5",
-    "typescript": "^5.8.0"
+    "typescript": "^7.0.2"
   },
   "pnpm": {
     "overrides": {
