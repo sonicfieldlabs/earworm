@@ -759,6 +759,39 @@ class AkousmataStore:
               receipt                TEXT NOT NULL
             );
             CREATE INDEX IF NOT EXISTS idx_forgetting_akousma ON forgetting_receipts(akousma_id, created_at);
+            CREATE TABLE IF NOT EXISTS run_memories (
+              session_id TEXT PRIMARY KEY,
+              revision   INTEGER NOT NULL,
+              updated_at TEXT NOT NULL,
+              memory     TEXT NOT NULL
+            );
+            """
+        )
+        circuit_index_existed = self.conn.execute(
+            "SELECT 1 FROM sqlite_master WHERE type='table' AND name='circuit_steps'"
+        ).fetchone() is not None
+        # v0.11 / earworm/listening-circuit/v1: hoist each circuit step so "every move this run
+        # made" and "every move at this source" are indexed questions. Canonical JSON stays as is.
+        self.conn.executescript(
+            """
+            CREATE TABLE IF NOT EXISTS circuit_steps (
+              akousma_id   TEXT NOT NULL,
+              step_id      TEXT NOT NULL,
+              session_id   TEXT NOT NULL,
+              source_key   TEXT NOT NULL,
+              at           TEXT NOT NULL,
+              move         TEXT NOT NULL,
+              layer        TEXT NOT NULL,
+              depth        INTEGER NOT NULL,
+              status       TEXT NOT NULL,
+              decider_kind TEXT NOT NULL,
+              decider      TEXT NOT NULL,
+              primary_mode TEXT,
+              confidence   TEXT,
+              PRIMARY KEY (akousma_id, step_id)
+            );
+            CREATE INDEX IF NOT EXISTS idx_circuit_session ON circuit_steps(session_id, at);
+            CREATE INDEX IF NOT EXISTS idx_circuit_source ON circuit_steps(source_key, at);
             """
         )
         # v0.3: location columns, hoisted from record["location"] so the
@@ -803,6 +836,8 @@ class AkousmataStore:
         self.conn.execute("CREATE INDEX IF NOT EXISTS idx_akousmata_decision ON akousmata(route_decision_count, stop_decision_count)")
         self.conn.execute("CREATE INDEX IF NOT EXISTS idx_akousmata_record_class ON akousmata(record_class, created_at)")
         self.conn.execute("CREATE INDEX IF NOT EXISTS idx_akousmata_revision_of ON akousmata(revision_of)")
+        if not circuit_index_existed:
+            derived_index_changed = True
         if derived_index_changed:
             self._reindex_derived_metadata()
         self.conn.commit()
@@ -872,6 +907,35 @@ class AkousmataStore:
                 (record_class(record), revision_of(record), row["akousma_id"]),
             )
             self._replace_listener_type_index(row["akousma_id"], listener_types(record))
+            self._replace_circuit_index(row["akousma_id"], record)
+
+    def _replace_circuit_index(self, akousma_id: str, record: dict[str, Any]) -> None:
+        self.conn.execute("DELETE FROM circuit_steps WHERE akousma_id=?", (akousma_id,))
+        extensions = record.get("extensions") if isinstance(record.get("extensions"), dict) else {}
+        circuit = extensions.get("earworm_listening_circuit")
+        if not isinstance(circuit, dict) or not isinstance(circuit.get("steps"), list):
+            return
+        run = circuit.get("run") if isinstance(circuit.get("run"), dict) else {}
+        rows = []
+        for step in circuit["steps"]:
+            if not isinstance(step, dict) or not step.get("step_id"):
+                continue
+            decider = step.get("decider") if isinstance(step.get("decider"), dict) else {}
+            route = step.get("route") if isinstance(step.get("route"), dict) else {}
+            outcome = step.get("outcome") if isinstance(step.get("outcome"), dict) else {}
+            rows.append((
+                akousma_id, str(step["step_id"]), str(run.get("session_id") or ""), str(run.get("source_key") or ""),
+                str(step.get("at") or ""), str(step.get("move") or ""), str(step.get("layer") or ""),
+                int(step.get("depth") or 0), str(outcome.get("status") or ""), str(decider.get("kind") or ""),
+                str(decider.get("provider") or ""), route.get("primary"), route.get("confidence"),
+            ))
+        self.conn.executemany(
+            """INSERT OR REPLACE INTO circuit_steps
+               (akousma_id, step_id, session_id, source_key, at, move, layer, depth, status,
+                decider_kind, decider, primary_mode, confidence)
+               VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+            rows,
+        )
 
     @staticmethod
     def _protected_account(record: dict[str, Any]) -> dict[str, Any]:
@@ -889,7 +953,7 @@ class AkousmataStore:
         return {
             "legacy_appeal": {"payload": oida["appeal"]} if "appeal" in oida else {},
             "listening_contract_extensions": {
-                key: extensions[key] for key in ("earworm_listening_access", "akouo_pass_adapter", "earworm_listening_context", "earworm_research", "earworm_generation_decision", "earworm_observation", "earworm_matter_context", "earworm_measurements", "earworm_agent_sector", "earworm_transformation_graph", "oida.spectral", "akouo.agent-native", "oida.aperture", "oida.native-policy")
+                key: extensions[key] for key in ("earworm_listening_access", "akouo_pass_adapter", "earworm_listening_context", "earworm_research", "earworm_generation_decision", "earworm_observation", "earworm_matter_context", "earworm_measurements", "earworm_agent_sector", "earworm_transformation_graph", "earworm_listening_circuit", "oida.spectral", "akouo.agent-native", "oida.aperture", "oida.native-policy")
                 if key in extensions
             },
             "evolution_relations": [relation for relation in lineage.get("relations", []) if relation.get("contract") == "earworm/relations/v1"],
@@ -1037,6 +1101,10 @@ class AkousmataStore:
             from .listening_context import listening_context_errors
 
             errors.extend(listening_context_errors(extensions["earworm_listening_context"], record))
+        if isinstance(extensions, dict) and "earworm_listening_circuit" in extensions:
+            from .listening_circuit import circuit_record_errors
+
+            errors.extend(circuit_record_errors(record))
         if errors:
             raise ValueError("invalid akousma:\n" + "\n".join(errors))
         rid = record["akousma_id"]
@@ -1102,6 +1170,7 @@ class AkousmataStore:
             ),
         )
         self._replace_listener_type_index(rid, types)
+        self._replace_circuit_index(rid, record)
         self.conn.execute("DELETE FROM lineage_edges WHERE child_id=?", (rid,))
         for parent in record.get("lineage", {}).get("parent_akousma_ids", []):
             self.conn.execute(
@@ -1539,6 +1608,7 @@ class AkousmataStore:
         self.conn.execute("DELETE FROM lineage_edges WHERE child_id=?", (akousma_id,))
         self.conn.execute("DELETE FROM relation_edges WHERE from_id=?", (akousma_id,))
         self.conn.execute("DELETE FROM listener_type_index WHERE akousma_id=?", (akousma_id,))
+        self.conn.execute("DELETE FROM circuit_steps WHERE akousma_id=?", (akousma_id,))
         self.conn.commit()
         return receipt
 
@@ -1630,8 +1700,84 @@ class AkousmataStore:
                 ),
             )
             self._replace_listener_type_index(rid, listener_types(record))
+            self._replace_circuit_index(rid, record)
         self.conn.commit()
         return len(rows)
+
+    # --- listening circuits and run memory ----------------------------------
+    def circuit_steps(
+        self,
+        *,
+        session_id: str | None = None,
+        source_key: str | None = None,
+        move: str | None = None,
+        limit: int = 500,
+    ) -> list[dict[str, Any]]:
+        """Indexed circuit steps in time order, newest last; each row names its record."""
+        if not isinstance(limit, int) or isinstance(limit, bool) or not 1 <= limit <= 5000:
+            raise ValueError("limit must be an integer from 1 to 5000")
+        clauses, params = [], []
+        for column, value in (("session_id", session_id), ("source_key", source_key), ("move", move)):
+            if value is not None:
+                clauses.append(f"{column}=?")
+                params.append(value)
+        where = (" WHERE " + " AND ".join(clauses)) if clauses else ""
+        rows = self.conn.execute(
+            f"""SELECT * FROM (SELECT * FROM circuit_steps{where} ORDER BY at DESC, akousma_id DESC, step_id DESC LIMIT ?)
+                ORDER BY at, akousma_id, step_id""",
+            (*params, limit),
+        ).fetchall()
+        return [dict(row) for row in rows]
+
+    def put_run_memory(self, memory: dict[str, Any], *, expected_revision: int | None) -> dict[str, Any]:
+        """Store a run memory, compare-and-set on its revision.
+
+        ``expected_revision`` is the revision the caller read (``None`` for a new run); a stale
+        writer is refused rather than overwriting another fold.
+        """
+        from .listening_circuit import run_memory_errors
+
+        errors = run_memory_errors(memory)
+        if errors:
+            raise ValueError("invalid run memory: " + "; ".join(errors))
+        session_id = memory["session_id"]
+        row = self.conn.execute("SELECT revision FROM run_memories WHERE session_id=?", (session_id,)).fetchone()
+        current = None if row is None else int(row["revision"])
+        if current != expected_revision:
+            raise ValueError(f"run memory {session_id!r} is at revision {current}, not {expected_revision}")
+        if expected_revision is not None and memory["revision"] <= expected_revision:
+            raise ValueError("a stored run memory only moves forward")
+        self.conn.execute(
+            "INSERT OR REPLACE INTO run_memories (session_id, revision, updated_at, memory) VALUES (?,?,?,?)",
+            (session_id, memory["revision"], memory["updated_at"], json.dumps(memory, sort_keys=True)),
+        )
+        self.conn.commit()
+        return memory
+
+    def run_memory(self, session_id: str) -> dict[str, Any] | None:
+        row = self.conn.execute("SELECT memory FROM run_memories WHERE session_id=?", (session_id,)).fetchone()
+        return None if row is None else json.loads(row["memory"])
+
+    def run_memories(self, *, limit: int = 100) -> list[dict[str, Any]]:
+        """Summaries of stored run memories, most recently updated first."""
+        if not isinstance(limit, int) or isinstance(limit, bool) or not 1 <= limit <= 1000:
+            raise ValueError("limit must be an integer from 1 to 1000")
+        out = []
+        for row in self.conn.execute(
+            "SELECT memory FROM run_memories ORDER BY updated_at DESC, session_id LIMIT ?", (limit,)
+        ):
+            memory = json.loads(row["memory"])
+            out.append({
+                "session_id": memory["session_id"],
+                "started_at": memory["started_at"],
+                "updated_at": memory["updated_at"],
+                "revision": memory["revision"],
+                "windows": memory["totals"]["windows"],
+                "steps": memory["totals"]["steps"],
+                "sources": len(memory["sources"]),
+                "current_source": memory.get("current_source"),
+            })
+        return out
 
     def verify(self) -> dict[str, list[str]]:
         """Integrity report — the archive of absence. Dangling links and missing

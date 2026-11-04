@@ -1,0 +1,689 @@
+{
+  "circuit": {
+    "contract": "earworm/listening-circuit/v1",
+    "run": {
+      "session_id": "ses_20261030T030000Z_ab12",
+      "loop_id": "loop_1",
+      "source_key": "locustream_1010",
+      "window_index": 4,
+      "memory_ref": "mem_ses_20261030T030000Z_ab12"
+    },
+    "steps": [
+      {
+        "step_id": "stp_0",
+        "at": "2026-10-30T03:00:30Z",
+        "move": "switch_source",
+        "from_akousma_id": "akm_window_0003",
+        "from_listening_id": "lst_7",
+        "to_listening_id": "lst_1",
+        "to_akousma_id": null,
+        "offered": [
+          {
+            "id": "relisten_route_0",
+            "move": "relisten_same",
+            "action": "relisten",
+            "label": "Re-listen with the musicological-listener route"
+          },
+          {
+            "id": "relisten_route_1",
+            "move": "relisten_same",
+            "action": "relisten",
+            "label": "Re-listen with the signal-health route"
+          },
+          {
+            "id": "fragment",
+            "move": "new_fragment",
+            "action": "continue",
+            "label": "Hear a new window of this station"
+          },
+          {
+            "id": "source_1",
+            "move": "switch_source",
+            "action": "switch_source",
+            "label": "Listen to another station"
+          },
+          {
+            "id": "generate",
+            "move": "sound",
+            "action": "generate",
+            "label": "Sound a response with Small Music"
+          },
+          {
+            "id": "stop",
+            "move": "stop",
+            "action": "stop",
+            "label": "Stop this circuit"
+          }
+        ],
+        "chosen": "source_1",
+        "decider": {
+          "kind": "router",
+          "provider": "akouo",
+          "model": null,
+          "fallback_from": null,
+          "decision_ref": "dec_0001",
+          "rules_ref": "rules:stations-v1"
+        },
+        "route": null,
+        "reasoning": "Dwell reached at the previous station; this least recently heard one is next.",
+        "alternative_reading": null,
+        "layer": "general",
+        "depth": 0,
+        "bounds": {
+          "remaining": {
+            "relisten": 3,
+            "generate": 1
+          },
+          "station_rule": "dwell 1 of 2-4",
+          "max_depth": 2
+        },
+        "outcome": {
+          "status": "executed",
+          "reason": null
+        }
+      },
+      {
+        "step_id": "stp_1",
+        "at": "2026-10-30T03:01:00Z",
+        "move": "relisten_same",
+        "from_akousma_id": null,
+        "from_listening_id": "lst_1",
+        "to_listening_id": "lst_2",
+        "to_akousma_id": null,
+        "offered": [
+          {
+            "id": "relisten_route_0",
+            "move": "relisten_same",
+            "action": "relisten",
+            "label": "Re-listen with the musicological-listener route"
+          },
+          {
+            "id": "relisten_route_1",
+            "move": "relisten_same",
+            "action": "relisten",
+            "label": "Re-listen with the signal-health route"
+          },
+          {
+            "id": "fragment",
+            "move": "new_fragment",
+            "action": "continue",
+            "label": "Hear a new window of this station"
+          },
+          {
+            "id": "source_1",
+            "move": "switch_source",
+            "action": "switch_source",
+            "label": "Listen to another station"
+          },
+          {
+            "id": "generate",
+            "move": "sound",
+            "action": "generate",
+            "label": "Sound a response with Small Music"
+          },
+          {
+            "id": "stop",
+            "move": "stop",
+            "action": "stop",
+            "label": "Stop this circuit"
+          }
+        ],
+        "chosen": "relisten_route_0",
+        "decider": {
+          "kind": "router",
+          "provider": "akouo",
+          "model": null,
+          "fallback_from": null,
+          "decision_ref": "dec_0001",
+          "rules_ref": "rules:stations-v1"
+        },
+        "route": {
+          "primary": "musical-aesthetic-listening",
+          "secondary": "acoulogical-object-listening",
+          "corrective": "signal-inspection-listening",
+          "confidence": "medium",
+          "heard_as": [
+            "music"
+          ],
+          "preset": "musicological-listener",
+          "router": "akouo-contract/router 0.13.0"
+        },
+        "reasoning": "The general pass heard a repeated melodic figure over a pulse; the musical ear asks for its rhythm and register.",
+        "alternative_reading": "The pulse may be a mechanical source near the microphone, not music.",
+        "layer": "focused",
+        "depth": 0,
+        "bounds": {
+          "remaining": {
+            "relisten": 3,
+            "generate": 1
+          },
+          "station_rule": "dwell 1 of 2-4",
+          "max_depth": 2
+        },
+        "outcome": {
+          "status": "executed",
+          "reason": null
+        }
+      },
+      {
+        "step_id": "stp_2",
+        "at": "2026-10-30T03:02:00Z",
+        "move": "relisten_same",
+        "from_akousma_id": null,
+        "from_listening_id": "lst_2",
+        "to_listening_id": "lst_3",
+        "to_akousma_id": null,
+        "offered": [
+          {
+            "id": "relisten_route_0",
+            "move": "relisten_same",
+            "action": "relisten",
+            "label": "Re-listen with the musicological-listener route"
+          },
+          {
+            "id": "relisten_route_1",
+            "move": "relisten_same",
+            "action": "relisten",
+            "label": "Re-listen with the signal-health route"
+          },
+          {
+            "id": "fragment",
+            "move": "new_fragment",
+            "action": "continue",
+            "label": "Hear a new window of this station"
+          },
+          {
+            "id": "source_1",
+            "move": "switch_source",
+            "action": "switch_source",
+            "label": "Listen to another station"
+          },
+          {
+            "id": "generate",
+            "move": "sound",
+            "action": "generate",
+            "label": "Sound a response with Small Music"
+          },
+          {
+            "id": "stop",
+            "move": "stop",
+            "action": "stop",
+            "label": "Stop this circuit"
+          }
+        ],
+        "chosen": "relisten_route_1",
+        "decider": {
+          "kind": "router",
+          "provider": "akouo",
+          "model": null,
+          "fallback_from": null,
+          "decision_ref": "dec_0001",
+          "rules_ref": "rules:stations-v1"
+        },
+        "route": {
+          "primary": "musical-aesthetic-listening",
+          "secondary": "acoulogical-object-listening",
+          "corrective": "signal-inspection-listening",
+          "confidence": "medium",
+          "heard_as": [
+            "music"
+          ],
+          "preset": "musicological-listener",
+          "router": "akouo-contract/router 0.13.0"
+        },
+        "reasoning": "A corrective pass checks the capture chain before the musical reading is kept.",
+        "alternative_reading": null,
+        "layer": "corrective",
+        "depth": 0,
+        "bounds": {
+          "remaining": {
+            "relisten": 3,
+            "generate": 1
+          },
+          "station_rule": "dwell 1 of 2-4",
+          "max_depth": 2
+        },
+        "outcome": {
+          "status": "executed",
+          "reason": null
+        }
+      },
+      {
+        "step_id": "stp_3",
+        "at": "2026-10-30T03:03:00Z",
+        "move": "sound",
+        "from_akousma_id": null,
+        "from_listening_id": "lst_3",
+        "to_listening_id": null,
+        "to_akousma_id": "akm_sounded_0001",
+        "offered": [
+          {
+            "id": "relisten_route_0",
+            "move": "relisten_same",
+            "action": "relisten",
+            "label": "Re-listen with the musicological-listener route"
+          },
+          {
+            "id": "relisten_route_1",
+            "move": "relisten_same",
+            "action": "relisten",
+            "label": "Re-listen with the signal-health route"
+          },
+          {
+            "id": "fragment",
+            "move": "new_fragment",
+            "action": "continue",
+            "label": "Hear a new window of this station"
+          },
+          {
+            "id": "source_1",
+            "move": "switch_source",
+            "action": "switch_source",
+            "label": "Listen to another station"
+          },
+          {
+            "id": "generate",
+            "move": "sound",
+            "action": "generate",
+            "label": "Sound a response with Small Music"
+          },
+          {
+            "id": "stop",
+            "move": "stop",
+            "action": "stop",
+            "label": "Stop this circuit"
+          }
+        ],
+        "chosen": "generate",
+        "decider": {
+          "kind": "router",
+          "provider": "akouo",
+          "model": null,
+          "fallback_from": null,
+          "decision_ref": "dec_0001",
+          "rules_ref": "rules:stations-v1"
+        },
+        "route": {
+          "primary": "musical-aesthetic-listening",
+          "secondary": "acoulogical-object-listening",
+          "corrective": "signal-inspection-listening",
+          "confidence": "medium",
+          "heard_as": [
+            "music"
+          ],
+          "preset": "musicological-listener",
+          "router": "akouo-contract/router 0.13.0"
+        },
+        "reasoning": "A sounding answers the account with Small Music; it will be listened to in its own record.",
+        "alternative_reading": null,
+        "layer": "sounding",
+        "depth": 1,
+        "bounds": {
+          "remaining": {
+            "relisten": 3,
+            "generate": 1
+          },
+          "station_rule": "dwell 1 of 2-4",
+          "max_depth": 2
+        },
+        "outcome": {
+          "status": "executed",
+          "reason": null
+        }
+      }
+    ]
+  },
+  "record": {
+    "akousma_id": "akm_window_0004",
+    "auditum": {
+      "contract": "earworm/auditum/v3",
+      "listenings": [
+        {
+          "listening_id": "lst_1"
+        },
+        {
+          "listening_id": "lst_2"
+        },
+        {
+          "listening_id": "lst_3"
+        }
+      ]
+    },
+    "extensions": {
+      "earworm_listening_circuit": {
+        "contract": "earworm/listening-circuit/v1",
+        "run": {
+          "session_id": "ses_20261030T030000Z_ab12",
+          "loop_id": "loop_1",
+          "source_key": "locustream_1010",
+          "window_index": 4,
+          "memory_ref": "mem_ses_20261030T030000Z_ab12"
+        },
+        "steps": [
+          {
+            "step_id": "stp_0",
+            "at": "2026-10-30T03:00:30Z",
+            "move": "switch_source",
+            "from_akousma_id": "akm_window_0003",
+            "from_listening_id": "lst_7",
+            "to_listening_id": "lst_1",
+            "to_akousma_id": null,
+            "offered": [
+              {
+                "id": "relisten_route_0",
+                "move": "relisten_same",
+                "action": "relisten",
+                "label": "Re-listen with the musicological-listener route"
+              },
+              {
+                "id": "relisten_route_1",
+                "move": "relisten_same",
+                "action": "relisten",
+                "label": "Re-listen with the signal-health route"
+              },
+              {
+                "id": "fragment",
+                "move": "new_fragment",
+                "action": "continue",
+                "label": "Hear a new window of this station"
+              },
+              {
+                "id": "source_1",
+                "move": "switch_source",
+                "action": "switch_source",
+                "label": "Listen to another station"
+              },
+              {
+                "id": "generate",
+                "move": "sound",
+                "action": "generate",
+                "label": "Sound a response with Small Music"
+              },
+              {
+                "id": "stop",
+                "move": "stop",
+                "action": "stop",
+                "label": "Stop this circuit"
+              }
+            ],
+            "chosen": "source_1",
+            "decider": {
+              "kind": "router",
+              "provider": "akouo",
+              "model": null,
+              "fallback_from": null,
+              "decision_ref": "dec_0001",
+              "rules_ref": "rules:stations-v1"
+            },
+            "route": null,
+            "reasoning": "Dwell reached at the previous station; this least recently heard one is next.",
+            "alternative_reading": null,
+            "layer": "general",
+            "depth": 0,
+            "bounds": {
+              "remaining": {
+                "relisten": 3,
+                "generate": 1
+              },
+              "station_rule": "dwell 1 of 2-4",
+              "max_depth": 2
+            },
+            "outcome": {
+              "status": "executed",
+              "reason": null
+            }
+          },
+          {
+            "step_id": "stp_1",
+            "at": "2026-10-30T03:01:00Z",
+            "move": "relisten_same",
+            "from_akousma_id": null,
+            "from_listening_id": "lst_1",
+            "to_listening_id": "lst_2",
+            "to_akousma_id": null,
+            "offered": [
+              {
+                "id": "relisten_route_0",
+                "move": "relisten_same",
+                "action": "relisten",
+                "label": "Re-listen with the musicological-listener route"
+              },
+              {
+                "id": "relisten_route_1",
+                "move": "relisten_same",
+                "action": "relisten",
+                "label": "Re-listen with the signal-health route"
+              },
+              {
+                "id": "fragment",
+                "move": "new_fragment",
+                "action": "continue",
+                "label": "Hear a new window of this station"
+              },
+              {
+                "id": "source_1",
+                "move": "switch_source",
+                "action": "switch_source",
+                "label": "Listen to another station"
+              },
+              {
+                "id": "generate",
+                "move": "sound",
+                "action": "generate",
+                "label": "Sound a response with Small Music"
+              },
+              {
+                "id": "stop",
+                "move": "stop",
+                "action": "stop",
+                "label": "Stop this circuit"
+              }
+            ],
+            "chosen": "relisten_route_0",
+            "decider": {
+              "kind": "router",
+              "provider": "akouo",
+              "model": null,
+              "fallback_from": null,
+              "decision_ref": "dec_0001",
+              "rules_ref": "rules:stations-v1"
+            },
+            "route": {
+              "primary": "musical-aesthetic-listening",
+              "secondary": "acoulogical-object-listening",
+              "corrective": "signal-inspection-listening",
+              "confidence": "medium",
+              "heard_as": [
+                "music"
+              ],
+              "preset": "musicological-listener",
+              "router": "akouo-contract/router 0.13.0"
+            },
+            "reasoning": "The general pass heard a repeated melodic figure over a pulse; the musical ear asks for its rhythm and register.",
+            "alternative_reading": "The pulse may be a mechanical source near the microphone, not music.",
+            "layer": "focused",
+            "depth": 0,
+            "bounds": {
+              "remaining": {
+                "relisten": 3,
+                "generate": 1
+              },
+              "station_rule": "dwell 1 of 2-4",
+              "max_depth": 2
+            },
+            "outcome": {
+              "status": "executed",
+              "reason": null
+            }
+          },
+          {
+            "step_id": "stp_2",
+            "at": "2026-10-30T03:02:00Z",
+            "move": "relisten_same",
+            "from_akousma_id": null,
+            "from_listening_id": "lst_2",
+            "to_listening_id": "lst_3",
+            "to_akousma_id": null,
+            "offered": [
+              {
+                "id": "relisten_route_0",
+                "move": "relisten_same",
+                "action": "relisten",
+                "label": "Re-listen with the musicological-listener route"
+              },
+              {
+                "id": "relisten_route_1",
+                "move": "relisten_same",
+                "action": "relisten",
+                "label": "Re-listen with the signal-health route"
+              },
+              {
+                "id": "fragment",
+                "move": "new_fragment",
+                "action": "continue",
+                "label": "Hear a new window of this station"
+              },
+              {
+                "id": "source_1",
+                "move": "switch_source",
+                "action": "switch_source",
+                "label": "Listen to another station"
+              },
+              {
+                "id": "generate",
+                "move": "sound",
+                "action": "generate",
+                "label": "Sound a response with Small Music"
+              },
+              {
+                "id": "stop",
+                "move": "stop",
+                "action": "stop",
+                "label": "Stop this circuit"
+              }
+            ],
+            "chosen": "relisten_route_1",
+            "decider": {
+              "kind": "router",
+              "provider": "akouo",
+              "model": null,
+              "fallback_from": null,
+              "decision_ref": "dec_0001",
+              "rules_ref": "rules:stations-v1"
+            },
+            "route": {
+              "primary": "musical-aesthetic-listening",
+              "secondary": "acoulogical-object-listening",
+              "corrective": "signal-inspection-listening",
+              "confidence": "medium",
+              "heard_as": [
+                "music"
+              ],
+              "preset": "musicological-listener",
+              "router": "akouo-contract/router 0.13.0"
+            },
+            "reasoning": "A corrective pass checks the capture chain before the musical reading is kept.",
+            "alternative_reading": null,
+            "layer": "corrective",
+            "depth": 0,
+            "bounds": {
+              "remaining": {
+                "relisten": 3,
+                "generate": 1
+              },
+              "station_rule": "dwell 1 of 2-4",
+              "max_depth": 2
+            },
+            "outcome": {
+              "status": "executed",
+              "reason": null
+            }
+          },
+          {
+            "step_id": "stp_3",
+            "at": "2026-10-30T03:03:00Z",
+            "move": "sound",
+            "from_akousma_id": null,
+            "from_listening_id": "lst_3",
+            "to_listening_id": null,
+            "to_akousma_id": "akm_sounded_0001",
+            "offered": [
+              {
+                "id": "relisten_route_0",
+                "move": "relisten_same",
+                "action": "relisten",
+                "label": "Re-listen with the musicological-listener route"
+              },
+              {
+                "id": "relisten_route_1",
+                "move": "relisten_same",
+                "action": "relisten",
+                "label": "Re-listen with the signal-health route"
+              },
+              {
+                "id": "fragment",
+                "move": "new_fragment",
+                "action": "continue",
+                "label": "Hear a new window of this station"
+              },
+              {
+                "id": "source_1",
+                "move": "switch_source",
+                "action": "switch_source",
+                "label": "Listen to another station"
+              },
+              {
+                "id": "generate",
+                "move": "sound",
+                "action": "generate",
+                "label": "Sound a response with Small Music"
+              },
+              {
+                "id": "stop",
+                "move": "stop",
+                "action": "stop",
+                "label": "Stop this circuit"
+              }
+            ],
+            "chosen": "generate",
+            "decider": {
+              "kind": "router",
+              "provider": "akouo",
+              "model": null,
+              "fallback_from": null,
+              "decision_ref": "dec_0001",
+              "rules_ref": "rules:stations-v1"
+            },
+            "route": {
+              "primary": "musical-aesthetic-listening",
+              "secondary": "acoulogical-object-listening",
+              "corrective": "signal-inspection-listening",
+              "confidence": "medium",
+              "heard_as": [
+                "music"
+              ],
+              "preset": "musicological-listener",
+              "router": "akouo-contract/router 0.13.0"
+            },
+            "reasoning": "A sounding answers the account with Small Music; it will be listened to in its own record.",
+            "alternative_reading": null,
+            "layer": "sounding",
+            "depth": 1,
+            "bounds": {
+              "remaining": {
+                "relisten": 3,
+                "generate": 1
+              },
+              "station_rule": "dwell 1 of 2-4",
+              "max_depth": 2
+            },
+            "outcome": {
+              "status": "executed",
+              "reason": null
+            }
+          }
+        ]
+      }
+    }
+  }
+}
