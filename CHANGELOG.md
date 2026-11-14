@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.9.0 (py-akousma 0.11.0) — 2026-11-04
 
 - Listening circuits and run memory (py-akousma 0.11.0, JavaScript packages
   0.9.0). `earworm/listening-circuit/v1` records, on one record as
@@ -19,6 +19,8 @@
   record and rebuilds them on `reindex` or first open, and stores run memories
   compare-and-set (`put_run_memory`, `run_memory`, `run_memories`). Additive: no
   released schema changed and producer defaults stay 1.6.
+
+## 0.8.0 (py-akousma 0.10.1) — 2026-10-13
 
 - py-akousma 0.10.1: joins the published 0.8.4 line (atomic audio publication,
   fast-uri 3.1.8) with the representation work: opt-in Akousma 1.9 records,
