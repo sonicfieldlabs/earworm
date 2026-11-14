@@ -5,19 +5,19 @@ agentic signal chains. It keeps audio events, intent, generation metadata,
 analysis, user edits, agent actions, modulation, provenance, retention, and
 render history in one queryable context chain.
 
-Current public release: JavaScript `0.8.0` and Python `akousma` 0.10.1 (GitHub,
-14 October 2026: opt-in Akousma 1.9 representation contracts and custody). This
-source adds listening circuits and run memory (`earworm/listening-circuit/v1`,
-`earworm/run-memory/v1`, [spec](spec/listening-circuit.md)): JavaScript packages
-0.9.0 and Python `akousma` 0.11.0. Producer defaults remain 1.6.
+Current public release: JavaScript `0.9.0` and Python `akousma` 0.11.0 (GitHub,
+4 November 2026): listening circuits and run memory (`earworm/listening-circuit/v1`,
+`earworm/run-memory/v1`, [spec](spec/listening-circuit.md)). The release before it,
+JavaScript 0.8.0 with `akousma` 0.10.1 (14 October 2026), added opt-in Akousma 1.9
+representation contracts and custody. Producer defaults remain 1.6.
 
 ## Packages
 
 | Package | Version | Purpose |
 | --- | --- | --- |
-| `@earworm/core` | 0.9.0 source | Canonical TypeScript event/session and representation types, schemas, event stores, state reconstruction, context queries, and consent-gated manifest export. |
-| `@earworm/sdk-js` | 0.9.0 source | JavaScript client, existing akousma helpers, opt-in representation, output, lineage and byte-admission validators, and listening circuits with run memory. |
-| `akousma` | 0.11.0 source | Python reference store with atomic audio publication, existing 1.7/1.8 admission, opt-in representation/1.9 validation, opt-in `RepresentationStore` custody, and listening circuits with run memory (`akousma.listening_circuit`). |
+| `@earworm/core` | 0.9.0 | Canonical TypeScript event/session and representation types, schemas, event stores, state reconstruction, context queries, and consent-gated manifest export. |
+| `@earworm/sdk-js` | 0.9.0 | JavaScript client, existing akousma helpers, opt-in representation, output, lineage and byte-admission validators, and listening circuits with run memory. |
+| `akousma` | 0.11.0 | Python reference store with atomic audio publication, existing 1.7/1.8 admission, opt-in representation/1.9 validation, opt-in `RepresentationStore` custody, and listening circuits with run memory (`akousma.listening_circuit`). |
 | `earworm-sdk-python` | 0.7.0 | Read-only Python helpers for Earworm fixtures and sessions. |
 
 ## Protocol capabilities
@@ -73,11 +73,13 @@ revision heads, forget with content-free durable receipts, reindex, and verify.
 | Component | Version / contract | Relationship |
 | --- | --- | --- |
 | [AKOÚŌ](https://github.com/sonicfieldlabs/akouo) | `akouo/v0.9` | Owns listening modes, claim attribution, context v2, provenance, passes, route decisions, ensembles, and covenant references. |
-| [OÍDA](https://github.com/sonicfieldlabs/oida) | 0.10.0 / `oida/gateway/v0.6` | Reference producer. OÍDA keeps agent and human accounts attributable and persists them as linked, separately revisable akousmata. |
-| [Akousmata](https://github.com/sonicfieldlabs/akousmata) | 0.7.0 | Reference navigator and accountability auditor over the Python store, including human-record revisions, listener facets, forgetting receipts, and true swarm semantics. |
-| [GERM](https://github.com/sonicfieldlabs/germ) | 0.3.3 | Writes lineage-bearing generations and Earworm context exports. |
-| [Algophony](https://github.com/sonicfieldlabs/algophony) | 0.5.2 | Uses Earworm context and akousma relations for traceable batch evaluation. |
-| [ORAM](https://github.com/sonicfieldlabs/oram) | 0.4.1 | Does not write the protocol directly; ORAM audio can be captured into akousma records by OÍDA or GERM. |
+| [OÍDA](https://github.com/sonicfieldlabs/oida) | `oida/gateway/v0.6` | Reference producer. OÍDA keeps agent and human accounts attributable and persists them as linked, separately revisable akousmata. |
+| [Akousmata](https://github.com/sonicfieldlabs/akousmata) | No version pinned | Reference navigator and accountability auditor over the Python store, including human-record revisions, listener facets, forgetting receipts, and true swarm semantics. |
+| [GERM](https://github.com/sonicfieldlabs/germ) | No version pinned | Writes lineage-bearing generations and Earworm context exports. |
+| [Algophony](https://github.com/sonicfieldlabs/algophony) | No version pinned | Uses Earworm context and akousma relations for traceable batch evaluation. |
+| [ORAM](https://github.com/sonicfieldlabs/oram) | No version pinned | Does not write the protocol directly; ORAM audio can be captured into akousma records by OÍDA or GERM. |
+
+Each project's current release is on [listening.md's Stack page](https://listening.md/stack).
 
 ## Quick start
 
@@ -151,13 +153,6 @@ synthetic conformance cases. Existing versioned schemas are retained.
 
 ## What does not exist yet
 
-- **A release of what this checkout adds.** The last public release is 0.7.0 (`v0.7.0`). The
-  changelog's Unreleased section lists everything since, among it:
-  - `akousma` 0.8.2 and its retained-covenant projection;
-  - observation-account bindings;
-  - agent sectors;
-  - local views;
-  - transformation graphs.
 - **New versions by default.** Default constructors still write 1.6. Versions 1.7, 1.8 and 1.9
   require explicit consumer support. The existing store refuses 1.9 persistence until a
   matching `RepresentationStore` adapter is explicitly supplied. That opt-in
