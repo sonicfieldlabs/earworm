@@ -4,12 +4,14 @@ updates:
     directories:
       - "/"
     schedule:
-      interval: weekly
-      day: monday
-      time: "10:00"
+      interval: cron
+      cronjob: "0 10 28 * *"
       timezone: America/Bogota
-    open-pull-requests-limit: 2
+    open-pull-requests-limit: 1
     groups:
+      security-updates:
+        applies-to: security-updates
+        patterns: ["*"]
       compatible-npm:
         patterns: ["*"]
         update-types: [minor, patch]
@@ -18,12 +20,14 @@ updates:
       - "/packages/py-akousma"
       - "/packages/sdk-python"
     schedule:
-      interval: weekly
-      day: monday
-      time: "10:00"
+      interval: cron
+      cronjob: "0 10 28 * *"
       timezone: America/Bogota
-    open-pull-requests-limit: 2
+    open-pull-requests-limit: 1
     groups:
+      security-updates:
+        applies-to: security-updates
+        patterns: ["*"]
       compatible-pip:
         patterns: ["*"]
         update-types: [minor, patch]
@@ -31,12 +35,14 @@ updates:
     directories:
       - "/"
     schedule:
-      interval: weekly
-      day: monday
-      time: "10:00"
+      interval: cron
+      cronjob: "0 10 28 * *"
       timezone: America/Bogota
-    open-pull-requests-limit: 2
+    open-pull-requests-limit: 1
     groups:
+      security-updates:
+        applies-to: security-updates
+        patterns: ["*"]
       compatible-github-actions:
         patterns: ["*"]
         update-types: [minor, patch]
